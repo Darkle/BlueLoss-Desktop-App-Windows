@@ -1,0 +1,45 @@
+import util from 'util'
+import { app as electronApp } from 'electron'
+
+import winston from 'winston'
+import Rollbar from 'rollbar'
+
+rollbarConfig = {
+  accessToken: process.env.rollbarAccessToken,
+  enabled: false,
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  environment: process.env.NODE_ENV,
+  reportLevel: 'error',
+  payload: {
+      mainOrRenderer: 'main',
+      platform: process.platform,
+      processVersions: process.versions,
+      arch: process.arch,
+      blueLossVersion: electronApp.getVersion()
+    },
+    // Ignore the server stuff cause that includes info about the host pc name.
+    transform(payload){
+      payload.server = {}
+    },
+}
+
+rollbarLogger = new Rollbar(rollbarConfig)
+
+CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
+  Object.assign(this, options)
+
+util.inherits(CustomRollbarTransport, winston.Transport)
+
+CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void ->
+  // Only log errors.
+  if level !== 'error': return
+  rollbarLogger.error(msg, error)
+  callback(null, true)
+
+
+
+export{
+  CustomRollbarTransport
+  rollbarLogger
+}

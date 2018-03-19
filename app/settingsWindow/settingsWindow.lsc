@@ -1,0 +1,102 @@
+import path from 'path'
+import url from 'url'
+
+import { app as electronApp, BrowserWindow, Menu } from 'electron'
+
+import { getSettings, updateSetting } from '../db/settings.lsc'
+import { logger } from '../common/logging/logging.lsc'
+
+settingsHTMLpath = url.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.resolve(__dirname, '..', 'settingsWindow', 'renderer', 'settingsWindow.html')
+})
+settingsWindowProperties = {
+  ...{
+    width: 786,
+    height: 616,
+    title: 'BlueLoss',
+    autoHideMenuBar: true,
+    resizable: false,
+    fullscreenable: false,
+    fullscreen: false,
+    frame: false,
+    show: false,
+    webPreferences: {
+      textAreasAreResizable: false,
+      devTools: ISDEV,
+    }
+  },
+  ...getStoredWindowPosition()
+}
+/****
+* Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+* Reload is for dev so we can easily reload the browserwindow with Ctrl+R
+*/
+settingsWindowMenu = if ISDEV: Menu.buildFromTemplate([{role: 'reload'}]) else: null
+let settingsWindow = null
+
+showSettingsWindow():void ->
+  if settingsWindow: return settingsWindow.show()
+
+  /*****
+  * We add the settings to a global each time we create a new settings window so we can easily
+  * load the inital app settings on renderer startup. This way we dont have to send a message from the renderer
+  * to the main processs to ask for the settings - or send them from main process on detection of the
+  * BrowserWindow 'ready-to-show' event, both of which might make the UI show nothing briefly before the settings.
+  *
+  * We can't use remote.require(../settings.lsc).getSettings() in the renderer because it doesn't seem to work
+  * with code that needs to be transpiled, as everything in settlings.lsc is compiled into appMain-compiled.js and the
+  * remote.require() looks for the .lsc file - it doesn't know that the settings module has been compiled and now lives
+  * inside of the appMain-compiled.js file.
+  */
+  global.settingsWindowRendererInitialSettings = getSettings()
+
+  now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})
+  settingsWindow.loadURL(settingsHTMLpath)
+  settingsWindow.setMenu(settingsWindowMenu)
+
+  electronApp.dock?.show()
+
+  if ISDEV: settingsWindow.webContents.openDevTools({ mode: 'undocked'})
+
+  settingsWindow.once('close', ():void ->
+    updateSetting('settingsWindowPosition', settingsWindow.getBounds())
+  )
+
+  settingsWindow.once('ready-to-show', ():void ->
+    settingsWindow.show()
+  )
+
+  settingsWindow.once('closed', ():void ->
+    now settingsWindow = null
+    electronApp.dock?.hide()
+  )
+
+  settingsWindow.webContents.once('crashed', (event):void ->
+    logger.error('settingsWindow.webContents crashed', event)
+  )
+
+  settingsWindow.once('unresponsive', (event):void ->
+    logger.error('settingsWindow unresponsive', event)
+  )
+
+getStoredWindowPosition() ->
+  if !getSettings?().settingsWindowPosition: return {}
+  {
+    x: getSettings?().settingsWindowPosition.x,
+    y: getSettings?().settingsWindowPosition.y
+  }
+
+toggleSettingsWindow():void ->
+  if !settingsWindow:
+    showSettingsWindow()
+  elif settingsWindow.isVisible():
+    settingsWindow.close()
+
+
+export {
+  showSettingsWindow,
+  toggleSettingsWindow,
+  settingsWindow,
+}

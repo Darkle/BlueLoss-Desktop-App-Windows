@@ -1,0 +1,66 @@
+import path from 'path'
+import url from 'url'
+
+import { BrowserWindow, Menu } from 'electron'
+
+import { addUserDebugLogger, removeUserDebugLogger } from '../common/logging/logging.lsc'
+
+debugWindowHTMLpath = url.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
+})
+debugWindowProperties = {
+  ...{
+    width: 786,
+    height: 616,
+    title: 'BlueLoss',
+    autoHideMenuBar: true,
+    resizable: false,
+    fullscreenable: false,
+    fullscreen: false,
+    frame: false,
+    show: false,
+    webPreferences: {
+      textAreasAreResizable: true,
+      devTools: ISDEV,
+    }
+  }
+}
+/****
+* Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+* Reload is for dev so we can easily reload the browserwindow with Ctrl+R
+*/
+debugWindowMenu = if ISDEV: Menu.buildFromTemplate([{role: 'reload'}]) else: null
+let debugWindow = null
+
+showDebugWindow():void ->
+  if debugWindow: return debugWindow.show()
+
+  now debugWindow = new BrowserWindow(debugWindowProperties)
+  debugWindow.loadURL(debugWindowHTMLpath)
+  debugWindow.setMenu(debugWindowMenu)
+
+  if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
+
+  debugWindow.once('close', ():void ->
+    removeUserDebugLogger()
+  )
+
+  debugWindow.once('ready-to-show', ():void ->
+    debugWindow.show()
+    addUserDebugLogger()
+  )
+
+  debugWindow.once('closed', ():void ->
+    now debugWindow = null
+  )
+
+closeDebugWindow():void ->
+  debugWindow.close()
+
+export {
+  debugWindow,
+  showDebugWindow,
+  closeDebugWindow,
+}

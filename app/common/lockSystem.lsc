@@ -1,0 +1,16 @@
+
+import ms from 'ms'
+
+import { getSettings } from '../db/settings.lsc'
+
+
+lockSystem():void ->
+  if !getSettings().blueLossEnabled: return
+
+checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor) ->
+  !sawDeviceWeAreLookingFor && (Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`)) )
+
+export{
+  lockSystem,
+  checkIfShouldLock,
+}

@@ -1,0 +1,45 @@
+
+
+/*
+Color scheme:
+
+#FFFFFF - white
+#F9F9F9 - off white
+#757575 - grey
+  http: //paletton.com/#uid=2000u0k00eG09ql01ki0288280u - complimentary colors
+#1B5299 - blue
+  http: //paletton.com/#uid=23D0u0ksMtghHAbmEuBunn2-bi5 - complimentary colors
+*/
+
+
+body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #F9F9F9;
+  font-family: 'Open Sans';
+  --primary-color: #1B5299;
+  --secondary-color: #1B5299;
+}
+
+* {
+  cursor: default;
+  -webkit-user-select: none;
+}
+
+* input,
+* [role="input"] {
+  cursor: text;
+  -webkit-user-select: auto;
+}
+
+#mainContainer {
+  display: flex;
+}
+
+x-button {
+  color: #757575;
+}
+x-button[toggled] {
+  background: #757575;
+}

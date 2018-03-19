@@ -1,0 +1,203 @@
+/*
+Color scheme:
+
+#FFFFFF - white
+#F9F9F9 - off white
+#757575 - grey
+  http: //paletton.com/#uid=2000u0k00eG09ql01ki0288280u - complimentary colors
+#1B5299 - blue
+  http: //paletton.com/#uid=23D0u0ksMtghHAbmEuBunn2-bi5 - complimentary colors
+*/
+
+#statusTabInfoWindow {
+  width: 639px;
+  height: 100%;
+  margin-top: 16px;
+  display: none;
+  flex-direction: column;
+  overflow-y: scroll;
+}
+
+#topStatus {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 44px;
+}
+
+#topStatus #disableButton {
+  justify-content: flex-end;
+  margin-right: 60px;
+  font-size: 16px;
+}
+
+#bluelossenableswitch {
+  margin-right: 10px;
+}
+
+#topStatus #disableButton x-label {
+  width: 132px;
+}
+
+/*
+* For the status dots
+*/
+@keyframes load {
+  0%,
+  10%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  0%,
+  10% {
+    transform: translateX(0);
+  }
+  45%,
+  55% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateX(200px);
+  }
+}
+
+
+#statusAnimation {
+  margin-left: 65px;
+  margin-top: -1px;
+}
+
+#statusAnimation ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  position: relative;
+}
+
+#statusAnimation li {
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  background: #1B5299;
+  position: absolute;
+  left: 0;
+  opacity: 0;
+}
+
+#statusAnimation .play li {
+  animation: load 3s cubic-bezier(0.15, 0.71, 0.74, 0.34) forwards;
+}
+
+#statusAnimation .play li:nth-child(1) {
+  animation-delay: 0s;
+}
+
+#statusAnimation .play li:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+#statusAnimation .play li:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+#statusAnimation .play li:nth-child(4) {
+  animation-delay: 0.9s;
+}
+
+#statusAnimation .play li:nth-child(5) {
+  animation-delay: 1.2s;
+}
+
+#statusAnimation .play li:nth-child(6) {
+  animation-delay: 1.5s;
+}
+
+#statusAnimation .play li:nth-child(7) {
+  animation-delay: 1.8s;
+}
+
+#statusAnimation .play li:nth-child(8) {
+  animation-delay: 2.1s;
+}
+
+#statusAnimation .play li:nth-child(9) {
+  animation-delay: 2.4s;
+}
+
+ #statusAnimation .play li:nth-child(10) {
+  animation-delay: 2.7s;
+}
+
+#devicesContainer {
+  text-align: center;
+  overflow-y: scroll;
+  height: 459px;
+  width: 627px;
+  // box-shadow: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
+  // border-bottom: 2px solid #757575;
+}
+
+#lookingForHeader {
+  opacity: 0.6;
+  margin-bottom: 20px;
+}
+
+#deviceAddHeader {
+  opacity: 0.6;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+#statusTabInfoWindow .deviceCard {
+  width: 472px;
+  padding: 10px;
+  margin-top: 0px;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#statusTabInfoWindow .deviceCard > x-box {
+  justify-content: space-between;
+}
+
+#statusTabInfoWindow .deviceName {
+  word-break: break-all;
+  -webkit-user-select: text;
+}
+
+#statusTabInfoWindow .deviceDetails {
+  padding: 0 10px;
+  width: 310px;
+}
+
+#statusTabInfoWindow .deviceMacAddress {
+  -webkit-user-select: text;
+  opacity: 0.5;
+}
+
+#statusTabInfoWindow x-card .cardDeviceIcon img {
+  width: 33px;
+  padding-right: 4px;
+  padding-left: 6px;
+}
+
+/*
+* If want to re-enable this, will need to make the height of #devicesContainer a little bigger.
+*/
+#devicesContainerBottomLip {
+  display: none;
+  position: absolute;
+  top: 607px;
+  height: 20px;
+  background-color: transparent;
+  width: 630px;
+  box-shadow: 0px -1px 11px -1px rgba(94,94,94,0.37);
+  margin-top: 9px;
+  z-index: 20;
+}

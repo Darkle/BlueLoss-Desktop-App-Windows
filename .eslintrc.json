@@ -1,0 +1,118 @@
+{
+  "parser": "@oigroup/lightscript-eslint",
+  "plugins": [
+    "react",
+    "jsx"
+  ],
+  "extends": [
+    "eslint:recommended"
+  ],
+  "globals": {
+    "h": true,
+    "ISDEV": true
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+    "jquery": true
+  },
+  "settings": {
+    "react": {
+      "pragma": "h"
+    }
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "impliedStrict": true,
+      "experimentalObjectRestSpread": true,
+      "modules": true,
+      "jsx": true
+    }
+  },
+  "rules": {
+    "jsx/uses-factory": [1, {
+      "pragma": "h"
+    }],
+    "jsx/factory-in-scope": [1, {
+      "pragma": "h"
+    }],
+    "jsx/mark-used-vars": 1,
+    "jsx/no-undef": 0,
+    "handle-callback-err": "error",
+    "key-spacing": [
+      "error",
+      {
+        "beforeColon": false,
+        "afterColon": true
+      }
+    ],
+    "no-await-in-loop": "error",
+    "no-buffer-constructor": "error",
+    "no-caller": "error",
+    "no-class-assign": "error",
+    "no-console": 0,
+    "no-const-assign": "error",
+    "no-debugger": "error",
+    "no-dupe-class-members": "error",
+    "no-duplicate-imports": "error",
+    "no-empty-function": "error",
+    "no-eval": "error",
+    "no-extend-native": "error",
+    "no-implied-eval": "error",
+    "no-invalid-this": "error",
+    "no-loop-func": "error",
+    "no-mixed-spaces-and-tabs": "error",
+    "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
+    "no-native-reassign": [
+      "error",
+      {
+        "exceptions": [
+          "Promise"
+        ]
+      }
+    ],
+    "no-new": "error",
+    "no-new-func": "error",
+    "no-new-require": "error",
+    "no-new-symbol": "error",
+    "no-new-wrappers": "error",
+    "no-param-reassign": "error",
+    "no-path-concat": "error",
+    "no-plusplus": [
+      "error",
+      {
+        "allowForLoopAfterthoughts": true
+      }
+    ],
+    "no-process-exit": "error",
+    "no-shadow": "error",
+    "no-spaced-func": "error",
+    "no-throw-literal": "error",
+    "no-undefined": "error",
+    "no-useless-call": "error",
+    "prefer-promise-reject-errors": "error",
+  	"prefer-spread": "error",
+  	"prefer-template": "error",
+  	"require-yield": "error",
+    // "quotes": [
+  	// 	"warn",
+  	// 	"single",
+  	// 	{
+  	// 		"avoidEscape": true,
+  	// 		"allowTemplateLiterals": true
+  	// 	}
+  	// ],
+  	"semi": [
+  		"error",
+  		"never"
+  	],
+    "space-before-function-paren": 0,
+  	"template-curly-spacing": [
+  		"error",
+  		"always"
+  	]
+  }
+}

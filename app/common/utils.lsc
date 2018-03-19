@@ -1,0 +1,28 @@
+import { print as prettyPrintObj } from 'q-i'
+import _ from 'lodash'
+
+noop() -> return
+
+logSettingsUpdateInDev(newSettingKey, newSettingValue):void ->
+  if ISDEV:
+    console.log('======================updateSetting======================')
+    console.log(newSettingKey)
+    prettyPrintObj(newSettingValue)
+
+omitInheritedProperties(obj) ->
+  Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
+    if isObject(obj[propName]):
+      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
+
+    {...prev, ...{ [propName]: obj[propName] }}
+  , {})
+
+
+isObject(obj) ->
+  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj) and !_.isString(obj)
+
+export {
+  noop,
+  logSettingsUpdateInDev,
+  omitInheritedProperties,
+}

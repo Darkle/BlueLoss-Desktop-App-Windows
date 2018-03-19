@@ -1,0 +1,37 @@
+import { h } from 'hyperapp'
+
+export default deviceCard({lookingForDevice, deviceName, deviceId, actions}) ->
+  <x-card class="deviceCard">
+    <x-box>
+      <x-box class="cardDeviceIcon">
+        <img src={ `assets/icons/devicesIconForCards-${ if lookingForDevice: 'blue' else: 'grey' }.svg` } />
+      </x-box>
+      <x-box vertical class="deviceDetails">
+        <strong class="deviceName">{ deviceName }</strong>
+        <p class="deviceMacAddress">{ deviceId }</p>
+      </x-box>
+      <x-box class="addRemoveButton">
+        {
+          // Lightscript if expressions FTW! http://bit.ly/2kNbt9R
+          if lookingForDevice:
+            <x-button
+              onclick={():void ->
+                actions.removeDevice({deviceName, deviceId})
+              }
+            >
+              <x-box><x-label>Remove</x-label></x-box>
+            </x-button>
+          else:
+            <x-button
+              onclick={():void ->
+                actions.addNewDevice({deviceName, deviceId})
+              }
+            >
+              <x-box><x-label>Add</x-label></x-box>
+            </x-button>
+        }
+      </x-box>
+    </x-box>
+  </x-card>
+
+

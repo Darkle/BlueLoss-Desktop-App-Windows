@@ -1,0 +1,28 @@
+import util from 'util'
+
+import winston from 'winston'
+
+import { debugWindow } from '../../debugWindow/debugWindow.lsc'
+
+/****
+* This is the loggger for when the user checks the "debug" checkbox in the options
+* window. The log data is sent to the debug window renderer and displayed there.
+*
+* The transports need a param (options) or they throw an error, even if you don't use it.
+*/
+UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->    // eslint-disable-line no-unused-vars
+  this.name = 'UserDebugLogger'
+  this.level = 'debug'
+  this.handleExceptions = true
+  this.humanReadableUnhandledException = true
+
+util.inherits(UserDebugLoggerTransport, winston.Transport)
+
+UserDebugLoggerTransport.prototype.log = (level, msg = '', meta = {}, callback):void ->
+  debugWindow?.webContents?.send?('mainprocess:debug-info-sent', {level, msg, meta})
+  callback(null, true)
+
+
+export {
+  UserDebugLoggerTransport,
+}

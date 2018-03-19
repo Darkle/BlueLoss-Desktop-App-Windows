@@ -1,0 +1,51 @@
+#header {
+  -webkit-app-region: drag;
+  height: 56px;
+  font-family: 'Lato';
+  /* background-color: #424852; */
+  font-size: 24px;
+  color: #757575;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
+  border-bottom: 2px solid #1B5299;
+  /* border-bottom: 1px solid #757575; */
+  background-color: #FFFFFF;
+}
+
+#logo {
+  display: flex;
+  flex-grow: 1.22;
+  justify-content: flex-end;
+}
+
+#headerIcon {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-right: 2px;
+}
+
+#headerText {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  color: #1B5299;
+}
+
+#headerButtons {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-grow: 1;
+  align-items: flex-start;
+}
+
+#headerButtons img {
+  padding: 7px;
+  -webkit-app-region: no-drag;
+}
+
+#headerButtons img:hover {
+  box-shadow: 0 0 0 0, 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
+}

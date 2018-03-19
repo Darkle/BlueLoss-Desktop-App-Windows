@@ -1,0 +1,12 @@
+
+import { updateSetting, getSettings } from '../db/settings.lsc'
+import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+
+toggleEnabledFromTray():void ->
+  toggledBlueLossEnabled = !getSettings().blueLossEnabled
+  updateSetting('blueLossEnabled', toggledBlueLossEnabled)
+  settingsWindow?.webContents?.send('mainprocess:blueloss-tray-enabled-disabled-toggled', toggledBlueLossEnabled)
+
+export {
+  toggleEnabledFromTray,
+}

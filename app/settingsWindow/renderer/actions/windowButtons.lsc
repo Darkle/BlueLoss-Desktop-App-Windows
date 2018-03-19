@@ -1,0 +1,14 @@
+import { remote } from 'electron'
+
+currentWindow = remote.getCurrentWindow()
+
+minimizeSettingsWindow():void ->
+  currentWindow.minimize()
+
+closeSettingsWindow():void ->
+  currentWindow.close()
+
+export {
+  minimizeSettingsWindow,
+  closeSettingsWindow
+}

@@ -1,0 +1,5 @@
+import { ipcRenderer } from 'electron'
+
+export default updateSetting({ settingName, settingValue }) ->
+  ipcRenderer.send('renderer:setting-updated-in-ui', settingName, settingValue)
+  { [settingName]: settingValue }

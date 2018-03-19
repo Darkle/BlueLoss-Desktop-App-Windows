@@ -1,0 +1,50 @@
+import path from 'path'
+import url from 'url'
+import { BrowserWindow } from 'electron'
+
+import { handleScanResults } from './handleScanResults.lsc'
+import { logger } from '../common/logging/logging.lsc'
+
+bluetoothHiddenWindowHTMLpath = url.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
+})
+
+bluetoothHiddenWindowProperties = {
+  show: ISDEV,
+  webPreferences: {
+    experimentalFeatures: true, // for web-bluetooth
+    devTools: ISDEV
+  }
+}
+
+let scannerWindow = null  // so it doesn't get garbage collected
+
+createBluetoothScannerWindow():void ->
+  now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
+  scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
+  if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+
+  scannerWindow.webContents.once('did-finish-load', scanforDevices)
+  scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
+  scannerWindow.webContents.once('crashed', (event):void ->
+    logger.error('scannerWindow.webContents crashed', event)
+  )
+  scannerWindow.once('unresponsive', (event):void ->
+    logger.error('scannerWindow unresponsive', event)
+  )
+
+
+
+scanforDevices() ->
+  scannerWindow.webContents
+    .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)
+    .catch(logger.error)
+
+
+export {
+  createBluetoothScannerWindow,
+  scanforDevices
+}
+

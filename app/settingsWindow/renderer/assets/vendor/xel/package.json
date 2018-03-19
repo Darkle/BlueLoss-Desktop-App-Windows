@@ -1,0 +1,82 @@
+{
+  "_from": "xel",
+  "_id": "xel@0.0.65",
+  "_inBundle": false,
+  "_integrity": "sha512-AzuYF+mi27MpExyWsReu5657BEEe+6JDrdSBgvHYBcwG69gOEjyVbOZyOQ2kFhpH60fB0YOrp0aKlR8stJVxNQ==",
+  "_location": "/xel",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "xel",
+    "name": "xel",
+    "escapedName": "xel",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/xel/-/xel-0.0.65.tgz",
+  "_shasum": "d2a1134feba47621516a4bac8154d1a12e448f55",
+  "_spec": "xel",
+  "_where": "C:\\Users\\Coop\\Coding\\BlueLoss",
+  "author": {
+    "name": "Jarosław Foksa"
+  },
+  "bugs": {
+    "url": "https://github.com/jarek-foksa/xel/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Widget toolkit for building native-like Electron, NW.js and Chrome apps",
+  "devDependencies": {
+    "csso": "^3.0.1",
+    "firebase-tools": "^3.5.0",
+    "fs-extra": ">=2.1.2",
+    "prismjs": "^1.6.0",
+    "rollup": "^0.49.2"
+  },
+  "homepage": "https://xel-toolkit.org/",
+  "keywords": [
+    "material",
+    "design",
+    "widget",
+    "toolkit",
+    "electron",
+    "nwjs",
+    "nw.js",
+    "macOS",
+    "desktop",
+    "ui",
+    "button",
+    "slider",
+    "tabs",
+    "card",
+    "menu",
+    "menubar",
+    "checkbox",
+    "radio",
+    "switch",
+    "select",
+    "dialog",
+    "drawer",
+    "overlay",
+    "popover",
+    "slider",
+    "throbber"
+  ],
+  "license": "MIT",
+  "name": "xel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jarek-foksa/xel.git"
+  },
+  "scripts": {
+    "prepare": "./project.js build",
+    "start": "./project.js serve"
+  },
+  "version": "0.0.65"
+}

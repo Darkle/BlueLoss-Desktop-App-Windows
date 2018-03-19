@@ -1,0 +1,34 @@
+{
+  "presets": [
+    [
+      "@oigroup/babel-preset-lightscript",
+      {
+        "env": {
+          "targets": {
+            "node": "8.2.1"
+          }
+        },
+        "stdlib": false,
+        "noEnforcedSubscriptIndentation": true,
+        "existential": true,
+        "useRequire": true
+      }
+    ]
+  ],
+  "plugins": [
+    "syntax-jsx",
+    [
+      "transform-object-rest-spread",
+      {
+        "useBuiltIns": true
+      }
+    ],
+    [
+      "transform-react-jsx",
+      {
+        "pragma": "h",
+        "useBuiltIns": true
+      }
+    ]
+  ]
+}

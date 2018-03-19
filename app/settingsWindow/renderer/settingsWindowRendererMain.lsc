@@ -1,0 +1,24 @@
+import { ipcRenderer } from 'electron'
+import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
+import { withLogger } from '@hyperapp/logger'
+
+import {
+  getInitialSettingsFromMainProcess as getInitialState,
+  identity,
+  handleRendererWindowError
+} from '../../common/renderers/utils.lsc'
+import appActions from './actions/actionsIndex.lsc'
+import views from './views/viewsIndex.lsc'
+
+logInDev = if ISDEV: withLogger else: identity
+
+settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
+
+ipcRenderer.on('mainprocess:blueloss-tray-enabled-disabled-toggled', (event, newBlueLossEnabledvalue):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?({blueLossEnabled: newBlueLossEnabledvalue})
+)
+ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?({devicesCanSee})
+)
+
+window.onerror = handleRendererWindowError

@@ -1,0 +1,95 @@
+import { ipcMain } from 'electron'
+import Store from 'electron-store'
+
+import _ from 'lodash'
+import { print as prettyPrintObj } from 'q-i'
+import gawk from 'gawk'
+
+import {
+  addRollbarLogging,
+  removeRollbarLogging,
+  addUserDebugLogger,
+  removeUserDebugLogger
+} from '../common/logging/logging.lsc'
+import { changeTrayIcon } from '../tray/tray.lsc'
+import { logSettingsUpdateInDev, omitInheritedProperties } from '../common/utils.lsc'
+import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.lsc'
+
+defaultSettings = {
+  blueLossEnabled: true,  //Boolean
+  firstRun: true,  //Boolean
+  trayIconColor: 'white',  //String
+  settingsWindowPosition: null, //Null or an Object with integer key values.
+  devicesToSearchFor: [], //Array of Objects {deviceName:'foo', deviceid:'C2:45:22:BG:H4:66'}
+  timeToLock: 4, //Integer (number of minutes)
+  reportErrors: true,  //Boolean
+  userDebug: false,  //Boolean
+  runOnStartup: true  //Boolean
+}
+
+store = new Store({defaults: defaultSettings})
+
+settings = gawk(omitInheritedProperties(store.store))
+
+if ISDEV: prettyPrintObj(settings)
+
+getSettings() -> settings
+
+// TODO: do some validation on the settings being passed in
+updateSetting(newSettingKey, newSettingValue):void ->
+  if ISDEV: logSettingsUpdateInDev(newSettingKey, newSettingValue)
+  settings[newSettingKey] = newSettingValue
+  store.set(newSettingKey, newSettingValue)
+
+/*****
+* Settings observers.
+*/
+gawk.watch(settings, ['reportErrors'], (newValue):void ->
+  if newValue: addRollbarLogging()
+  else: removeRollbarLogging()
+)
+gawk.watch(settings, ['userDebug'], (newValue):void ->
+  if newValue:
+    addUserDebugLogger()
+    showDebugWindow()
+  else:
+    removeUserDebugLogger()
+    closeDebugWindow()
+)
+gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
+
+/*****
+* Regular Array.includes compares by reference, not value, so using _.find.
+*/
+findDeviceInDevicesToSearchFor(deviceId) ->
+  _.find(settings.devicesToSearchFor, { deviceId })
+
+addNewDeviceToSearchFor(deviceToAdd):void ->
+  if findDeviceInDevicesToSearchFor(deviceToAdd.deviceId): return
+  updateSetting('devicesToSearchFor', [...settings.devicesToSearchFor, ...[deviceToAdd]])
+
+removeNewDeviceToSearchFor({deviceId: deviceIdToRemove}):void ->
+  if !findDeviceInDevicesToSearchFor(deviceIdToRemove): return
+  updateSetting('devicesToSearchFor',
+    settings.devicesToSearchFor.filter(({deviceId}) -> deviceId !== deviceIdToRemove)
+  )
+
+ipcMain.on('renderer:setting-updated-in-ui', (event, settingName, settingValue):void ->
+  updateSetting(settingName, settingValue)
+)
+
+ipcMain.on('renderer:device-added-in-ui', (event, deviceToAdd):void ->
+  addNewDeviceToSearchFor(deviceToAdd)
+)
+
+ipcMain.on('renderer:device-removed-in-ui', (event, deviceToRemove):void ->
+  removeNewDeviceToSearchFor(deviceToRemove)
+)
+
+
+export {
+  updateSetting,
+  getSettings,
+  addNewDeviceToSearchFor,
+  removeNewDeviceToSearchFor,
+}

@@ -1,0 +1,22 @@
+import { minimizeSettingsWindow, closeSettingsWindow } from './windowButtons.lsc'
+import toggleTab from './toggleTab.lsc'
+import openLink from './openLink.lsc'
+import animateDots from './animateDots.lsc'
+import updateSetting from './updateSetting.lsc'
+import updateStateOnIpcMessage from './updateStateOnIpcMessage.lsc'
+import changeTrayIconColor from './changeTrayIconColor.lsc'
+import removeDevice from './removeDevice.lsc'
+import addNewDevice from './addNewDevice.lsc'
+
+export default {
+  minimizeSettingsWindow,
+  closeSettingsWindow,
+  toggleTab,
+  openLink,
+  animateDots,
+  updateSetting,
+  updateStateOnIpcMessage,
+  changeTrayIconColor,
+  removeDevice,
+  addNewDevice,
+}

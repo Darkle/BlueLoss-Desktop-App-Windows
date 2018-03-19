@@ -1,0 +1,32 @@
+import path from 'path'
+
+import { BrowserWindow } from 'electron'
+
+import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
+
+settingsWindowDirPath = path.resolve(__dirname, '..', 'settingsWindow', 'renderer')
+settingsWindowHTMLfilePath = path.join(settingsWindowDirPath, 'settingsWindow.html')
+settingsWindowCSSfilePath = path.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
+settingsWindowJSfilePath = path.join(settingsWindowDirPath, 'settingsWindowRendererMain-compiled.js')
+settingsWindowIconFiles = path.join(settingsWindowDirPath, 'assets', 'icons', '*.*')
+bluetoothRendereJSfilePath = path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothRendererMain-compiled.js')
+devtronPath = path.resolve(__dirname, '..', '..', 'node_modules', 'devtron')
+
+setUpDev():void ->
+  if !ISDEV: return
+  require('electron-reload')([
+    settingsWindowHTMLfilePath,
+    settingsWindowCSSfilePath,
+    settingsWindowJSfilePath,
+    settingsWindowIconFiles,
+    bluetoothRendereJSfilePath,
+  ])
+  BrowserWindow.addDevToolsExtension(devtronPath)
+  // auto open the settings window in dev so dont have to manually open it each time electron restarts
+  showSettingsWindow()
+
+export {
+  setUpDev
+}
+
+

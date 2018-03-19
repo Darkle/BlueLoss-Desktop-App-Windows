@@ -1,0 +1,10 @@
+
+// This is called from a lifecycle event, so the element is the thing thats passed in.
+export default animateDots(element):void ->
+  animateStatusDots(interval=0):void ->
+    setTimeout(():void ->
+      element.classList.toggle('play')
+      animateStatusDots(!element.classList.contains('play')? 285 : 4200)
+    , interval)
+
+  animateStatusDots()

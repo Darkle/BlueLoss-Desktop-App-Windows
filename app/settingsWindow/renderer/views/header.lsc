@@ -1,0 +1,17 @@
+import { h } from 'hyperapp'
+
+export default ({ actions }) ->
+  <div id="header">
+    <div id="logo">
+      <div id="headerIcon">
+        <img src="assets/icons/BlueLossIcon.svg" />
+      </div>
+      <div id="headerText">BlueLoss</div>
+    </div>
+    <div id="headerButtons">
+      <img id="windowControlClose" src="assets/icons/closeIcon.svg" onclick={ actions.closeSettingsWindow } />
+      <img id="windowControlMinimize" src="assets/icons/minimizeIcon.svg" onclick={ actions.minimizeSettingsWindow } />
+    </div>
+  </div>
+
+

@@ -1,0 +1,81 @@
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  height: 558px;
+  justify-content: space-between;
+  border-right: 1px solid #757575;
+}
+
+#sidebar .activeTab .tabIcon,
+#sidebar .activeTab .tabText {
+  fill: #1B5299;
+  color: #1B5299;
+}
+
+#sidebar .tab {
+  font-size: 16px;
+  color: #757575;
+  display: flex;
+  justify-content: space-between;
+  height: 56px;
+}
+
+#sidebar .tab:hover .tabIcon,
+#sidebar .tab:hover .tabText {
+  fill: #1B5299;
+  color: #1B5299;
+}
+
+#sidebar .tabIcon {
+  color: #757575;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  fill: #757575;
+  margin-left: 12px;
+  margin-right: 13px;
+}
+
+#sidebar .tabText {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 90px;
+  margin-left: -6px;
+}
+
+#sidebar .tabLip {
+  height: 56px;
+  display: flex;
+  visibility: hidden;
+}
+
+#sidebar .activeTab .tabLip {
+  visibility: visible;
+}
+
+#sidebar .tabArrow {
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  transform: rotate(135deg);
+  border-right: 1px solid #757575;
+  border-bottom: 1px solid #757575;
+  margin-right: -8px;
+}
+
+#sidebar .tabLine {
+  margin: auto;
+  height: 20px;
+  border-right: 1px solid #F9F9F9;
+  margin-right: -1px;
+}
+
+#helpTab {
+  cursor: pointer;
+}
+
+#helpTab * {
+  cursor: pointer;
+}
