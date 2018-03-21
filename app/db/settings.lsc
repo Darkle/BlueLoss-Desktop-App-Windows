@@ -4,6 +4,7 @@ import Store from 'electron-store'
 import _ from 'lodash'
 import { print as prettyPrintObj } from 'q-i'
 import gawk from 'gawk'
+import compose from 'just-compose'
 
 import {
   addRollbarLogging,
@@ -16,7 +17,7 @@ import { logSettingsUpdateInDev, omitInheritedProperties } from '../common/utils
 import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.lsc'
 
 defaultSettings = {
-  blueLossEnabled: true,  //Boolean
+  lanLostEnabled: true,  //Boolean
   firstRun: true,  //Boolean
   trayIconColor: 'white',  //String
   settingsWindowPosition: null, //Null or an Object with integer key values.
@@ -29,7 +30,7 @@ defaultSettings = {
 
 store = new Store({defaults: defaultSettings})
 
-settings = gawk(omitInheritedProperties(store.store))
+settings = compose(gawk, omitInheritedProperties)(store.store)
 
 if ISDEV: prettyPrintObj(settings)
 

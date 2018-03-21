@@ -14,7 +14,7 @@ debugWindowProperties = {
   ...{
     width: 786,
     height: 616,
-    title: 'BlueLoss',
+    title: 'LANLost',
     autoHideMenuBar: true,
     resizable: false,
     fullscreenable: false,

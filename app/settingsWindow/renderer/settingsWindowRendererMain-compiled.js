@@ -86,6 +86,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
@@ -101,7 +103,7 @@ function identity(param) {
   * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
   * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
   */
-  return Object.assign({
+  return _extends({
     activeTab: 'statusTab',
     devicesCanSee: []
   }, omitInheritedProperties(_electron.remote.getGlobal('settingsWindowRendererInitialSettings')));
@@ -116,8 +118,8 @@ function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNum
 }function omitInheritedProperties(obj) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     if (isObject(obj[propName])) {
-      return Object.assign({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
-    }return Object.assign({}, prev, { [propName]: obj[propName] });
+      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
+    }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
@@ -550,10 +552,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // eslint-disable-line no-unused-vars
 const logInDev =  true ? _logger.withLogger : undefined;
 
+console.log(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
+console.log((0, _utils.getInitialSettingsFromMainProcess)());
+
 const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
 
-_electron.ipcRenderer.on('mainprocess:blueloss-tray-enabled-disabled-toggled', function (event, newBlueLossEnabledvalue) {
-  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage({ blueLossEnabled: newBlueLossEnabledvalue });
+_electron.ipcRenderer.on('mainprocess:lanlost-tray-enabled-disabled-toggled', function (event, newLanLostEnabledvalue) {
+  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage({ lanLostEnabled: newLanLostEnabledvalue });
 });
 _electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage({ devicesCanSee });
@@ -599,7 +604,7 @@ exports.default = function ({ actions, state }) {
           (0, _hyperapp.h)(
             'h3',
             null,
-            'BlueLoss ',
+            'LANLost ',
             _electron.remote.app.getVersion()
           )
         ),
@@ -611,8 +616,8 @@ exports.default = function ({ actions, state }) {
             null,
             (0, _hyperapp.h)(
               'a',
-              { id: 'aboutRepoLink', onclick: actions.openLink, 'data-external-link': 'https://github.com/Darkle/BlueLoss', href: 'https://github.com/Darkle/BlueLoss' },
-              'https://github.com/Darkle/BlueLoss'
+              { id: 'aboutRepoLink', onclick: actions.openLink, 'data-external-link': 'https://github.com/Darkle/LANLost', href: 'https://github.com/Darkle/LANLost' },
+              'https://github.com/Darkle/LANLost'
             )
           ),
           (0, _hyperapp.h)(
@@ -760,12 +765,12 @@ exports.default = function ({ actions }) {
       (0, _hyperapp.h)(
         "div",
         { id: "headerIcon" },
-        (0, _hyperapp.h)("img", { src: "assets/icons/BlueLossIcon.svg" })
+        (0, _hyperapp.h)("img", { src: "assets/icons/LANLostIcon.svg" })
       ),
       (0, _hyperapp.h)(
         "div",
         { id: "headerText" },
-        "BlueLoss"
+        "LANLost"
       )
     ),
     (0, _hyperapp.h)(
@@ -798,7 +803,7 @@ var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 exports.default = function ({ actions }) {
   return (0, _hyperapp.h)(
     "div",
-    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://github.com/Darkle/BlueLoss" },
+    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://github.com/Darkle/LANLost" },
     (0, _hyperapp.h)(
       "div",
       { "class": "tabIcon" },
@@ -883,7 +888,7 @@ exports.default = function ({ actions, state }) {
           (0, _hyperapp.h)(
             'x-label',
             null,
-            'Once a device has been lost, BlueLoss will wait this many minutes before locking the computer.'
+            'Once a device has been lost, LANLost will wait this many minutes before locking the computer.'
           )
         )
       )
@@ -1076,8 +1081,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'statusTab' ? 'flex' : 'none';
-  const statusAnimationVisibility = state.blueLossEnabled ? 'visible' : 'hidden';
-  const blueLossStatusText = state.blueLossEnabled ? 'Enabled' : 'Disabled';
+  const statusAnimationVisibility = state.lanLostEnabled ? 'visible' : 'hidden';
+  const lanLostStatusText = state.lanLostEnabled ? 'Enabled' : 'Disabled';
   const lookingForHeaderDisplay = state.devicesToSearchFor.length > 0 ? 'block' : 'none';
 
   return (0, _hyperapp.h)(
@@ -1103,17 +1108,17 @@ exports.default = function ({ actions, state }) {
         'x-box',
         { id: 'disableButton' },
         (0, _hyperapp.h)('x-switch', {
-          id: 'bluelossenableswitch',
-          toggled: state.blueLossEnabled,
+          id: 'lanLostenableswitch',
+          toggled: state.lanLostEnabled,
           onchange: function (event) {
-            actions.updateSetting({ settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled });
+            actions.updateSetting({ settingName: 'lanLostEnabled', settingValue: event.currentTarget.toggled });
           }
         }),
         (0, _hyperapp.h)(
           'x-label',
-          { 'for': 'bluelossenableswitch', id: 'bluelossenableswitch' },
-          'Blueloss ',
-          blueLossStatusText
+          { 'for': 'lanLostenableswitch', id: 'lanLostenableswitch' },
+          'LANLost ',
+          lanLostStatusText
         )
       )
     ),

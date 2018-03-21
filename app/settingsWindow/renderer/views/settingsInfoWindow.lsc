@@ -23,7 +23,7 @@ export default ({ actions, state }) ->
           <x-label>
             <strong>Time To Lock</strong>
           </x-label>
-          <x-label>Once a device has been lost, BlueLoss will wait this many minutes before locking the computer.</x-label>
+          <x-label>Once a device has been lost, LANLost will wait this many minutes before locking the computer.</x-label>
         </x-box>
       </x-label>
     </x-box>

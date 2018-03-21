@@ -5,8 +5,8 @@ import DeviceCard from '../components/deviceCard.lsc'
 
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'statusTab': 'flex' else: 'none'
-  statusAnimationVisibility = if state.blueLossEnabled: 'visible' else: 'hidden'
-  blueLossStatusText = if state.blueLossEnabled: 'Enabled' else: 'Disabled'
+  statusAnimationVisibility = if state.lanLostEnabled: 'visible' else: 'hidden'
+  lanLostStatusText = if state.lanLostEnabled: 'Enabled' else: 'Disabled'
   lookingForHeaderDisplay = if state.devicesToSearchFor.length > 0: 'block' else: 'none'
 
   <div id="statusTabInfoWindow" style={ { display: infoWindowDisplay } } >
@@ -22,13 +22,13 @@ export default ({ actions, state }) ->
       </div>
       <x-box id="disableButton">
         <x-switch
-          id="bluelossenableswitch"
-          toggled={ state.blueLossEnabled }
+          id="lanLostenableswitch"
+          toggled={ state.lanLostEnabled }
           onchange={(event):void ->
-            actions.updateSetting({ settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled})
+            actions.updateSetting({ settingName: 'lanLostEnabled', settingValue: event.currentTarget.toggled})
           }
         ></x-switch>
-        <x-label for="bluelossenableswitch" id="bluelossenableswitch">Blueloss { blueLossStatusText }</x-label>
+        <x-label for="lanLostenableswitch" id="lanLostenableswitch">LANLost { lanLostStatusText }</x-label>
       </x-box>
     </div>
     <div id="devicesContainer">

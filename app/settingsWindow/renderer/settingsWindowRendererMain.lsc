@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, remote } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
 
@@ -12,13 +12,17 @@ import views from './views/viewsIndex.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
 
+console.log(remote.getGlobal('settingsWindowRendererInitialSettings'))
+console.log(getInitialState())
+
 settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
 
-ipcRenderer.on('mainprocess:blueloss-tray-enabled-disabled-toggled', (event, newBlueLossEnabledvalue):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?({blueLossEnabled: newBlueLossEnabledvalue})
+ipcRenderer.on('mainprocess:lanlost-tray-enabled-disabled-toggled', (event, newLanLostEnabledvalue):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?({lanLostEnabled: newLanLostEnabledvalue})
 )
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?({devicesCanSee})
 )
 
 window.onerror = handleRendererWindowError
+window.onunhandledrejection = handleRendererWindowError

@@ -5,7 +5,7 @@ import { getSettings } from '../db/settings.lsc'
 
 
 lockSystem():void ->
-  if !getSettings().blueLossEnabled: return
+  if !getSettings().lanLostEnabled: return
 
 checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor) ->
   !sawDeviceWeAreLookingFor && (Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`)) )

@@ -10,11 +10,8 @@ import { debugWindow } from '../../debugWindow/debugWindow.lsc'
 *
 * The transports need a param (options) or they throw an error, even if you don't use it.
 */
-UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->    // eslint-disable-line no-unused-vars
-  this.name = 'UserDebugLogger'
-  this.level = 'debug'
-  this.handleExceptions = true
-  this.humanReadableUnhandledException = true
+UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->
+    Object.assign(this, options)
 
 util.inherits(UserDebugLoggerTransport, winston.Transport)
 

@@ -51,6 +51,11 @@ x-button[toggled] {
   flex-direction: column;
   margin-right: 2px;
 }
+#headerIcon > img {
+  padding-top: 4px;
+  height: 40px;
+  padding-right: 13px;
+}
 #headerText {
   display: flex;
   justify-content: center;
@@ -161,7 +166,7 @@ x-button[toggled] {
   margin-right: 60px;
   font-size: 16px;
 }
-#bluelossenableswitch {
+#lanlostenableswitch {
   margin-right: 10px;
 }
 #topStatus #disableButton x-label {

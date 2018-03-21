@@ -4,9 +4,9 @@ export default ({ actions }) ->
   <div id="header">
     <div id="logo">
       <div id="headerIcon">
-        <img src="assets/icons/BlueLossIcon.svg" />
+        <img src="assets/icons/LANLostIcon.svg" />
       </div>
-      <div id="headerText">BlueLoss</div>
+      <div id="headerText">LANLost</div>
     </div>
     <div id="headerButtons">
       <img id="windowControlClose" src="assets/icons/closeIcon.svg" onclick={ actions.closeSettingsWindow } />

@@ -1,8 +1,8 @@
 {
   "name": "lanloss",
   "productName": "LANLoss",
-  "version": "2017.9.29",
-  "description": "A desktop app that locks your computer when a device is removed from your local network",
+  "version": "2018.3.20",
+  "description": "A desktop app that locks your computer when a device is lost on your local network",
   "main": "app/main/appMain-compiled.js",
   "scripts": {
     "webpackWatch": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
@@ -28,10 +28,10 @@
     "formbase": "^6.0.3",
     "gawk": "^4.4.5",
     "hyperapp": "^1.2.0",
+    "just-compose": "^1.0.6",
     "lodash": "^4.17.5",
     "ms": "^2.1.1",
     "q-i": "^2.0.1",
-    "ramda": "^0.25.0",
     "rollbar": "^2.3.9",
     "winston": "^2.4.1",
     "xel": "0.0.128"
@@ -54,7 +54,6 @@
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.2",
     "babel-loader": "^7.1.4",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "cross-env": "^5.1.4",
     "devtron": "^1.4.0",
@@ -68,8 +67,9 @@
     "parallel-webpack": "^2.3.0",
     "sleep-ms": "^2.0.1",
     "snyk": "^1.70.2",
+    "stylus": "^0.54.5",
     "typesync": "^0.2.5",
-    "webpack": "^4.1.1",
+    "webpack": "^4.2.0",
     "webpack-node-externals": "^1.6.0"
   },
   "snyk": true

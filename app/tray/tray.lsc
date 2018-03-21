@@ -9,31 +9,31 @@ let tray = null // might need to be outside to avoid being garbage collected. ht
 trayIconsFolderPath = path.resolve(__dirname, '..', '..', 'resources', 'icons')
 
 getNewTrayIconPath(trayIconColor) ->
-  path.join(trayIconsFolderPath, trayIconColor, `BlueLoss-${ trayIconColor }-128x128.png`)
+  path.join(trayIconsFolderPath, trayIconColor, `LANLost-${ trayIconColor }-128x128.png`)
 
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
   tray.setContextMenu(createContextMenu())
-  tray.setToolTip('BlueLoss Settings')
+  tray.setToolTip('LANLost')
   tray.on('double-click', toggleSettingsWindow)
 
 createContextMenu() -> Menu.buildFromTemplate(
   [
     {
-      label: 'Open BlueLoss Settings',
+      label: 'Open LANLost Settings',
       click() {
         showSettingsWindow()
       }
     },
     {
-      label: `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`,
+      label: `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`,
       click(){
         toggleEnabledFromTray()
         tray.setContextMenu(createContextMenu())
       }
     },
     {
-      label: 'Quit BlueLoss',
+      label: 'Quit LANLost',
       click(){
         electronApp.quit()
       }

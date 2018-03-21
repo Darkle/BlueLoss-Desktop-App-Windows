@@ -102,6 +102,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
@@ -117,7 +119,7 @@ function identity(param) {
   * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
   * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
   */
-  return Object.assign({
+  return _extends({
     activeTab: 'statusTab',
     devicesCanSee: []
   }, omitInheritedProperties(_electron.remote.getGlobal('settingsWindowRendererInitialSettings')));
@@ -132,8 +134,8 @@ function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNum
 }function omitInheritedProperties(obj) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     if (isObject(obj[propName])) {
-      return Object.assign({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
-    }return Object.assign({}, prev, { [propName]: obj[propName] });
+      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
+    }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);

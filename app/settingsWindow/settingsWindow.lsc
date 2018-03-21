@@ -1,10 +1,10 @@
 import path from 'path'
 import url from 'url'
-
 import { app as electronApp, BrowserWindow, Menu } from 'electron'
 
 import { getSettings, updateSetting } from '../db/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
+import { omitGawkObserverFromSettings } from '../common/utils.lsc'
 
 settingsHTMLpath = url.format({
   protocol: 'file',
@@ -15,7 +15,7 @@ settingsWindowProperties = {
   ...{
     width: 786,
     height: 616,
-    title: 'BlueLoss',
+    title: 'LANLost',
     autoHideMenuBar: true,
     resizable: false,
     fullscreenable: false,
@@ -50,7 +50,7 @@ showSettingsWindow():void ->
   * remote.require() looks for the .lsc file - it doesn't know that the settings module has been compiled and now lives
   * inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = getSettings()
+  global.settingsWindowRendererInitialSettings = omitGawkObserverFromSettings(getSettings())
 
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})
   settingsWindow.loadURL(settingsHTMLpath)
@@ -84,8 +84,8 @@ showSettingsWindow():void ->
 getStoredWindowPosition() ->
   if !getSettings?().settingsWindowPosition: return {}
   {
-    x: getSettings?().settingsWindowPosition.x,
-    y: getSettings?().settingsWindowPosition.y
+    x: getSettings().settingsWindowPosition.x,
+    y: getSettings().settingsWindowPosition.y
   }
 
 toggleSettingsWindow():void ->

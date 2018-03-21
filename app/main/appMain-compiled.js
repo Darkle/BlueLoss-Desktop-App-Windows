@@ -245,7 +245,7 @@ var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function lockSystem() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return;
+  if (!(0, _settings.getSettings)().lanLostEnabled) return;
 }function checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor) {
   return !sawDeviceWeAreLookingFor && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.lockSystem = lockSystem;
@@ -296,7 +296,7 @@ const rollbarConfig = {
     platform: process.platform,
     processVersions: process.versions,
     arch: process.arch,
-    blueLossVersion: _electron.app.getVersion()
+    lanLostVersion: _electron.app.getVersion()
   },
   // Ignore the server stuff cause that includes info about the host pc name.
   transform(payload) {
@@ -438,11 +438,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 * The transports need a param (options) or they throw an error, even if you don't use it.
 */
 const UserDebugLoggerTransport = _winston2.default.transports.CustomLogger = function (options) {
-  // eslint-disable-line no-unused-vars
-  this.name = 'UserDebugLogger';
-  this.level = 'debug';
-  this.handleExceptions = true;
-  this.humanReadableUnhandledException = true;
+  Object.assign(this, options);
 };_util2.default.inherits(UserDebugLoggerTransport, _winston2.default.Transport);
 
 UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, callback) {
@@ -510,7 +506,9 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.omitGawkObserverFromSettings = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _qI = __webpack_require__(/*! q-i */ "q-i");
 
@@ -522,23 +520,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function noop() {
   return;
+}function omitGawkObserverFromSettings(settings) {
+  return omitInheritedProperties(settings, '__gawk__');
 }function logSettingsUpdateInDev(newSettingKey, newSettingValue) {
   if (true) {
     console.log('======================updateSetting======================');
     console.log(newSettingKey);
     (0, _qI.print)(newSettingValue);
   }
-}function omitInheritedProperties(obj) {
+} /**
+   * In the off-chance that an object key name is literally the word 'undefined',
+   * set Symbol() as the default param.
+   */
+function omitInheritedProperties(obj, propFilter = Symbol()) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
+    if (propFilter === propName) return prev;
     if (isObject(obj[propName])) {
-      return Object.assign({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
-    }return Object.assign({}, prev, { [propName]: obj[propName] });
+      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName], propFilter) });
+    }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
 }function isObject(obj) {
-  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
+  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj);
 }exports.noop = noop;
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
+exports.omitGawkObserverFromSettings = omitGawkObserverFromSettings;
 
 /***/ }),
 
@@ -573,6 +579,10 @@ var _gawk = __webpack_require__(/*! gawk */ "gawk");
 
 var _gawk2 = _interopRequireDefault(_gawk);
 
+var _justCompose = __webpack_require__(/*! just-compose */ "just-compose");
+
+var _justCompose2 = _interopRequireDefault(_justCompose);
+
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
@@ -584,7 +594,7 @@ var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const defaultSettings = {
-  blueLossEnabled: true, //Boolean
+  lanLostEnabled: true, //Boolean
   firstRun: true, //Boolean
   trayIconColor: 'white', //String
   settingsWindowPosition: null, //Null or an Object with integer key values.
@@ -597,7 +607,7 @@ const defaultSettings = {
 
 const store = new _electronStore2.default({ defaults: defaultSettings });
 
-const settings = (0, _gawk2.default)((0, _utils.omitInheritedProperties)(store.store));
+const settings = (0, _justCompose2.default)(_gawk2.default, _utils.omitInheritedProperties)(store.store);
 
 if (true) (0, _qI.print)(settings);
 
@@ -674,6 +684,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.closeDebugWindow = exports.showDebugWindow = exports.debugWindow = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
@@ -693,10 +705,10 @@ const debugWindowHTMLpath = _url2.default.format({
   slashes: true,
   pathname: _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
 });
-const debugWindowProperties = Object.assign({
+const debugWindowProperties = _extends({
   width: 786,
   height: 616,
-  title: 'BlueLoss',
+  title: 'LANLost',
   autoHideMenuBar: true,
   resizable: false,
   fullscreenable: false,
@@ -811,6 +823,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.settingsWindow = exports.toggleSettingsWindow = exports.showSettingsWindow = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
@@ -825,6 +839,8 @@ var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const settingsHTMLpath = _url2.default.format({
@@ -832,10 +848,10 @@ const settingsHTMLpath = _url2.default.format({
   slashes: true,
   pathname: _path2.default.resolve(__dirname, '..', 'settingsWindow', 'renderer', 'settingsWindow.html')
 });
-const settingsWindowProperties = Object.assign({
+const settingsWindowProperties = _extends({
   width: 786,
   height: 616,
-  title: 'BlueLoss',
+  title: 'LANLost',
   autoHideMenuBar: true,
   resizable: false,
   fullscreenable: false,
@@ -870,9 +886,9 @@ function showSettingsWindow() {
   * remote.require() looks for the .lsc file - it doesn't know that the settings module has been compiled and now lives
   * inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = (0, _settings.getSettings)();
+  global.settingsWindowRendererInitialSettings = (0, _utils.omitGawkObserverFromSettings)((0, _settings.getSettings)());
 
-  exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(Object.assign({}, settingsWindowProperties, getStoredWindowPosition()));
+  exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);
   settingsWindow.setMenu(settingsWindowMenu);
 
@@ -905,8 +921,8 @@ function showSettingsWindow() {
 }function getStoredWindowPosition() {
   if (!(typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition)) return {};
   return {
-    x: typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition.x,
-    y: typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition.y
+    x: (0, _settings.getSettings)().settingsWindowPosition.x,
+    y: (0, _settings.getSettings)().settingsWindowPosition.y
   };
 }function toggleSettingsWindow() {
   if (!settingsWindow) {
@@ -942,9 +958,9 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 function toggleEnabledFromTray() {
   var _settingsWindow$webCo;
 
-  const toggledBlueLossEnabled = !(0, _settings.getSettings)().blueLossEnabled;
-  (0, _settings.updateSetting)('blueLossEnabled', toggledBlueLossEnabled);
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:blueloss-tray-enabled-disabled-toggled', toggledBlueLossEnabled);
+  const toggledLanLostEnabled = !(0, _settings.getSettings)().lanLostEnabled;
+  (0, _settings.updateSetting)('lanLostEnabled', toggledLanLostEnabled);
+  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:lanLost-tray-enabled-disabled-toggled', toggledLanLostEnabled);
 }exports.toggleEnabledFromTray = toggleEnabledFromTray;
 
 /***/ }),
@@ -982,26 +998,26 @@ let tray = null; // might need to be outside to avoid being garbage collected. h
 const trayIconsFolderPath = _path2.default.resolve(__dirname, '..', '..', 'resources', 'icons');
 
 function getNewTrayIconPath(trayIconColor) {
-  return _path2.default.join(trayIconsFolderPath, trayIconColor, `BlueLoss-${trayIconColor}-128x128.png`);
+  return _path2.default.join(trayIconsFolderPath, trayIconColor, `LANLost-${trayIconColor}-128x128.png`);
 }function initTrayMenu() {
   tray = new _electron.Tray(getNewTrayIconPath((0, _settings.getSettings)().trayIconColor));
   tray.setContextMenu(createContextMenu());
-  tray.setToolTip('BlueLoss Settings');
+  tray.setToolTip('LANLost');
   tray.on('double-click', _settingsWindow.toggleSettingsWindow);
 }function createContextMenu() {
   return _electron.Menu.buildFromTemplate([{
-    label: 'Open BlueLoss Settings',
+    label: 'Open LANLost Settings',
     click() {
       return (0, _settingsWindow.showSettingsWindow)();
     }
   }, {
-    label: `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`,
+    label: `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`,
     click() {
       (0, _toggleEnabledFromTray.toggleEnabledFromTray)();
       return tray.setContextMenu(createContextMenu());
     }
   }, {
-    label: 'Quit BlueLoss',
+    label: 'Quit LANLost',
     click() {
       return _electron.app.quit();
     }
@@ -1090,6 +1106,17 @@ module.exports = require("electron-store");
 /***/ (function(module, exports) {
 
 module.exports = require("gawk");
+
+/***/ }),
+
+/***/ "just-compose":
+/*!*******************************!*\
+  !*** external "just-compose" ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("just-compose");
 
 /***/ }),
 

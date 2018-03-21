@@ -3,26 +3,35 @@ import _ from 'lodash'
 
 noop() -> return
 
+omitGawkObserverFromSettings(settings) ->
+  omitInheritedProperties(settings, '__gawk__')
+
 logSettingsUpdateInDev(newSettingKey, newSettingValue):void ->
   if ISDEV:
     console.log('======================updateSetting======================')
     console.log(newSettingKey)
     prettyPrintObj(newSettingValue)
 
-omitInheritedProperties(obj) ->
+/**
+ * In the off-chance that an object key name is literally the word 'undefined',
+ * set Symbol() as the default param.
+ */
+omitInheritedProperties(obj, propFilter = Symbol()) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
+    if propFilter === propName: return prev
     if isObject(obj[propName]):
-      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
+      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propFilter) }}
 
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
 
 isObject(obj) ->
-  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj) and !_.isString(obj)
+  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj)
 
 export {
   noop,
   logSettingsUpdateInDev,
   omitInheritedProperties,
+  omitGawkObserverFromSettings,
 }
