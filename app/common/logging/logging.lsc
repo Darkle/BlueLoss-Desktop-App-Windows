@@ -58,10 +58,6 @@ ipcMain.on('settings-renderer:error-sent', (event, arg) => {
   logger.error('settings-renderer:error-sent', arg)
 })
 
-ipcMain.on('bluetooth-renderer:error-sent', (event, arg) => {
-  logger.error('bluetooth-renderer:error-sent', arg)
-})
-
 
 export {
   logger,

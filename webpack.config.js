@@ -9,8 +9,6 @@ const mainDir = path.join(appDir, 'main')
 const mainAppEntryPoint = path.join(mainDir, 'appMain.lsc')
 const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer')
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
-const bluetoothRendererDir = path.join(appDir, 'bluetooth', 'renderer')
-const bluetoothRendererEntryPoint = path.join(bluetoothRendererDir, 'bluetoothRendererMain.lsc')
 const isDev = process.env.NODE_ENV !== 'production'
 const debugging = isDev && process.env.nodeDebug === 'true'
 
@@ -99,20 +97,7 @@ const electronSettingsRendererWebpackOptions = {
   }
 }
 
-const bluetoothRendererWebpackOptions = {
-  ...commonWebpackOptions,
-  ...{
-    target: 'electron-renderer',
-    entry: bluetoothRendererEntryPoint,
-    output: {
-      filename: 'bluetoothRendererMain-compiled.js',
-      path: bluetoothRendererDir
-    }
-  }
-}
-
 module.exports = [
   electronMainWebpackOptions,
   electronSettingsRendererWebpackOptions,
-  bluetoothRendererWebpackOptions,
 ]

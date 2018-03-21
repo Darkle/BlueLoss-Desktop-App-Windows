@@ -20,7 +20,7 @@ settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, 
 ipcRenderer.on('mainprocess:lanlost-tray-enabled-disabled-toggled', (event, newLanLostEnabledvalue):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?({lanLostEnabled: newLanLostEnabledvalue})
 )
-ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee):void ->
+ipcRenderer.on('mainprocess:update-of-network-devices-can-see', (event, devicesCanSee):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?({devicesCanSee})
 )
 

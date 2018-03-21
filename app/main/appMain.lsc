@@ -1,14 +1,11 @@
 import '../../config/env.lsc'
 import { app as electronApp } from 'electron'
 
- electronApp.commandLine.appendSwitch('enable-web-bluetooth')
-
 import { setUpDev } from '../common/setUpDev.lsc'
 import { getSettings, updateSetting } from '../db/settings.lsc'
 import { noop } from '../common/utils.lsc'
 import { initTrayMenu } from '../tray/tray.lsc'
 import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { createBluetoothScannerWindow } from '../bluetooth/blueToothMain.lsc'
 import { logger } from '../common/logging/logging.lsc'
 
 electronApp.once('ready', ():void ->
@@ -16,7 +13,6 @@ electronApp.once('ready', ():void ->
   if ISDEV: setUpDev()
   if !getSettings().firstRun: electronApp.dock?.hide()
 
-  createBluetoothScannerWindow()
   initTrayMenu()
 
   if getSettings().firstRun:

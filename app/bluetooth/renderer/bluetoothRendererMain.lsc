@@ -1,3 +1,0 @@
-import { handleRendererWindowError } from '../../common/renderers/utils.lsc'
-
-window.onerror = handleRendererWindowError
