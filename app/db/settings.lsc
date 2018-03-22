@@ -25,11 +25,10 @@ initSettingsObservers(settings)
 initSettingsIPClisteners()
 if ISDEV: prettyPrintObj(settings)
 
-
 getSettings() -> settings
 
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if ISDEV: logSettingsUpdateInDev(newSettingKey, newSettingValue)
+  logSettingsUpdateInDev(newSettingKey, newSettingValue)
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
 
@@ -47,7 +46,6 @@ removeNewDeviceToSearchFor({macAddress: macAddressOfDeviceToRemove}):void ->
 */
 findDeviceInDevicesToSearchFor(macAddress) ->
   _.find(settings.devicesToSearchFor, { macAddress })
-
 
 
 export {

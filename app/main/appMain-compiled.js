@@ -428,7 +428,7 @@ if (true) (0, _qI.print)(settings);
 function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
-  if (true) (0, _utils.logSettingsUpdateInDev)(newSettingKey, newSettingValue);
+  (0, _utils.logSettingsUpdateInDev)(newSettingKey, newSettingValue);
   settings[newSettingKey] = newSettingValue;
   db.set(newSettingKey, newSettingValue).write();
 }function addNewDeviceToSearchFor(deviceToAdd) {

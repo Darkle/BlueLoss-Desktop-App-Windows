@@ -6,7 +6,7 @@ import {
   getInitialSettingsFromMainProcess as getInitialState,
   identity,
   handleRendererWindowError
-} from '../../common/renderers/utils.lsc'
+} from './utils.lsc'
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
