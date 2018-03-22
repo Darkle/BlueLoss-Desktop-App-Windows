@@ -71,188 +71,6 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/bluetooth/blueToothMain.lsc":
-/*!*****************************************!*\
-  !*** ./app/bluetooth/blueToothMain.lsc ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.scanforDevices = exports.createBluetoothScannerWindow = undefined;
-
-var _path = __webpack_require__(/*! path */ "path");
-
-var _path2 = _interopRequireDefault(_path);
-
-var _url = __webpack_require__(/*! url */ "url");
-
-var _url2 = _interopRequireDefault(_url);
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/bluetooth/handleScanResults.lsc");
-
-var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const bluetoothHiddenWindowHTMLpath = _url2.default.format({
-  protocol: 'file',
-  slashes: true,
-  pathname: _path2.default.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
-});
-
-const bluetoothHiddenWindowProperties = {
-  show: true,
-  webPreferences: {
-    experimentalFeatures: true, // for web-bluetooth
-    devTools: true
-  }
-};
-
-let scannerWindow = null; // so it doesn't get garbage collected
-
-function createBluetoothScannerWindow() {
-  scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
-  scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
-  if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
-
-  scannerWindow.webContents.once('did-finish-load', scanforDevices);
-  scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
-  scannerWindow.webContents.once('crashed', function (event) {
-    _logging.logger.error('scannerWindow.webContents crashed', event);
-  });
-  scannerWindow.once('unresponsive', function (event) {
-    _logging.logger.error('scannerWindow unresponsive', event);
-  });
-}function scanforDevices() {
-  return scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true).catch(_logging.logger.error);
-}exports.createBluetoothScannerWindow = createBluetoothScannerWindow;
-exports.scanforDevices = scanforDevices;
-
-/***/ }),
-
-/***/ "./app/bluetooth/handleScanResults.lsc":
-/*!*********************************************!*\
-  !*** ./app/bluetooth/handleScanResults.lsc ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.handleScanResults = undefined;
-
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
-
-var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
-
-var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
-
-var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
-
-var _blueToothMain = __webpack_require__(/*! ./blueToothMain.lsc */ "./app/bluetooth/blueToothMain.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-let lastTimeSawADeviceWeAreLookingFor = Date.now();
-
-/**
-* deviceList example:
-*  [
-*    { deviceName: 'MotoG3', deviceId: 'E1:77:42:CF:F2:11' }.,
-*    { deviceName: 'Foo\'s iPad', deviceId: '12:22:F1:AD:46:17' }
-*    ...
-*  ]
-*/
-let i = 0;
-function handleScanResults(event, deviceList, callback) {
-  event.preventDefault();
-  console.log(`handleScanResults scan: ${i++}`);
-  // Check for duplicates in deviceList in case run in to this bug:
-  // https://github.com/electron/electron/issues/10800
-  const dedupedDeviceList = dedupeAndPreferName(deviceList);
-
-  _logging.logger.info('scan results', dedupedDeviceList);
-
-  // settingsWindow?.webContents?.send('mainprocess:update-of-bluetooth-devices-can-see', dedupedDeviceList)
-
-  // sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
-  // shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)
-
-  // if shouldLock: lockSystem()
-  // if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
-
-  callback(''); // http://bit.ly/2kZhD74
-  (0, _blueToothMain.scanforDevices)();
-} /*****
-  * We remove duplicates, but also for any duplicates, we prefer to take the duplicate
-  * that has a device name (sometimes they have an empty string for a device name).
-  */
-function dedupeAndPreferName(deviceList) {
-  return deviceList.reduce(function (newDeviceList, newDevice) {
-    var _foundDeviceInNewList;
-
-    const deviceId = newDevice.deviceId;
-    const foundDeviceInNewList = _lodash2.default.find(newDeviceList, { deviceId });
-    if (!foundDeviceInNewList) {
-      return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
-    }if (!(foundDeviceInNewList == null ? void 0 : (_foundDeviceInNewList = foundDeviceInNewList.deviceName) == null ? void 0 : _foundDeviceInNewList.length) && newDevice.deviceName.length) {
-      var _ref;
-
-      return [...(_ref = _lodash2.default.filter(newDeviceList, item => item.deviceId !== deviceId), _ref === void 0 ? [] : _ref), newDevice];
-    }return newDeviceList;
-  }, []);
-}exports.handleScanResults = handleScanResults;
-
-/***/ }),
-
-/***/ "./app/common/lockSystem.lsc":
-/*!***********************************!*\
-  !*** ./app/common/lockSystem.lsc ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.checkIfShouldLock = exports.lockSystem = undefined;
-
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
-
-var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function lockSystem() {
-  if (!(0, _settings.getSettings)().lanLostEnabled) return;
-}function checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor) {
-  return !sawDeviceWeAreLookingFor && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
-}exports.lockSystem = lockSystem;
-exports.checkIfShouldLock = checkIfShouldLock;
-
-/***/ }),
-
 /***/ "./app/common/logging/customRollbarTransport.lsc":
 /*!*******************************************************!*\
   !*** ./app/common/logging/customRollbarTransport.lsc ***!
@@ -392,10 +210,6 @@ function addRollbarLogging() {
   return logger.error('settings-renderer:error-sent', arg);
 });
 
-_electron.ipcMain.on('bluetooth-renderer:error-sent', (event, arg) => {
-  return logger.error('bluetooth-renderer:error-sent', arg);
-});
-
 exports.logger = logger;
 exports.addUserDebugLogger = addUserDebugLogger;
 exports.removeUserDebugLogger = removeUserDebugLogger;
@@ -480,12 +294,11 @@ const settingsWindowHTMLfilePath = _path2.default.join(settingsWindowDirPath, 's
 const settingsWindowCSSfilePath = _path2.default.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css');
 const settingsWindowJSfilePath = _path2.default.join(settingsWindowDirPath, 'settingsWindowRendererMain-compiled.js');
 const settingsWindowIconFiles = _path2.default.join(settingsWindowDirPath, 'assets', 'icons', '*.*');
-const bluetoothRendereJSfilePath = _path2.default.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothRendererMain-compiled.js');
 const devtronPath = _path2.default.resolve(__dirname, '..', '..', 'node_modules', 'devtron');
 
 function setUpDev() {
   if (false) {}
-  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, bluetoothRendereJSfilePath]);
+  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
   (0, _settingsWindow.showSettingsWindow)();
@@ -780,11 +593,7 @@ var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
-var _blueToothMain = __webpack_require__(/*! ../bluetooth/blueToothMain.lsc */ "./app/bluetooth/blueToothMain.lsc");
-
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
-
-_electron.app.commandLine.appendSwitch('enable-web-bluetooth');
 
 _electron.app.once('ready', function () {
   var _electronApp$dock;
@@ -793,7 +602,6 @@ _electron.app.once('ready', function () {
   if (true) (0, _setUpDev.setUpDev)();
   if (!(0, _settings.getSettings)().firstRun) (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
 
-  (0, _blueToothMain.createBluetoothScannerWindow)();
   (0, _tray.initTrayMenu)();
 
   if ((0, _settings.getSettings)().firstRun) {
@@ -1128,17 +936,6 @@ module.exports = require("just-compose");
 /***/ (function(module, exports) {
 
 module.exports = require("lodash");
-
-/***/ }),
-
-/***/ "ms":
-/*!*********************!*\
-  !*** external "ms" ***!
-  \*********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("ms");
 
 /***/ }),
 
