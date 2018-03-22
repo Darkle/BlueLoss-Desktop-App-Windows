@@ -1,0 +1,27 @@
+import { SettingsWindowPositionType, DeviceType } from '../types/types.lsc'
+
+defaultSettings: {
+  lanLostEnabled: boolean,
+  firstRun: boolean,
+  trayIconColor: string,
+  settingsWindowPosition: SettingsWindowPositionType,
+  devicesToSearchFor: Array<DeviceType>,
+  timeToLock: number,
+  reportErrors: boolean,
+  userDebug: boolean,
+  runOnStartup: boolean,
+} = {
+  lanLostEnabled: true,
+  firstRun: true,
+  trayIconColor: 'white',
+  settingsWindowPosition: null,
+  devicesToSearchFor: [],
+  timeToLock: 2,
+  reportErrors: true,
+  userDebug: false,
+  runOnStartup: true
+}
+
+export {
+  defaultSettings
+}

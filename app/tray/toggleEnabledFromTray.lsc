@@ -1,11 +1,9 @@
 
 import { updateSetting, getSettings } from '../db/settings.lsc'
-import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
 toggleEnabledFromTray():void ->
   toggledLanLostEnabled = !getSettings().lanLostEnabled
   updateSetting('lanLostEnabled', toggledLanLostEnabled)
-  settingsWindow?.webContents?.send('mainprocess:lanLost-tray-enabled-disabled-toggled', toggledLanLostEnabled)
 
 export {
   toggleEnabledFromTray,

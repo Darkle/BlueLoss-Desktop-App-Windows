@@ -11,7 +11,7 @@ export default ({ actions, state }) ->
         id="timeToLock"
         value={ state.timeToLock }
         suffix=" mins"
-        min="1"
+        min="2"
         onchange={(event):void ->
           actions.updateSetting({ settingName: 'timeToLock', settingValue: ( event.currentTarget.value )})
         }

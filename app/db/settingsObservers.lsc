@@ -1,0 +1,34 @@
+
+import gawk from 'gawk'
+
+import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import {
+  addRollbarLogging,
+  removeRollbarLogging,
+  addUserDebugLogger,
+  removeUserDebugLogger
+} from '../common/logging/logging.lsc'
+import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.lsc'
+import { changeTrayIcon } from '../tray/tray.lsc'
+
+initSettingsObservers(settings):void ->
+  gawk.watch(settings, ['lanLostEnabled'], (newValue: boolean):void ->
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {lanLostEnabled: newValue})
+  )
+  gawk.watch(settings, ['reportErrors'], (newValue: boolean):void ->
+    if newValue: addRollbarLogging()
+    else: removeRollbarLogging()
+  )
+  gawk.watch(settings, ['userDebug'], (newValue: boolean):void ->
+    if newValue:
+      addUserDebugLogger()
+      showDebugWindow()
+    else:
+      removeUserDebugLogger()
+      closeDebugWindow()
+  )
+  gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
+
+export {
+  initSettingsObservers
+}

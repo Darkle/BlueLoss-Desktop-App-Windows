@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron'
 
-export default changeTrayIconColor(newTrayIconColor) ->
+export default changeTrayIconColor(newTrayIconColor: string) ->
   ipcRenderer.send('renderer:setting-updated-in-ui', 'trayIconColor', newTrayIconColor)
   ({trayIconColor: newTrayIconColor})

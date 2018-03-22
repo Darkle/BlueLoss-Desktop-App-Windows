@@ -1,11 +1,14 @@
 import { ipcRenderer } from 'electron'
 import _ from 'lodash'
 
+import { DeviceType } from '../../../types/types.lsc'
+
+
 /**
 * If you need to use the state & actions and return data, you need to use (value) => (state, actions)
 * https://github.com/hyperapp/hyperapp#actions
 */
-export default addNewDevice(newDevice) -> state ->
-  if _.find(state.devicesToSearchFor, {deviceId: newDevice.deviceId}): return
+export default addNewDevice(newDevice: DeviceType) -> state ->
+  if _.find(state.devicesToSearchFor, {macAddress: newDevice.macAddress}): return
   ipcRenderer.send('renderer:device-added-in-ui', newDevice)
   ({devicesToSearchFor: [...state.devicesToSearchFor, ...[newDevice]]})

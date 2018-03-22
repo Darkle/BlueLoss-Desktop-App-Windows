@@ -1,0 +1,22 @@
+import getDefaultGateway from 'default-gateway'
+import deviceDiscovery from 'device-discovery'
+
+import { logger } from '../common/logging/logging.lsc'
+
+initScan():void ->
+  gateway = getDefaultGateway.v4.sync()
+
+  if !gateway?.interface?.length:
+    getGatewayError = new Error('unable to get default interface')
+    logger.error(getGatewayError)
+    return
+
+  scanNetwork(gateway.interface)
+
+scanNetwork(networkInterface: string): void ->
+  deviceDiscovery({ type: 'ICMP', iface: networkInterface })
+    .on('device', console.log)
+
+export {
+  initScan
+}

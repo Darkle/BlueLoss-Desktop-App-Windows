@@ -214,6 +214,8 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -224,7 +226,7 @@ exports.default = function addNewDevice(newDevice) {
   return function (state) {
     var _ref;
 
-    if (_lodash2.default.find(state.devicesToSearchFor, { deviceId: newDevice.deviceId })) return;
+    if (_lodash2.default.find(state.devicesToSearchFor, { macAddress: newDevice.macAddress })) return;
     _electron.ipcRenderer.send('renderer:device-added-in-ui', newDevice);
     return { devicesToSearchFor: [...(_ref = state.devicesToSearchFor, _ref === void 0 ? [] : _ref), ...[newDevice]] };
   };
@@ -324,6 +326,8 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -332,10 +336,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 exports.default = function removeDevice(deviceToRemove) {
   return function (state) {
-    if (!_lodash2.default.find(state.devicesToSearchFor, { deviceId: deviceToRemove.deviceId })) return;
+    if (!_lodash2.default.find(state.devicesToSearchFor, { macAddress: deviceToRemove.macAddress })) return;
     _electron.ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove);
-    return { devicesToSearchFor: [state.devicesToSearchFor.filter(function ({ deviceId }) {
-        return deviceId !== deviceToRemove.deviceId;
+    return { devicesToSearchFor: [state.devicesToSearchFor.filter(function ({ macAddress }) {
+        return macAddress !== deviceToRemove.macAddress;
       })] };
   };
 };
@@ -450,7 +454,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-exports.default = function deviceCard({ lookingForDevice, deviceName, deviceId, actions }) {
+exports.default = function deviceCard({ lookingForDevice, deviceName, macAddress, actions }) {
   return (0, _hyperapp.h)(
     "x-card",
     { "class": "deviceCard" },
@@ -473,7 +477,7 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, deviceId, 
         (0, _hyperapp.h)(
           "p",
           { "class": "deviceMacAddress" },
-          deviceId
+          macAddress
         )
       ),
       (0, _hyperapp.h)(
@@ -485,7 +489,7 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, deviceId, 
           "x-button",
           {
             onclick: function () {
-              actions.removeDevice({ deviceName, deviceId });
+              actions.removeDevice({ deviceName, macAddress });
             }
           },
           (0, _hyperapp.h)(
@@ -501,7 +505,7 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, deviceId, 
           "x-button",
           {
             onclick: function () {
-              actions.addNewDevice({ deviceName, deviceId });
+              actions.addNewDevice({ deviceName, macAddress });
             }
           },
           (0, _hyperapp.h)(
@@ -547,21 +551,24 @@ var _viewsIndex = __webpack_require__(/*! ./views/viewsIndex.lsc */ "./app/setti
 
 var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
 
+var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/types/types.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// eslint-disable-line no-unused-vars
-const logInDev =  true ? _logger.withLogger : undefined;
+const logInDev =  true ? _logger.withLogger : undefined; // eslint-disable-line no-unused-vars
 
-console.log(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
-console.log((0, _utils.getInitialSettingsFromMainProcess)());
 
 const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
 
-_electron.ipcRenderer.on('mainprocess:lanlost-tray-enabled-disabled-toggled', function (event, newLanLostEnabledvalue) {
-  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage({ lanLostEnabled: newLanLostEnabledvalue });
+/**
+ * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
+ * for that.
+ */
+_electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
+  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
 });
 _electron.ipcRenderer.on('mainprocess:update-of-network-devices-can-see', function (event, devicesCanSee) {
-  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage({ devicesCanSee });
+  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
 });
 
 window.onerror = _utils.handleRendererWindowError;
@@ -864,7 +871,7 @@ exports.default = function ({ actions, state }) {
           id: 'timeToLock',
           value: state.timeToLock,
           suffix: ' mins',
-          min: '1',
+          min: '2',
           onchange: function (event) {
             actions.updateSetting({ settingName: 'timeToLock', settingValue: event.currentTarget.value });
           }
@@ -1131,8 +1138,8 @@ exports.default = function ({ actions, state }) {
         { id: 'lookingForHeader', style: { display: lookingForHeaderDisplay } },
         'Currently Looking For:'
       ),
-      state.devicesToSearchFor.map(function ({ deviceName, deviceId }) {
-        return (0, _hyperapp.h)(_deviceCard2.default, { key: deviceId, actions: actions, lookingForDevice: true, deviceName: deviceName, deviceId: deviceId });
+      state.devicesToSearchFor.map(function ({ deviceName, macAddress }) {
+        return (0, _hyperapp.h)(_deviceCard2.default, { key: macAddress, actions: actions, lookingForDevice: true, deviceName: deviceName, macAddress: macAddress });
       }),
       (0, _hyperapp.h)(
         'div',
@@ -1141,10 +1148,10 @@ exports.default = function ({ actions, state }) {
       ),
 
       // Regular Array.includes compares by reference, not value, so using _.find.
-      state.devicesCanSee.filter(function ({ deviceId }) {
-        return !_lodash2.default.find(state.devicesToSearchFor, { deviceId });
-      }).map(function ({ deviceName, deviceId }) {
-        return (0, _hyperapp.h)(_deviceCard2.default, { key: deviceId, actions: actions, lookingForDevice: false, deviceName: deviceName, deviceId: deviceId });
+      state.devicesCanSee.filter(function ({ macAddress }) {
+        return !_lodash2.default.find(state.devicesToSearchFor, { macAddress });
+      }).map(function ({ deviceName, macAddress }) {
+        return (0, _hyperapp.h)(_deviceCard2.default, { key: macAddress, actions: actions, lookingForDevice: false, deviceName: deviceName, macAddress: macAddress });
       })
     ),
     (0, _hyperapp.h)('div', { id: 'devicesContainerBottomLip' })
@@ -1297,6 +1304,18 @@ exports.default = function (state, actions) {
     )
   );
 };
+
+/***/ }),
+
+/***/ "./app/types/types.lsc":
+/*!*****************************!*\
+  !*** ./app/types/types.lsc ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /***/ }),
 

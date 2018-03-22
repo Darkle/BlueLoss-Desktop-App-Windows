@@ -189,8 +189,7 @@ const userDebugTransportOptions = {
 if (true) {
   logger.add(_winston2.default.transports.Console, {
     handleExceptions: true,
-    humanReadableUnhandledException: true,
-    json: true
+    humanReadableUnhandledException: true
   });
 } // dont send errors to rollbar in dev && only if enabled.
 if (false) {} /**
@@ -329,6 +328,8 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function noop() {
@@ -376,11 +377,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = undefined;
 
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
 var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _electronStore = __webpack_require__(/*! electron-store */ "electron-store");
-
-var _electronStore2 = _interopRequireDefault(_electronStore);
 
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
@@ -392,93 +393,183 @@ var _gawk = __webpack_require__(/*! gawk */ "gawk");
 
 var _gawk2 = _interopRequireDefault(_gawk);
 
-var _justCompose = __webpack_require__(/*! just-compose */ "just-compose");
+var _lowdb = __webpack_require__(/*! lowdb */ "lowdb");
 
-var _justCompose2 = _interopRequireDefault(_justCompose);
+var _lowdb2 = _interopRequireDefault(_lowdb);
 
-var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+var _FileSync = __webpack_require__(/*! lowdb/adapters/FileSync */ "lowdb/adapters/FileSync");
 
-var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
+var _FileSync2 = _interopRequireDefault(_FileSync);
 
 var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
-var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/debugWindow/debugWindow.lsc");
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+
+var _settingsDefaults = __webpack_require__(/*! ./settingsDefaults.lsc */ "./app/db/settingsDefaults.lsc");
+
+var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./app/db/settingsObservers.lsc");
+
+var _settingsIPClisteners = __webpack_require__(/*! ./settingsIPClisteners.lsc */ "./app/db/settingsIPClisteners.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const defaultSettings = {
-  lanLostEnabled: true, //Boolean
-  firstRun: true, //Boolean
-  trayIconColor: 'white', //String
-  settingsWindowPosition: null, //Null or an Object with integer key values.
-  devicesToSearchFor: [], //Array of Objects {deviceName:'foo', deviceid:'C2:45:22:BG:H4:66'}
-  timeToLock: 4, //Integer (number of minutes)
-  reportErrors: true, //Boolean
-  userDebug: false, //Boolean
-  runOnStartup: true //Boolean
-};
+const settingsDBpath = _path2.default.join(_electron.app.getPath('userData'), 'lanlost-settings.json');
+const adapter = new _FileSync2.default(settingsDBpath);
+const db = (0, _lowdb2.default)(adapter);
 
-const store = new _electronStore2.default({ defaults: defaultSettings });
+db.defaults(_settingsDefaults.defaultSettings).write();
 
-const settings = (0, _justCompose2.default)(_gawk2.default, _utils.omitInheritedProperties)(store.store);
+const settings = (0, _gawk2.default)(db.getState());
 
+(0, _settingsObservers.initSettingsObservers)(settings);
+(0, _settingsIPClisteners.initSettingsIPClisteners)();
 if (true) (0, _qI.print)(settings);
 
 function getSettings() {
   return settings;
-} // TODO: do some validation on the settings being passed in
-function updateSetting(newSettingKey, newSettingValue) {
+}function updateSetting(newSettingKey, newSettingValue) {
   if (true) (0, _utils.logSettingsUpdateInDev)(newSettingKey, newSettingValue);
   settings[newSettingKey] = newSettingValue;
-  store.set(newSettingKey, newSettingValue);
-} /*****
-  * Settings observers.
-  */
-_gawk2.default.watch(settings, ['reportErrors'], function (newValue) {
-  if (newValue) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
-});
-_gawk2.default.watch(settings, ['userDebug'], function (newValue) {
-  if (newValue) {
-    (0, _logging.addUserDebugLogger)();
-    (0, _debugWindow.showDebugWindow)();
-  } else {
-    (0, _logging.removeUserDebugLogger)();
-    (0, _debugWindow.closeDebugWindow)();
-  }
-});
-_gawk2.default.watch(settings, ['trayIconColor'], _tray.changeTrayIcon);
-
-/*****
-* Regular Array.includes compares by reference, not value, so using _.find.
-*/
-function findDeviceInDevicesToSearchFor(deviceId) {
-  return _lodash2.default.find(settings.devicesToSearchFor, { deviceId });
+  db.set(newSettingKey, newSettingValue).write();
 }function addNewDeviceToSearchFor(deviceToAdd) {
   var _ref;
 
-  if (findDeviceInDevicesToSearchFor(deviceToAdd.deviceId)) return;
+  if (findDeviceInDevicesToSearchFor(deviceToAdd.macAddress)) return;
   updateSetting('devicesToSearchFor', [...(_ref = settings.devicesToSearchFor, _ref === void 0 ? [] : _ref), ...[deviceToAdd]]);
-}function removeNewDeviceToSearchFor({ deviceId: deviceIdToRemove }) {
-  if (!findDeviceInDevicesToSearchFor(deviceIdToRemove)) return;
-  updateSetting('devicesToSearchFor', settings.devicesToSearchFor.filter(function ({ deviceId }) {
-    return deviceId !== deviceIdToRemove;
+}function removeNewDeviceToSearchFor({ macAddress: macAddressOfDeviceToRemove }) {
+  if (!findDeviceInDevicesToSearchFor(macAddressOfDeviceToRemove)) return;
+  updateSetting('devicesToSearchFor', settings.devicesToSearchFor.filter(function ({ macAddress }) {
+    return macAddress !== macAddressOfDeviceToRemove;
   }));
-}_electron.ipcMain.on('renderer:setting-updated-in-ui', function (event, settingName, settingValue) {
-  updateSetting(settingName, settingValue);
-});
-
-_electron.ipcMain.on('renderer:device-added-in-ui', function (event, deviceToAdd) {
-  addNewDeviceToSearchFor(deviceToAdd);
-});
-
-_electron.ipcMain.on('renderer:device-removed-in-ui', function (event, deviceToRemove) {
-  removeNewDeviceToSearchFor(deviceToRemove);
-});
-
-exports.updateSetting = updateSetting;
+} /*****
+  * Regular Array.includes compares by reference, not value, so using _.find.
+  */
+function findDeviceInDevicesToSearchFor(macAddress) {
+  return _lodash2.default.find(settings.devicesToSearchFor, { macAddress });
+}exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
+
+/***/ }),
+
+/***/ "./app/db/settingsDefaults.lsc":
+/*!*************************************!*\
+  !*** ./app/db/settingsDefaults.lsc ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultSettings = undefined;
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+
+const defaultSettings = {
+  lanLostEnabled: true,
+  firstRun: true,
+  trayIconColor: 'white',
+  settingsWindowPosition: null,
+  devicesToSearchFor: [],
+  timeToLock: 2,
+  reportErrors: true,
+  userDebug: false,
+  runOnStartup: true
+};
+
+exports.defaultSettings = defaultSettings;
+
+/***/ }),
+
+/***/ "./app/db/settingsIPClisteners.lsc":
+/*!*****************************************!*\
+  !*** ./app/db/settingsIPClisteners.lsc ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initSettingsIPClisteners = undefined;
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+
+var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/db/settings.lsc");
+
+function initSettingsIPClisteners() {
+  _electron.ipcMain.on('renderer:setting-updated-in-ui', function (event, settingName, settingValue) {
+    (0, _settings.updateSetting)(settingName, settingValue);
+  });
+  _electron.ipcMain.on('renderer:device-added-in-ui', function (event, deviceToAdd) {
+    (0, _settings.addNewDeviceToSearchFor)(deviceToAdd);
+  });
+  _electron.ipcMain.on('renderer:device-removed-in-ui', function (event, deviceToRemove) {
+    (0, _settings.removeNewDeviceToSearchFor)(deviceToRemove);
+  });
+}exports.initSettingsIPClisteners = initSettingsIPClisteners;
+
+/***/ }),
+
+/***/ "./app/db/settingsObservers.lsc":
+/*!**************************************!*\
+  !*** ./app/db/settingsObservers.lsc ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initSettingsObservers = undefined;
+
+var _gawk = __webpack_require__(/*! gawk */ "gawk");
+
+var _gawk2 = _interopRequireDefault(_gawk);
+
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/debugWindow/debugWindow.lsc");
+
+var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function initSettingsObservers(settings) {
+  _gawk2.default.watch(settings, ['lanLostEnabled'], function (newValue) {
+    var _settingsWindow$webCo;
+
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { lanLostEnabled: newValue });
+  });
+  _gawk2.default.watch(settings, ['reportErrors'], function (newValue) {
+    if (newValue) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
+  });
+  _gawk2.default.watch(settings, ['userDebug'], function (newValue) {
+    if (newValue) {
+      (0, _logging.addUserDebugLogger)();
+      (0, _debugWindow.showDebugWindow)();
+    } else {
+      (0, _logging.removeUserDebugLogger)();
+      (0, _debugWindow.closeDebugWindow)();
+    }
+  });
+  _gawk2.default.watch(settings, ['trayIconColor'], _tray.changeTrayIcon);
+}exports.initSettingsObservers = initSettingsObservers;
 
 /***/ }),
 
@@ -761,14 +852,9 @@ exports.toggleEnabledFromTray = undefined;
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
 
-var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
-
 function toggleEnabledFromTray() {
-  var _settingsWindow$webCo;
-
   const toggledLanLostEnabled = !(0, _settings.getSettings)().lanLostEnabled;
   (0, _settings.updateSetting)('lanLostEnabled', toggledLanLostEnabled);
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:lanLost-tray-enabled-disabled-toggled', toggledLanLostEnabled);
 }exports.toggleEnabledFromTray = toggleEnabledFromTray;
 
 /***/ }),
@@ -837,6 +923,18 @@ exports.changeTrayIcon = changeTrayIcon;
 
 /***/ }),
 
+/***/ "./app/types/types.lsc":
+/*!*****************************!*\
+  !*** ./app/types/types.lsc ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/***/ }),
+
 /***/ "./config/env.lsc":
 /*!************************!*\
   !*** ./config/env.lsc ***!
@@ -895,17 +993,6 @@ module.exports = require("electron-reload");
 
 /***/ }),
 
-/***/ "electron-store":
-/*!*********************************!*\
-  !*** external "electron-store" ***!
-  \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("electron-store");
-
-/***/ }),
-
 /***/ "gawk":
 /*!***********************!*\
   !*** external "gawk" ***!
@@ -917,17 +1004,6 @@ module.exports = require("gawk");
 
 /***/ }),
 
-/***/ "just-compose":
-/*!*******************************!*\
-  !*** external "just-compose" ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("just-compose");
-
-/***/ }),
-
 /***/ "lodash":
 /*!*************************!*\
   !*** external "lodash" ***!
@@ -936,6 +1012,28 @@ module.exports = require("just-compose");
 /***/ (function(module, exports) {
 
 module.exports = require("lodash");
+
+/***/ }),
+
+/***/ "lowdb":
+/*!************************!*\
+  !*** external "lowdb" ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lowdb");
+
+/***/ }),
+
+/***/ "lowdb/adapters/FileSync":
+/*!******************************************!*\
+  !*** external "lowdb/adapters/FileSync" ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lowdb/adapters/FileSync");
 
 /***/ }),
 

@@ -1,0 +1,15 @@
+
+/**
+ * Settings Types
+ *
+ */
+type DeviceType = { vendorName: string, ipAddress: string, macAddress: string }
+type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
+type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
+
+
+export type {
+  DeviceType,
+  SettingsWindowPositionType,
+  SettingsTypes,
+}

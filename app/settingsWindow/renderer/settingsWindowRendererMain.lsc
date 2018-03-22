@@ -1,4 +1,4 @@
-import { ipcRenderer, remote } from 'electron'
+import { ipcRenderer } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
 
@@ -9,19 +9,21 @@ import {
 } from '../../common/renderers/utils.lsc'
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
+import { DeviceType, SettingsTypes } from '../../types/types.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
 
-console.log(remote.getGlobal('settingsWindowRendererInitialSettings'))
-console.log(getInitialState())
-
 settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
 
-ipcRenderer.on('mainprocess:lanlost-tray-enabled-disabled-toggled', (event, newLanLostEnabledvalue):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?({lanLostEnabled: newLanLostEnabledvalue})
+/**
+ * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
+ * for that.
+ */
+ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsTypes):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?(setting)
 )
-ipcRenderer.on('mainprocess:update-of-network-devices-can-see', (event, devicesCanSee):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?({devicesCanSee})
+ipcRenderer.on('mainprocess:update-of-network-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
 
 window.onerror = handleRendererWindowError

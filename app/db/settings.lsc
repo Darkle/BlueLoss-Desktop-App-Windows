@@ -1,91 +1,53 @@
-import { ipcMain } from 'electron'
-import Store from 'electron-store'
+import path from 'path'
+import { app as electronApp } from 'electron'
 
 import _ from 'lodash'
 import { print as prettyPrintObj } from 'q-i'
 import gawk from 'gawk'
-import compose from 'just-compose'
+import low from 'lowdb'
+import FileSync from 'lowdb/adapters/FileSync'
 
-import {
-  addRollbarLogging,
-  removeRollbarLogging,
-  addUserDebugLogger,
-  removeUserDebugLogger
-} from '../common/logging/logging.lsc'
-import { changeTrayIcon } from '../tray/tray.lsc'
-import { logSettingsUpdateInDev, omitInheritedProperties } from '../common/utils.lsc'
-import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.lsc'
+import { logSettingsUpdateInDev } from '../common/utils.lsc'
+import { DeviceType, SettingsTypes } from '../types/types.lsc'
+import { defaultSettings } from './settingsDefaults.lsc'
+import { initSettingsObservers } from './settingsObservers.lsc'
+import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
 
-defaultSettings = {
-  lanLostEnabled: true,  //Boolean
-  firstRun: true,  //Boolean
-  trayIconColor: 'white',  //String
-  settingsWindowPosition: null, //Null or an Object with integer key values.
-  devicesToSearchFor: [], //Array of Objects {deviceName:'foo', deviceid:'C2:45:22:BG:H4:66'}
-  timeToLock: 4, //Integer (number of minutes)
-  reportErrors: true,  //Boolean
-  userDebug: false,  //Boolean
-  runOnStartup: true  //Boolean
-}
+settingsDBpath = path.join(electronApp.getPath('userData'), 'lanlost-settings.json')
+adapter = new FileSync(settingsDBpath)
+db = low(adapter)
 
-store = new Store({defaults: defaultSettings})
+db.defaults(defaultSettings).write()
 
-settings = compose(gawk, omitInheritedProperties)(store.store)
+settings = gawk(db.getState())
 
+initSettingsObservers(settings)
+initSettingsIPClisteners()
 if ISDEV: prettyPrintObj(settings)
+
 
 getSettings() -> settings
 
-// TODO: do some validation on the settings being passed in
-updateSetting(newSettingKey, newSettingValue):void ->
+updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   if ISDEV: logSettingsUpdateInDev(newSettingKey, newSettingValue)
   settings[newSettingKey] = newSettingValue
-  store.set(newSettingKey, newSettingValue)
+  db.set(newSettingKey, newSettingValue).write()
 
-/*****
-* Settings observers.
-*/
-gawk.watch(settings, ['reportErrors'], (newValue):void ->
-  if newValue: addRollbarLogging()
-  else: removeRollbarLogging()
-)
-gawk.watch(settings, ['userDebug'], (newValue):void ->
-  if newValue:
-    addUserDebugLogger()
-    showDebugWindow()
-  else:
-    removeUserDebugLogger()
-    closeDebugWindow()
-)
-gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
+addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
+  if findDeviceInDevicesToSearchFor(deviceToAdd.macAddress): return
+  updateSetting('devicesToSearchFor', [...settings.devicesToSearchFor, ...[deviceToAdd]])
 
+removeNewDeviceToSearchFor({macAddress: macAddressOfDeviceToRemove}):void ->
+  if !findDeviceInDevicesToSearchFor(macAddressOfDeviceToRemove): return
+  updateSetting('devicesToSearchFor',
+    settings.devicesToSearchFor.filter(({ macAddress }) -> macAddress !== macAddressOfDeviceToRemove)
+  )
 /*****
 * Regular Array.includes compares by reference, not value, so using _.find.
 */
-findDeviceInDevicesToSearchFor(deviceId) ->
-  _.find(settings.devicesToSearchFor, { deviceId })
+findDeviceInDevicesToSearchFor(macAddress) ->
+  _.find(settings.devicesToSearchFor, { macAddress })
 
-addNewDeviceToSearchFor(deviceToAdd):void ->
-  if findDeviceInDevicesToSearchFor(deviceToAdd.deviceId): return
-  updateSetting('devicesToSearchFor', [...settings.devicesToSearchFor, ...[deviceToAdd]])
-
-removeNewDeviceToSearchFor({deviceId: deviceIdToRemove}):void ->
-  if !findDeviceInDevicesToSearchFor(deviceIdToRemove): return
-  updateSetting('devicesToSearchFor',
-    settings.devicesToSearchFor.filter(({deviceId}) -> deviceId !== deviceIdToRemove)
-  )
-
-ipcMain.on('renderer:setting-updated-in-ui', (event, settingName, settingValue):void ->
-  updateSetting(settingName, settingValue)
-)
-
-ipcMain.on('renderer:device-added-in-ui', (event, deviceToAdd):void ->
-  addNewDeviceToSearchFor(deviceToAdd)
-)
-
-ipcMain.on('renderer:device-removed-in-ui', (event, deviceToRemove):void ->
-  removeNewDeviceToSearchFor(deviceToRemove)
-)
 
 
 export {
