@@ -473,13 +473,19 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.ls
 const defaultSettings = {
   lanLostEnabled: true,
   firstRun: true,
+  runOnStartup: true,
   trayIconColor: 'white',
   settingsWindowPosition: null,
   devicesToSearchFor: [],
   timeToLock: 2,
   reportErrors: true,
   userDebug: false,
-  runOnStartup: true
+  hostsScanRange: {
+    start: 2,
+    end: 254
+  },
+  hostScanTimeout: 3000,
+  getMacVendorInfo: true
 };
 
 exports.defaultSettings = defaultSettings;
@@ -686,6 +692,8 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _networkScanner = __webpack_require__(/*! ../networkScan/networkScanner.lsc */ "./app/networkScan/networkScanner.lsc");
+
 _electron.app.once('ready', function () {
   var _electronApp$dock;
 
@@ -693,6 +701,7 @@ _electron.app.once('ready', function () {
   if (true) (0, _setUpDev.setUpDev)();
   if (!(0, _settings.getSettings)().firstRun) (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
 
+  (0, _networkScanner.initScan)().catch(_logging.logger.error);
   (0, _tray.initTrayMenu)();
 
   if ((0, _settings.getSettings)().firstRun) {
@@ -704,6 +713,199 @@ _electron.app.once('ready', function () {
 _electron.app.on('window-all-closed', _utils.noop);
 
 process.on('unhandledRejection', _logging.logger.error);
+
+/***/ }),
+
+/***/ "./app/networkScan/handleScanResults.lsc":
+/*!***********************************************!*\
+  !*** ./app/networkScan/handleScanResults.lsc ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+// import _ from 'lodash'
+
+// import { logger } from '../common/logging/logging.lsc'
+// import { getSettings } from '../db/settings.lsc'
+// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+// import { lockSystem, checkIfShouldLock } from '../common/lockSystem.lsc'
+// import { scanforDevices } from './blueToothMain.lsc'
+
+// let lastTimeSawADeviceWeAreLookingFor = Date.now()
+
+function handleScanResults(host) {
+  return;
+} // console.log('handleScanResults')
+// console.log(host)
+// logger.debug(`scanHost returned device active on ip: ${ activeHostIP }`)
+
+// Check for duplicates in deviceList in case run in to this bug:
+// https://github.com/electron/electron/issues/10800
+// dedupedDeviceList = dedupeAndPreferName(deviceList)
+
+// logger.info('scan results', dedupedDeviceList)
+
+// settingsWindow?.webContents?.send('mainprocess:update-of-bluetooth-devices-can-see', dedupedDeviceList)
+
+// sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
+// shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)
+
+// if shouldLock: lockSystem()
+// if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
+
+
+/*****
+* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
+* that has a device name (sometimes they have an empty string for a device name).
+*/
+function dedupeAndPreferName(deviceList) {
+  return deviceList.reduce(function (newDeviceList, newDevice) {
+    var _foundDeviceInNewList;
+
+    const deviceId = newDevice.deviceId;
+    const foundDeviceInNewList = _.find(newDeviceList, { deviceId });
+    if (!foundDeviceInNewList) {
+      return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
+    }if (!(foundDeviceInNewList == null ? void 0 : (_foundDeviceInNewList = foundDeviceInNewList.deviceName) == null ? void 0 : _foundDeviceInNewList.length) && newDevice.deviceName.length) {
+      var _ref;
+
+      return [...(_ref = _.filter(newDeviceList, item => item.deviceId !== deviceId), _ref === void 0 ? [] : _ref), newDevice];
+    }return newDeviceList;
+  }, []);
+}exports.handleScanResults = handleScanResults;
+
+/***/ }),
+
+/***/ "./app/networkScan/networkScanner.lsc":
+/*!********************************************!*\
+  !*** ./app/networkScan/networkScanner.lsc ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initScan = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _net = __webpack_require__(/*! net */ "net");
+
+var _util = __webpack_require__(/*! util */ "util");
+
+var _util2 = _interopRequireDefault(_util);
+
+var _defaultGateway = __webpack_require__(/*! default-gateway */ "default-gateway");
+
+var _defaultGateway2 = _interopRequireDefault(_defaultGateway);
+
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _nodeArp = __webpack_require__(/*! node-arp */ "./node_modules/node-arp/lib/arp.js");
+
+var _nodeArp2 = _interopRequireDefault(_nodeArp);
+
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/networkScan/handleScanResults.lsc");
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const pGetMAC = _util2.default.promisify(_nodeArp2.default.getMAC);
+const scanInterval = (0, _ms2.default)('30 seconds');
+/**
+ * defaultGateway.v4() Promise contains an object like:
+ * { gateway: '192.168.1.1', interface: 'Ethernet' } if successful.
+ */
+function initScan() {
+  return _defaultGateway2.default.v4().then(scanNetwork);
+}function scanNetwork({ gateway }) {
+  const {
+    hostsScanRange: { start: hostsRangeStart, end: hostsRangeEnd },
+    hostScanTimeout
+  } = (0, _settings.getSettings)();
+
+  _logging.logger.debug(`new scan started`);
+  _logging.logger.debug(`gateway ip: ${gateway}`);
+
+  generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd).forEach(function (hostIP) {
+    scanHost(hostIP, hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  });
+
+  setTimeout(function () {
+    scanNetwork({ gateway });
+  }, scanInterval);
+} // http://bit.ly/2pzLeD3
+function scanHost(hostIP, hostScanTimeout) {
+  return new Promise(function (resolve, reject) {
+    const socket = new _net.Socket();
+
+    socket.setTimeout(hostScanTimeout);
+    socket.connect({ host: hostIP, port: 1 });
+    socket.unref();
+
+    socket.on('error', function (error) {
+      if (error.code === 'ECONNREFUSED') resolve(hostIP);else reject(error);
+    });
+
+    socket.on('timeout', function () {
+      socket.destroy();
+    });
+
+    socket.on('connect', function () {
+      resolve(hostIP);
+      socket.destroy();
+    });
+  });
+}function getMacAdressForHostIP(activeHostIP) {
+  return pGetMAC(activeHostIP).then(function (macAddress) {
+    return { ipAddress: activeHostIP, macAddress };
+  });
+}function getVendorInfoForMacAddress(hostDetails) {
+  if (!(0, _settings.getSettings)().getMacVendorInfo) return hostDetails;
+
+  const apiAddress = `http://macvendors.co/api/${hostDetails.macAddress.replace(/:([^:]{1}):/g, ':0$1:')}/json`;
+
+  return fetch(apiAddress).then(function (response) {
+    return response.json();
+  }).then(function (json) {
+    var _json$result;
+
+    return _extends({}, hostDetails, { vendorName: json == null ? void 0 : (_json$result = json.result) == null ? void 0 : _json$result.company });
+  })
+  // don't want a fetch error to cancel everything, so catch here and continue.
+  .catch(function (err) {
+    _logging.logger.error(err);
+    return _extends({}, hostDetails, { vendorName: undefined });
+  } // eslint-disable-line no-undefined
+  );
+}function generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd) {
+  const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
+
+  return _lodash2.default.range(hostsRangeStart, hostsRangeEnd).map(function (lastOctet) {
+    return `${networkOctects}.${lastOctet}`;
+  }).filter(function (hostIP) {
+    return hostIP !== gateway;
+  });
+}exports.initScan = initScan;
 
 /***/ }),
 
@@ -960,6 +1162,215 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
+/***/ "./node_modules/node-arp/lib/arp.js":
+/*!******************************************!*\
+  !*** ./node_modules/node-arp/lib/arp.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var util = __webpack_require__(/*! util */ "util");
+var spawn = __webpack_require__(/*! child_process */ "child_process").spawn;
+
+/**
+ * Read the MAC address from the ARP table.
+ * 
+ * 3 methods for lin/win/mac  Linux reads /proc/net/arp
+ * mac and win read the output of the arp command.
+ * 
+ * all 3 ping the IP first without checking the response to encourage the
+ * OS to update the arp table.
+ * 
+ * 31/12/2014 -- Changelog by Leandre Gohy (leandre.gohy@hexeo.be)
+ * - FIX : ping command for windows (-n not -c)
+ *
+ * 26/08/2013 -- Changelog by Leandre Gohy (leandre.gohy@hexeo.be)
+ * - FIX : arp command for OSX (-n not -an)
+ * - MODIFY : rewrite Linux lookup function to avoid looping over all entries and returned lines (arp -n IPADDRESS)
+ * - MODIFY : rewrite OSX lookup function to avoid looping over all returned lines
+ * - FIX : OSX formates double zero as a single one (i.e : 0:19:99:50:3a:3 instead of 00:19:99:50:3a:3)
+ * - FIX : lookup functions did not returns the function on error causing callback to be called twice
+ * - FIX : Windows lookup function returns wrong mac address due to indexOf usage (192.168.1.1 -> 192.168.1.10)
+ * 
+ */
+module.exports.getMAC = function(ipaddress, cb) {
+	if(process.platform.indexOf('linux') == 0) {
+		exports.readMACLinux(ipaddress, cb);
+	}
+	else if (process.platform.indexOf('win') == 0) {
+		exports.readMACWindows(ipaddress, cb);
+	}
+	else if (process.platform.indexOf('darwin') == 0) {
+		exports.readMACMac(ipaddress, cb);
+	}
+};
+
+/**
+ * read from arp -n IPADDRESS
+ */
+module.exports.readMACLinux = function(ipaddress, cb) {
+	
+	// ping the ip address to encourage the kernel to populate the arp tables
+	var ping = spawn("ping", [ "-c", "1", ipaddress ]);
+	
+	ping.on('close', function (code) {
+		// not bothered if ping did not work
+		
+		var arp = spawn("arp", [ "-n", ipaddress ]);
+		var buffer = '';
+		var errstream = '';
+		arp.stdout.on('data', function (data) {
+			buffer += data;
+		});
+		arp.stderr.on('data', function (data) {
+			errstream += data;
+		});
+		
+		arp.on('close', function (code) {
+			if (code !== 0) {
+				console.log("Error running arp " + code + " " + errstream);
+				cb(true, code);
+				return;
+			}
+			
+			//Parse this format
+			//Lookup succeeded : Address                  HWtype  HWaddress           Flags Mask            Iface
+			//					IPADDRESS	              ether   MACADDRESS   C                     IFACE
+			//Lookup failed : HOST (IPADDRESS) -- no entry
+			//There is minimum two lines when lookup is successful
+			var table = buffer.split('\n');
+			if (table.length >= 2) {
+				var parts = table[1].split(' ').filter(String);
+				cb(false, parts.length == 5 ? parts[2] : parts[1]);
+				return;
+			}
+			cb(true, "Could not find ip in arp table: " + ipaddress);
+		});
+	});	
+	
+};
+
+/**
+ * read from arp -a IPADDRESS
+ */
+module.exports.readMACWindows = function(ipaddress, cb) {
+	
+	// ping the ip address to encourage the kernel to populate the arp tables
+	var ping = spawn("ping", ["-n", "1", ipaddress ]);
+	
+	ping.on('close', function (code) {
+		// not bothered if ping did not work
+		
+		var arp = spawn("arp", ["-a", ipaddress] );
+		var buffer = '';
+		var errstream = '';
+		var lineIndex;
+		
+		arp.stdout.on('data', function (data) {
+			buffer += data;
+		});
+		arp.stderr.on('data', function (data) {
+			errstream += data;
+		});
+		
+		arp.on('close', function (code) {
+			if (code !== 0) {
+				console.log("Error running arp " + code + " " + errstream);
+				cb(true, code);
+				return;
+			}
+			
+			var table = buffer.split('\r\n');
+			for (lineIndex = 3; lineIndex < table.length; lineIndex++) {
+				//parse this format
+				//[blankline]
+				//Interface: 192.º68.1.54
+				//  Internet Address      Physical Address     Type
+				//  192.168.1.1           50-67-f0-8c-7a-3f    dynamic
+				
+				var parts = table[lineIndex].split(' ').filter(String);
+				if (parts[0] === ipaddress) {
+					var mac = parts[1].replace(/-/g, ':');
+					cb(false, mac);
+					return;
+				}
+			}
+			cb(true, "Count not find ip in arp table: " + ipaddress); 
+		});
+	});	
+	
+};
+/**
+ * read from arp -n IPADDRESS
+ */
+module.exports.readMACMac = function(ipaddress, cb) {
+	
+	// ping the ip address to encourage the kernel to populate the arp tables
+	var ping = spawn("ping", ["-c", "1", ipaddress ]);
+	
+	ping.on('close', function (code) {
+		// not bothered if ping did not work
+		
+		var arp = spawn("arp", ["-n", ipaddress] );
+		var buffer = '';
+		var errstream = '';
+		arp.stdout.on('data', function (data) {
+			buffer += data;
+		});
+		arp.stderr.on('data', function (data) {
+			errstream += data;
+		});
+		
+		arp.on('close', function (code) {
+			// On lookup failed OSX returns code 1
+			// but errstream will be empty
+			if (code !== 0 && errstream !== '') {
+				console.log("Error running arp " + code + " " + errstream);
+				cb(true, code);
+				return;
+			}
+			 
+			//parse this format
+			//Lookup succeeded : HOST (IPADDRESS) at MACADDRESS on IFACE ifscope [ethernet]
+			//Lookup failed : HOST (IPADDRESS) -- no entry
+			var parts = buffer.split(' ').filter(String);
+			if (parts[3] !== 'no') {
+				var mac = parts[3].replace(/^0:/g, '00:').replace(/:0:/g, ':00:').replace(/:0$/g, ':00').replace(/:([^:]{1}):/g, ':0$1:');
+				cb(false, mac);
+				return;
+			}
+				
+			cb(true, "Count not find ip in arp table: " + ipaddress);
+		});
+	});	
+	
+};
+
+
+/***/ }),
+
+/***/ "child_process":
+/*!********************************!*\
+  !*** external "child_process" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("child_process");
+
+/***/ }),
+
+/***/ "default-gateway":
+/*!**********************************!*\
+  !*** external "default-gateway" ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("default-gateway");
+
+/***/ }),
+
 /***/ "dotenv":
 /*!*************************!*\
   !*** external "dotenv" ***!
@@ -1034,6 +1445,28 @@ module.exports = require("lowdb");
 /***/ (function(module, exports) {
 
 module.exports = require("lowdb/adapters/FileSync");
+
+/***/ }),
+
+/***/ "ms":
+/*!*********************!*\
+  !*** external "ms" ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("ms");
+
+/***/ }),
+
+/***/ "net":
+/*!**********************!*\
+  !*** external "net" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("net");
 
 /***/ }),
 

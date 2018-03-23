@@ -1,25 +1,34 @@
-import { SettingsWindowPositionType, DeviceType } from '../types/types.lsc'
+import { SettingsWindowPositionType, DeviceType, HostsScanRangeType } from '../types/types.lsc'
 
 defaultSettings: {
   lanLostEnabled: boolean,
   firstRun: boolean,
+  runOnStartup: boolean,
   trayIconColor: string,
   settingsWindowPosition: SettingsWindowPositionType,
   devicesToSearchFor: Array<DeviceType>,
   timeToLock: number,
   reportErrors: boolean,
   userDebug: boolean,
-  runOnStartup: boolean,
+  hostsScanRange: HostsScanRangeType,
+  hostScanTimeout: number,
+  getMacVendorInfo: boolean,
 } = {
   lanLostEnabled: true,
   firstRun: true,
+  runOnStartup: true,
   trayIconColor: 'white',
   settingsWindowPosition: null,
   devicesToSearchFor: [],
   timeToLock: 2,
   reportErrors: true,
   userDebug: false,
-  runOnStartup: true
+  hostsScanRange: {
+    start: 2,
+    end: 254
+  },
+  hostScanTimeout: 3000,
+  getMacVendorInfo: true,
 }
 
 export {

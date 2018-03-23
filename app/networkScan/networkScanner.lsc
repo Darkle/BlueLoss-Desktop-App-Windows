@@ -1,21 +1,92 @@
-import getDefaultGateway from 'default-gateway'
-import deviceDiscovery from 'device-discovery'
+import { Socket } from 'net'
+import util from 'util'
 
+import getDefaultGateway from 'default-gateway'
+import _ from 'lodash'
+import ms from 'ms'
+import arp from 'node-arp'
+
+import { getSettings } from '../db/settings.lsc'
+import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
 
-initScan():void ->
-  gateway = getDefaultGateway.v4.sync()
+pGetMAC = util.promisify(arp.getMAC)
+scanInterval = ms('30 seconds')
+/**
+ * defaultGateway.v4() Promise contains an object like:
+ * { gateway: '192.168.1.1', interface: 'Ethernet' } if successful.
+ */
+initScan():Promise<any> ->
+   getDefaultGateway.v4().then(scanNetwork)
 
-  if !gateway?.interface?.length:
-    getGatewayError = new Error('unable to get default interface')
-    logger.error(getGatewayError)
-    return
+scanNetwork({gateway}):void ->
+  {
+    hostsScanRange: { start: hostsRangeStart, end: hostsRangeEnd },
+    hostScanTimeout
+  } = getSettings()
 
-  scanNetwork(gateway.interface)
+  logger.debug(`new scan started`)
+  logger.debug(`gateway ip: ${ gateway }`)
 
-scanNetwork(networkInterface: string): void ->
-  deviceDiscovery({ type: 'ICMP', iface: networkInterface })
-    .on('device', console.log)
+  generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd)
+    .forEach((hostIP):void ->
+      scanHost(hostIP, hostScanTimeout)
+      .then(getMacAdressForHostIP)
+      .then(getVendorInfoForMacAddress)
+      .then(handleScanResults)
+      .catch(logger.error)
+    )
+
+  setTimeout(():void -> scanNetwork({gateway}), scanInterval)
+
+// http://bit.ly/2pzLeD3
+scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
+  new Promise((resolve, reject):void ->
+    socket = new Socket()
+
+    socket.setTimeout(hostScanTimeout)
+    socket.connect({ host: hostIP, port: 1 })
+    socket.unref()
+
+    socket.on('error', (error):void ->
+      if error.code === 'ECONNREFUSED': resolve(hostIP)
+      else: reject(error)
+    )
+
+    socket.on('timeout', ():void -> socket.destroy())
+
+    socket.on('connect', ():void ->
+      resolve(hostIP)
+      socket.destroy()
+    )
+  )
+
+getMacAdressForHostIP(activeHostIP: string):Promise<any> ->
+  pGetMAC(activeHostIP).then(macAddress -> ({ ipAddress: activeHostIP, macAddress }))
+
+getVendorInfoForMacAddress(hostDetails) ->
+  if !getSettings().getMacVendorInfo: return hostDetails
+
+  apiAddress = `http://macvendors.co/api/${ hostDetails.macAddress.replace(/:([^:]{1}):/g, ':0$1:') }/json`
+
+  fetch(apiAddress)
+    .then(response -> response.json())
+    .then(json ->
+      {...hostDetails, ...{ vendorName: json?.result?.company }}
+    )
+    // don't want a fetch error to cancel everything, so catch here and continue.
+    .catch(err ->
+      logger.error(err)
+      {...hostDetails, ...{ vendorName: undefined }} // eslint-disable-line no-undefined
+    )
+
+generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd):Array<string> ->
+  networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
+
+  _.range(hostsRangeStart, hostsRangeEnd)
+    .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
+    .filter((hostIP:string) -> hostIP !== gateway)
+
 
 export {
   initScan

@@ -4,12 +4,14 @@
  *
  */
 type DeviceType = { vendorName: string, ipAddress: string, macAddress: string }
+type HostsScanRangeType = { start: number, end: number }
 type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
 type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
 
 
 export type {
   DeviceType,
+  HostsScanRangeType,
   SettingsWindowPositionType,
   SettingsTypes,
 }

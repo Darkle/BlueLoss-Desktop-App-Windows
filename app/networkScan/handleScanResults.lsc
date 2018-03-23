@@ -1,0 +1,57 @@
+// import _ from 'lodash'
+
+// import { logger } from '../common/logging/logging.lsc'
+// import { getSettings } from '../db/settings.lsc'
+// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+// import { lockSystem, checkIfShouldLock } from '../common/lockSystem.lsc'
+// import { scanforDevices } from './blueToothMain.lsc'
+
+// let lastTimeSawADeviceWeAreLookingFor = Date.now()
+
+/**
+* deviceList example:
+*  [
+*    { deviceName: 'MotoG3', deviceId: 'E1:77:42:CF:F2:11' }.,
+*    { deviceName: 'Foo\'s iPad', deviceId: '12:22:F1:AD:46:17' }
+*    ...
+*  ]
+*/
+handleScanResults(host):void -> return
+  // console.log('handleScanResults')
+  // console.log(host)
+  // logger.debug(`scanHost returned device active on ip: ${ activeHostIP }`)
+
+  // Check for duplicates in deviceList in case run in to this bug:
+  // https://github.com/electron/electron/issues/10800
+  // dedupedDeviceList = dedupeAndPreferName(deviceList)
+
+  // logger.info('scan results', dedupedDeviceList)
+
+  // settingsWindow?.webContents?.send('mainprocess:update-of-bluetooth-devices-can-see', dedupedDeviceList)
+
+  // sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
+  // shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)
+
+  // if shouldLock: lockSystem()
+  // if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
+
+
+/*****
+* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
+* that has a device name (sometimes they have an empty string for a device name).
+*/
+dedupeAndPreferName(deviceList) ->
+  deviceList.reduce((newDeviceList, newDevice) ->
+    deviceId = newDevice.deviceId
+    foundDeviceInNewList = _.find(newDeviceList, { deviceId })
+    if !foundDeviceInNewList:
+      return [...newDeviceList, newDevice]
+    if !foundDeviceInNewList?.deviceName?.length and newDevice.deviceName.length:
+      return [..._.filter(newDeviceList, item => item.deviceId !== deviceId ), newDevice]
+    newDeviceList
+  , [])
+
+
+export {
+  handleScanResults
+}
