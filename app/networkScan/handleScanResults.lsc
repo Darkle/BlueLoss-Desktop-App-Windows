@@ -16,9 +16,9 @@
 *    ...
 *  ]
 */
-handleScanResults(host):void -> return
-  // console.log('handleScanResults')
-  // console.log(host)
+handleScanResults(host):void ->
+  console.log('handleScanResults')
+  console.log(host)
   // logger.debug(`scanHost returned device active on ip: ${ activeHostIP }`)
 
   // Check for duplicates in deviceList in case run in to this bug:

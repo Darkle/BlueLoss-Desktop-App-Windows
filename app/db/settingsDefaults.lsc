@@ -12,7 +12,6 @@ defaultSettings: {
   userDebug: boolean,
   hostsScanRange: HostsScanRangeType,
   hostScanTimeout: number,
-  getMacVendorInfo: boolean,
 } = {
   lanLostEnabled: true,
   firstRun: true,
@@ -28,7 +27,6 @@ defaultSettings: {
     end: 254
   },
   hostScanTimeout: 3000,
-  getMacVendorInfo: true,
 }
 
 export {

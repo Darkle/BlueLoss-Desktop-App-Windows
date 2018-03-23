@@ -37,7 +37,8 @@ if !ISDEV and getSettings().reportErrors:
   addRollbarLogging()
 
 /**
-* We also need to disable rollbar itself as it is set to report uncaught exceptions.
+* We also need to enable/disable rollbar itself as well as it is set to
+* report uncaught exceptions as well as logging caught errors.
 */
 addRollbarLogging():void ->
   rollbarLogger.configure({enabled: true})
