@@ -177,7 +177,7 @@ const userDebugTransportOptions = {
   handleExceptions: true,
   humanReadableUnhandledException: true
   /*****
-  * https://github.com/winstonjs/winston
+  * https://github.com/winstonjs/winston/tree/2.4.0
   * Winston log levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5 }
   * So can use logger.error(), logger.warn(), logger.info(), logger.verbose(), logger.debug()
   */
@@ -310,8 +310,8 @@ const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'common', 'ou
 let ouiFileData = null;
 
 /**
- * If we haven't downloaded a new copy of the mac vendor prefix list, use
- * our built in one.
+ * If we haven't downloaded a new copy of the MAC vendor prefix list, use
+ * our built in one. MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/
  */
 function loadOUIfileIfNotLoaded() {
   if (ouiFileData) return Promise.resolve();
@@ -652,16 +652,16 @@ var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function initSettingsObservers(settings) {
-  _gawk2.default.watch(settings, ['lanLostEnabled'], function (newValue) {
+  _gawk2.default.watch(settings, ['lanLostEnabled'], function (enabled) {
     var _settingsWindow$webCo;
 
-    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { lanLostEnabled: newValue });
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { lanLostEnabled: enabled });
   });
-  _gawk2.default.watch(settings, ['reportErrors'], function (newValue) {
-    if (newValue) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
+  _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
+    if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
   });
-  _gawk2.default.watch(settings, ['userDebug'], function (newValue) {
-    if (newValue) {
+  _gawk2.default.watch(settings, ['userDebug'], function (enabled) {
+    if (enabled) {
       (0, _logging.addUserDebugLogger)();
       (0, _debugWindow.showDebugWindow)();
     } else {
@@ -932,7 +932,6 @@ function scanNetwork() {
 function connectToHostSocket(hostIP) {
   return new _bluebird2.default(function (resolve, reject) {
     const socket = new _net.Socket();
-
     socket.setTimeout((0, _settings.getSettings)().hostScanTimeout);
     socket.connect({ host: hostIP, port: 1 });
     socket.unref();
@@ -971,7 +970,7 @@ function connectToHostSocket(hostIP) {
    */
   for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
     const line = ouiFileData[_i];
-    if ((line == null ? void 0 : typeof line.indexOf !== 'function' ? void 0 : line.indexOf(ouiSansDelimeters)) === 0) {
+    if (line.indexOf(ouiSansDelimeters) === 0) {
       const vendorName = line.split(ouiSansDelimeters)[1].trim();
       return _bluebird2.default.resolve({ ipAddress, macAddress, vendorName });
     }
@@ -980,9 +979,8 @@ function connectToHostSocket(hostIP) {
   const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
   const internalIp = _internalIp2.default.v4.sync();
-
   /**
-   * Lodash range doesn;t include the last number.
+   * Lodash range doesn't include the last number.
    */
   return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
     return `${networkOctects}.${lastOctet}`;

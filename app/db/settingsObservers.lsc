@@ -12,15 +12,15 @@ import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.ls
 import { changeTrayIcon } from '../tray/tray.lsc'
 
 initSettingsObservers(settings):void ->
-  gawk.watch(settings, ['lanLostEnabled'], (newValue: boolean):void ->
-    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {lanLostEnabled: newValue})
+  gawk.watch(settings, ['lanLostEnabled'], (enabled: boolean):void ->
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {lanLostEnabled: enabled})
   )
-  gawk.watch(settings, ['reportErrors'], (newValue: boolean):void ->
-    if newValue: addRollbarLogging()
+  gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
+    if enabled: addRollbarLogging()
     else: removeRollbarLogging()
   )
-  gawk.watch(settings, ['userDebug'], (newValue: boolean):void ->
-    if newValue:
+  gawk.watch(settings, ['userDebug'], (enabled: boolean):void ->
+    if enabled:
       addUserDebugLogger()
       showDebugWindow()
     else:

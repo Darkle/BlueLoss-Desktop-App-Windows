@@ -24,13 +24,11 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
       if propertyToFilter === propName: return prev
     if isObject(obj[propName]):
       return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) }}
-
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
 
-isObject(obj) ->
-  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
+isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
 
 export {
   noop,

@@ -41,7 +41,6 @@ scanHost(hostIP: string): Promise<any> ->
 connectToHostSocket(hostIP: string): Promise<any> ->
   new Promise((resolve, reject):void ->
     socket = new Socket()
-
     socket.setTimeout(getSettings().hostScanTimeout)
     socket.connect({ host: hostIP, port: 1 })
     socket.unref()
@@ -83,7 +82,7 @@ getVendorInfoForMacAddress({ ipAddress, macAddress }):Promise<DeviceType> ->
    * indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
    */
   for elem line in ouiFileData:
-    if line?.indexOf?(ouiSansDelimeters) === 0:
+    if line.indexOf(ouiSansDelimeters) === 0:
       vendorName = line.split(ouiSansDelimeters)[1].trim()
       return Promise.resolve({ ipAddress, macAddress, vendorName })
   Promise.resolve({ ipAddress, macAddress, vendorName: null })
@@ -92,9 +91,8 @@ generateHostIPs(gateway):Array<string> ->
   { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   internalIp = getInternalIP.v4.sync()
-
   /**
-   * Lodash range doesn;t include the last number.
+   * Lodash range doesn't include the last number.
    */
   _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
       .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
