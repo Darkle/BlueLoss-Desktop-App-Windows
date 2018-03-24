@@ -7,7 +7,8 @@ import { noop } from '../common/utils.lsc'
 import { initTrayMenu } from '../tray/tray.lsc'
 import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { loadOUIfile, scanNetwork } from '../networkScan/networkScanner.lsc'
+import { scanNetwork } from '../networkScan/networkScanner.lsc'
+import { updateOUIfilePeriodically } from '../common/oui/updateOUIfilePeriodically.lsc'
 
 electronApp.once('ready', ():void ->
   if electronApp.makeSingleInstance(noop): electronApp.quit()
@@ -15,11 +16,13 @@ electronApp.once('ready', ():void ->
   if !getSettings().firstRun: electronApp.dock?.hide()
 
   initTrayMenu()
-  loadOUIfile().then(scanNetwork).catch(logger.error)
+  scanNetwork()
 
   if getSettings().firstRun:
     updateSetting('firstRun', false)
     showSettingsWindow()
+
+  updateOUIfilePeriodically()
 )
 
 electronApp.on('window-all-closed', noop)

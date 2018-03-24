@@ -6,38 +6,38 @@ import _ from 'lodash'
 import ms from 'ms'
 import arp from 'node-arp'
 import getInternalIP from 'internal-ip'
+import isIp from 'is-ip'
 import Promise from 'nuo'
 
 import { getSettings } from '../db/settings.lsc'
+import { loadOUIfileIfNotLoaded, getOUIfileData } from '../common/oui/getOUIfile.lsc'
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { DeviceType, DefaultGatewayType } from '../types/types.lsc'
+import { DeviceType } from '../types/types.lsc'
 
 pGetMAC = util.promisify(arp.getMAC)
 scanInterval = ms('30 seconds')
 
-scanNetwork():Promise<any> ->
+scanNetwork():void ->
   logger.debug(`new scan started`)
-  {
-    hostsScanRange: { start: hostsRangeStart, end: hostsRangeEnd },
-    hostScanTimeout
-  } = getSettings()
 
-  Promise.resolve(getDefaultGateway.v4())
-    .then((defaultGateway: DefaultGatewayType) ->
-      logger.debug(`gateway ip: ${ defaultGateway }`)
-      generateHostIPs(defaultGateway, hostsRangeStart, hostsRangeEnd)
+  Promise.resolve(loadOUIfileIfNotLoaded())
+    .then(getDefaultGatewayIP)
+    .then(gatewayIP ->
+      { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
+      generateHostIPs(gatewayIP, hostsScanRangeStart, hostsScanRangeEnd)
     )
-    .then(hostIPs => {
-      hostIPs.forEach(hostIP => {
-        scanHost(hostIP, hostScanTimeout)
-        .then(getMacAdressForHostIP)
-        .then(getVendorInfoForMacAddress)
-        .then(handleScanResults)
-        .catch(logger.error)
-      })
-    })
-    .finally(():void -> setTimeout(scanNetwork, scanInterval))
+    .then((hostIPs):void ->
+      hostIPs.forEach((hostIP):void ->
+        scanHost(hostIP, getSettings().hostScanTimeout)
+          .then(getMacAdressForHostIP)
+          .then(getVendorInfoForMacAddress)
+          .then(handleScanResults)
+          .catch(logger.error)
+      )
+    )
+    .catch(logger.error)
+    .finally(() -> setTimeout(scanNetwork, scanInterval))
 
 
 // http://bit.ly/2pzLeD3
@@ -60,20 +60,29 @@ scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
     )
   )
 
+getDefaultGatewayIP():Promise<any> ->
+  getDefaultGateway.v4()
+    .then(({gateway: defaultGatewayIP}): ?string ->
+      if !isIp.v4(defaultGatewayIP):
+        throw new Error(`Didn't get valid gateway IP address`, { defaultGatewayIP })
+      logger.debug(`defaultGatewayIP ip: ${ defaultGatewayIP }`)
+      defaultGatewayIP
+    )
+
 getMacAdressForHostIP(activeHostIP: string):Promise<any> ->
   pGetMAC(activeHostIP)
-    .catch((err): void ->
+    .catch((err):void ->
       logger.error(`couldn't get MAC adress for: ${ activeHostIP }`, err)
     )
     .then(macAddress -> ({ ipAddress: activeHostIP, macAddress }))
 
-
 getVendorInfoForMacAddress({ ipAddress, macAddress }):Promise<DeviceType> ->
-  if !getSettings().getMacVendorInfo: return { ipAddress, macAddress }
-  ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6)
+  if !getSettings().privateSettings.canSearchForMacVendorInfo:
+    return { ipAddress, macAddress }
+  ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6).toUpperCase()
   // use a native for loop here cause the OUI file is over 20,000 lines long
   // indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
-  getOUIfileData()
+  ouiFileData = getOUIfileData()
   for elem line in ouiFileData:
     if line.indexOf(ouiSansDelimeters) === 0:
       vendorName = line.split(ouiSansDelimeters)[1].trim()

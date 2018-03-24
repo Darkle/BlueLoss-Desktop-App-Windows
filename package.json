@@ -30,6 +30,7 @@
     "gawk": "^4.4.5",
     "hyperapp": "^1.2.0",
     "internal-ip": "^3.0.1",
+    "is-ip": "^2.0.0",
     "just-compose": "^1.0.6",
     "lodash": "^4.17.5",
     "lowdb": "^1.0.0",

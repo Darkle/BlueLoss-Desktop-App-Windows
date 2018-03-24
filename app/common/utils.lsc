@@ -18,19 +18,19 @@ logSettingsUpdateInDev(newSettingKey: string, newSettingValue: SettingsTypes):vo
  * In the off-chance that an object key name is literally the word 'undefined',
  * set Symbol() as the default param.
  */
-omitInheritedProperties(obj: any, propertiesFilter: Array<?string> = []) ->
+omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
-    for elem propertyToFilter in propertiesFilter:
+    for elem propertyToFilter in propertyFiltersArr:
       if propertyToFilter === propName: return prev
     if isObject(obj[propName]):
-      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propFilter) }}
+      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) }}
 
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
 
 isObject(obj) ->
-  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj)
+  _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
 
 export {
   noop,

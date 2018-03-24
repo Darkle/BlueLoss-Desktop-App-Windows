@@ -40,16 +40,16 @@ handleScanResults(host):void ->
 * We remove duplicates, but also for any duplicates, we prefer to take the duplicate
 * that has a device name (sometimes they have an empty string for a device name).
 */
-dedupeAndPreferName(deviceList) ->
-  deviceList.reduce((newDeviceList, newDevice) ->
-    deviceId = newDevice.deviceId
-    foundDeviceInNewList = _.find(newDeviceList, { deviceId })
-    if !foundDeviceInNewList:
-      return [...newDeviceList, newDevice]
-    if !foundDeviceInNewList?.deviceName?.length and newDevice.deviceName.length:
-      return [..._.filter(newDeviceList, item => item.deviceId !== deviceId ), newDevice]
-    newDeviceList
-  , [])
+// dedupeAndPreferName(deviceList) ->
+//   deviceList.reduce((newDeviceList, newDevice) ->
+//     deviceId = newDevice.deviceId
+//     foundDeviceInNewList = _.find(newDeviceList, { deviceId })
+//     if !foundDeviceInNewList:
+//       return [...newDeviceList, newDevice]
+//     if !foundDeviceInNewList?.deviceName?.length and newDevice.deviceName.length:
+//       return [..._.filter(newDeviceList, item => item.deviceId !== deviceId ), newDevice]
+//     newDeviceList
+//   , [])
 
 
 export {

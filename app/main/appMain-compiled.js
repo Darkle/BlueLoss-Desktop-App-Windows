@@ -264,6 +264,88 @@ UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, c
 
 /***/ }),
 
+/***/ "./app/common/oui/getOUIfile.lsc":
+/*!***************************************!*\
+  !*** ./app/common/oui/getOUIfile.lsc ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getOUIfileData = exports.loadOUIfileIfNotLoaded = undefined;
+
+var _fs = __webpack_require__(/*! fs */ "fs");
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _util = __webpack_require__(/*! util */ "util");
+
+var _util2 = _interopRequireDefault(_util);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _fsJetpack = __webpack_require__(/*! fs-jetpack */ "fs-jetpack");
+
+var _fsJetpack2 = _interopRequireDefault(_fsJetpack);
+
+var _settings = __webpack_require__(/*! ../../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const pReadFile = _util2.default.promisify(_fs2.default.readFile);
+const fileName = 'lanlost-mac-vendor-prefixes.txt';
+const downloadedOUIfilePath = _path2.default.join(_electron.app.getPath('userData'), fileName);
+const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'common', 'oui', fileName);
+let ouiFileData = null;
+
+function loadOUIfileIfNotLoaded() {
+  if (ouiFileData) return Promise.resolve();
+  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(function (result) {
+    return pReadFile(result === 'file' ? downloadedOUIfilePath : initialOUIfilePath, 'utf8');
+  }).then(function (fileData) {
+    ouiFileData = fileData.split(/\r\n?|\n/);
+  }).catch(function (err) {
+    _logging.logger.error(`Couldn't load OUI file`, err);
+    (0, _settings.updateSetting)('canSearchForMacVendorInfo', false);
+  });
+}function getOUIfileData() {
+  return ouiFileData;
+}exports.loadOUIfileIfNotLoaded = loadOUIfileIfNotLoaded;
+exports.getOUIfileData = getOUIfileData;
+
+/***/ }),
+
+/***/ "./app/common/oui/updateOUIfilePeriodically.lsc":
+/*!******************************************************!*\
+  !*** ./app/common/oui/updateOUIfilePeriodically.lsc ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function updateOUIfilePeriodically() {
+  return;
+}exports.updateOUIfilePeriodically = updateOUIfilePeriodically;
+
+/***/ }),
+
 /***/ "./app/common/setUpDev.lsc":
 /*!*********************************!*\
   !*** ./app/common/setUpDev.lsc ***!
@@ -347,17 +429,17 @@ function noop() {
    * In the off-chance that an object key name is literally the word 'undefined',
    * set Symbol() as the default param.
    */
-function omitInheritedProperties(obj, propertiesFilter = []) {
+function omitInheritedProperties(obj, propertyFiltersArr = []) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
-    for (let _i = 0, _len = propertiesFilter.length; _i < _len; _i++) {
-      const propertyToFilter = propertiesFilter[_i];
+    for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
+      const propertyToFilter = propertyFiltersArr[_i];
       if (propertyToFilter === propName) return prev;
     }if (isObject(obj[propName])) {
-      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName], propFilter) });
+      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) });
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
 }function isObject(obj) {
-  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj);
+  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj);
 }exports.noop = noop;
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
@@ -483,13 +565,11 @@ const defaultSettings = {
   timeToLock: 2,
   reportErrors: true,
   userDebug: false,
-  hostsScanRange: {
-    start: 2,
-    end: 254
-  },
+  hostsScanRangeStart: 2,
+  hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
   privateSettings: {
-    getMacVendorInfo: true,
+    canSearchForMacVendorInfo: true,
     dateLastCheckedForOUIupdate: Date.now()
   }
 };
@@ -700,6 +780,8 @@ var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/c
 
 var _networkScanner = __webpack_require__(/*! ../networkScan/networkScanner.lsc */ "./app/networkScan/networkScanner.lsc");
 
+var _updateOUIfilePeriodically = __webpack_require__(/*! ../common/oui/updateOUIfilePeriodically.lsc */ "./app/common/oui/updateOUIfilePeriodically.lsc");
+
 _electron.app.once('ready', function () {
   var _electronApp$dock;
 
@@ -708,12 +790,12 @@ _electron.app.once('ready', function () {
   if (!(0, _settings.getSettings)().firstRun) (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
 
   (0, _tray.initTrayMenu)();
-  (0, _networkScanner.loadOUIfile)().then(_networkScanner.scanNetwork).catch(_logging.logger.error);
+  (0, _networkScanner.scanNetwork)();
 
   if ((0, _settings.getSettings)().firstRun) {
     (0, _settings.updateSetting)('firstRun', false);
     (0, _settingsWindow.showSettingsWindow)();
-  }
+  }(0, _updateOUIfilePeriodically.updateOUIfilePeriodically)();
 });
 
 _electron.app.on('window-all-closed', _utils.noop);
@@ -769,21 +851,19 @@ function handleScanResults(host) {
 * We remove duplicates, but also for any duplicates, we prefer to take the duplicate
 * that has a device name (sometimes they have an empty string for a device name).
 */
-function dedupeAndPreferName(deviceList) {
-  return deviceList.reduce(function (newDeviceList, newDevice) {
-    var _foundDeviceInNewList;
+// dedupeAndPreferName(deviceList) ->
+//   deviceList.reduce((newDeviceList, newDevice) ->
+//     deviceId = newDevice.deviceId
+//     foundDeviceInNewList = _.find(newDeviceList, { deviceId })
+//     if !foundDeviceInNewList:
+//       return [...newDeviceList, newDevice]
+//     if !foundDeviceInNewList?.deviceName?.length and newDevice.deviceName.length:
+//       return [..._.filter(newDeviceList, item => item.deviceId !== deviceId ), newDevice]
+//     newDeviceList
+//   , [])
 
-    const deviceId = newDevice.deviceId;
-    const foundDeviceInNewList = _.find(newDeviceList, { deviceId });
-    if (!foundDeviceInNewList) {
-      return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
-    }if (!(foundDeviceInNewList == null ? void 0 : (_foundDeviceInNewList = foundDeviceInNewList.deviceName) == null ? void 0 : _foundDeviceInNewList.length) && newDevice.deviceName.length) {
-      var _ref;
 
-      return [...(_ref = _.filter(newDeviceList, item => item.deviceId !== deviceId), _ref === void 0 ? [] : _ref), newDevice];
-    }return newDeviceList;
-  }, []);
-}exports.handleScanResults = handleScanResults;
+exports.handleScanResults = handleScanResults;
 
 /***/ }),
 
@@ -828,11 +908,17 @@ var _internalIp = __webpack_require__(/*! internal-ip */ "internal-ip");
 
 var _internalIp2 = _interopRequireDefault(_internalIp);
 
+var _isIp = __webpack_require__(/*! is-ip */ "./node_modules/is-ip/index.js");
+
+var _isIp2 = _interopRequireDefault(_isIp);
+
 var _nuo = __webpack_require__(/*! nuo */ "nuo");
 
 var _nuo2 = _interopRequireDefault(_nuo);
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _getOUIfile = __webpack_require__(/*! ../common/oui/getOUIfile.lsc */ "./app/common/oui/getOUIfile.lsc");
 
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/networkScan/handleScanResults.lsc");
 
@@ -847,20 +933,16 @@ const scanInterval = (0, _ms2.default)('30 seconds');
 
 function scanNetwork() {
   _logging.logger.debug(`new scan started`);
-  const {
-    hostsScanRange: { start: hostsRangeStart, end: hostsRangeEnd },
-    hostScanTimeout
-  } = (0, _settings.getSettings)();
 
-  return _nuo2.default.resolve(_defaultGateway2.default.v4()).then(function (defaultGateway) {
-    _logging.logger.debug(`gateway ip: ${defaultGateway}`);
-    return generateHostIPs(defaultGateway, hostsRangeStart, hostsRangeEnd);
-  }).then(hostIPs => {
-    return hostIPs.forEach(hostIP => {
-      return scanHost(hostIP, hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  _nuo2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(function (gatewayIP) {
+    const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
+    return generateHostIPs(gatewayIP, hostsScanRangeStart, hostsScanRangeEnd);
+  }).then(function (hostIPs) {
+    hostIPs.forEach(function (hostIP) {
+      scanHost(hostIP, (0, _settings.getSettings)().hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
     });
-  }).finally(function () {
-    setTimeout(scanNetwork, scanInterval);
+  }).catch(_logging.logger.error).finally(function () {
+    return setTimeout(scanNetwork, scanInterval);
   });
 } // http://bit.ly/2pzLeD3
 function scanHost(hostIP, hostScanTimeout) {
@@ -882,6 +964,13 @@ function scanHost(hostIP, hostScanTimeout) {
       socket.destroy();
     });
   });
+}function getDefaultGatewayIP() {
+  return _defaultGateway2.default.v4().then(function ({ gateway: defaultGatewayIP }) {
+    if (!_isIp2.default.v4(defaultGatewayIP)) {
+      throw new Error(`Didn't get valid gateway IP address`, { defaultGatewayIP });
+    }_logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
+    return defaultGatewayIP;
+  });
 }function getMacAdressForHostIP(activeHostIP) {
   return pGetMAC(activeHostIP).catch(function (err) {
     _logging.logger.error(`couldn't get MAC adress for: ${activeHostIP}`, err);
@@ -889,11 +978,12 @@ function scanHost(hostIP, hostScanTimeout) {
     return { ipAddress: activeHostIP, macAddress };
   });
 }function getVendorInfoForMacAddress({ ipAddress, macAddress }) {
-  if (!(0, _settings.getSettings)().getMacVendorInfo) return { ipAddress, macAddress };
-  const ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6);
+  if (!(0, _settings.getSettings)().privateSettings.canSearchForMacVendorInfo) {
+    return { ipAddress, macAddress };
+  }const ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6).toUpperCase();
   // use a native for loop here cause the OUI file is over 20,000 lines long
   // indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
-  getOUIfileData();
+  const ouiFileData = (0, _getOUIfile.getOUIfileData)();
   for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
     const line = ouiFileData[_i];
     if (line.indexOf(ouiSansDelimeters) === 0) {
@@ -1168,6 +1258,24 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
+/***/ "./node_modules/is-ip/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/is-ip/index.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const ipRegex = __webpack_require__(/*! ip-regex */ "ip-regex");
+
+const isIp = module.exports = x => ipRegex({exact: true}).test(x);
+isIp.v4 = x => ipRegex.v4({exact: true}).test(x);
+isIp.v6 = x => ipRegex.v6({exact: true}).test(x);
+
+
+/***/ }),
+
 /***/ "default-gateway":
 /*!**********************************!*\
   !*** external "default-gateway" ***!
@@ -1212,6 +1320,28 @@ module.exports = require("electron-reload");
 
 /***/ }),
 
+/***/ "fs":
+/*!*********************!*\
+  !*** external "fs" ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ "fs-jetpack":
+/*!*****************************!*\
+  !*** external "fs-jetpack" ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("fs-jetpack");
+
+/***/ }),
+
 /***/ "gawk":
 /*!***********************!*\
   !*** external "gawk" ***!
@@ -1231,6 +1361,17 @@ module.exports = require("gawk");
 /***/ (function(module, exports) {
 
 module.exports = require("internal-ip");
+
+/***/ }),
+
+/***/ "ip-regex":
+/*!***************************!*\
+  !*** external "ip-regex" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("ip-regex");
 
 /***/ }),
 

@@ -9,31 +9,33 @@ import { updateSetting } from '../../db/settings.lsc'
 import { logger } from '../logging/logging.lsc'
 
 pReadFile = util.promisify(fs.readFile)
-
-ouiFilePath = path.join(electronApp.getPath('userData'), 'lanlost-mac-vendor-prefixes.txt')
-initialOUIfilePath = path.join(__dirname, 'lanlost-mac-vendor-prefixes.txt')
+fileName = 'lanlost-mac-vendor-prefixes.txt'
+downloadedOUIfilePath = path.join(electronApp.getPath('userData'), fileName)
+initialOUIfilePath = path.resolve(__dirname, '..', 'common', 'oui', fileName)
 let ouiFileData = null
 
-loadOUIfile():Promise<any> ->
-  jetpack.exists(ouiFilePath)
-    .then((result: string | false): ?Promise<any> ->
-      if result !== 'file':
-        return jetpack.copy(initialOUIfilePath, ouiFilePath)
+loadOUIfileIfNotLoaded():Promise<any> ->
+  if ouiFileData: return Promise.resolve()
+  jetpack.existsAsync(downloadedOUIfilePath)
+    .then((result: string | false): Promise<any> ->
+      pReadFile(
+        result === 'file' ? downloadedOUIfilePath : initialOUIfilePath,
+        'utf8'
+      )
     )
-    .then(() -> pReadFile(ouiFilePath, 'utf8'))
-    .then(fileData => {
+    .then((fileData):void ->
       now ouiFileData = fileData.split(/\r\n?|\n/)
-    })
-    .catch(err => {
+    )
+    .catch((err):void ->
       logger.error(`Couldn't load OUI file`, err)
-      updateSetting('getMacVendorInfo', false)
-    })
+      updateSetting('canSearchForMacVendorInfo', false)
+    )
 
 
-getOUIfileData() -> return ouiFileData
+getOUIfileData() -> ouiFileData
 
 
 export {
-  loadOUIfile,
+  loadOUIfileIfNotLoaded,
   getOUIfileData,
 }
