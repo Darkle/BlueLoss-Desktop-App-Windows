@@ -4,5 +4,6 @@
   ],
   "execMap": {
     "js": "node_modules/.bin/electron"
-  }
+  },
+  "delay": 1800
 }

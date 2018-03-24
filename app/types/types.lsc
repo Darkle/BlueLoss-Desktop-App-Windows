@@ -3,16 +3,13 @@
  * Settings Types
  *
  */
-type DeviceType = { vendorName?: string, ipAddress: string, macAddress: string }
+type DeviceType = { vendorName: ?string, ipAddress: string, macAddress: string }
 type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
 type PrivateSettingsType = { canSearchForMacVendorInfo: boolean }
 type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
 
 
 
-/**
- * networkScanner types
- */
 
 export type {
   DeviceType,

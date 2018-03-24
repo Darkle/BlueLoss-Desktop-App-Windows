@@ -14,6 +14,10 @@ downloadedOUIfilePath = path.join(electronApp.getPath('userData'), fileName)
 initialOUIfilePath = path.resolve(__dirname, '..', 'common', 'oui', fileName)
 let ouiFileData = null
 
+/**
+ * If we haven't downloaded a new copy of the mac vendor prefix list, use
+ * our built in one.
+ */
 loadOUIfileIfNotLoaded():Promise<any> ->
   if ouiFileData: return Promise.resolve()
   jetpack.existsAsync(downloadedOUIfilePath)

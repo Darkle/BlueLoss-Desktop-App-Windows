@@ -7,12 +7,15 @@ import ms from 'ms'
 import arp from 'node-arp'
 import getInternalIP from 'internal-ip'
 import isIp from 'is-ip'
-import Promise from 'nuo'
+import Promise from 'bluebird'
+import pMap from 'p-map'
+import pSettle from 'p-settle'
 
 import { getSettings } from '../db/settings.lsc'
 import { loadOUIfileIfNotLoaded, getOUIfileData } from '../common/oui/getOUIfile.lsc'
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
+import { isObject } from '../common/utils.lsc'
 import { DeviceType } from '../types/types.lsc'
 
 pGetMAC = util.promisify(arp.getMAC)
@@ -23,19 +26,15 @@ scanNetwork():void ->
 
   Promise.resolve(loadOUIfileIfNotLoaded())
     .then(getDefaultGatewayIP)
-    .then(gatewayIP ->
-      { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
-      generateHostIPs(gatewayIP, hostsScanRangeStart, hostsScanRangeEnd)
+    .then(generateHostIPs)
+    .map(hostIP ->
+      scanHost(hostIP, getSettings().hostScanTimeout)
+        .then(getMacAdressForHostIP)
+        .then(getVendorInfoForMacAddress)
+        .catch(err -> if !ISDEV: logger.debug(err))
     )
-    .then((hostIPs):void ->
-      hostIPs.forEach((hostIP):void ->
-        scanHost(hostIP, getSettings().hostScanTimeout)
-          .then(getMacAdressForHostIP)
-          .then(getVendorInfoForMacAddress)
-          .then(handleScanResults)
-          .catch(logger.error)
-      )
-    )
+    .filter(isObject)
+    .then(handleScanResults)
     .catch(logger.error)
     .finally(() -> setTimeout(scanNetwork, scanInterval))
 
@@ -53,7 +52,10 @@ scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
       if error.code === 'ECONNREFUSED': resolve(hostIP)
       else: reject(error)
     )
-    socket.on('timeout', ():void -> socket.destroy())
+    socket.on('timeout', ():void ->
+      socket.destroy()
+      reject(new Error(`socket timeout for ${ hostIP }`))
+    )
     socket.on('connect', ():void ->
       resolve(hostIP)
       socket.destroy()
@@ -71,30 +73,32 @@ getDefaultGatewayIP():Promise<any> ->
 
 getMacAdressForHostIP(activeHostIP: string):Promise<any> ->
   pGetMAC(activeHostIP)
-    .catch((err):void ->
-      logger.error(`couldn't get MAC adress for: ${ activeHostIP }`, err)
-    )
     .then(macAddress -> ({ ipAddress: activeHostIP, macAddress }))
 
 getVendorInfoForMacAddress({ ipAddress, macAddress }):Promise<DeviceType> ->
   if !getSettings().privateSettings.canSearchForMacVendorInfo:
     return { ipAddress, macAddress }
   ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6).toUpperCase()
-  // use a native for loop here cause the OUI file is over 20,000 lines long
-  // indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
   ouiFileData = getOUIfileData()
+  /**
+   * use a native for loop here cause the OUI file is over 20,000 lines long.
+   * indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
+   */
   for elem line in ouiFileData:
-    if line.indexOf(ouiSansDelimeters) === 0:
+    if line?.indexOf?(ouiSansDelimeters) === 0:
       vendorName = line.split(ouiSansDelimeters)[1].trim()
       return Promise.resolve({ ipAddress, macAddress, vendorName })
   Promise.resolve({ ipAddress, macAddress, vendorName: null })
 
-
-generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd):Array<string> ->
+generateHostIPs(gateway):Array<string> ->
+  { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   internalIp = getInternalIP.v4.sync()
 
-  _.range(hostsRangeStart, hostsRangeEnd)
+  /**
+   * Lodash range doesn;t include the last number.
+   */
+  _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
       .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
       .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
 

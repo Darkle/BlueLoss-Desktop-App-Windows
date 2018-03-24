@@ -309,6 +309,10 @@ const downloadedOUIfilePath = _path2.default.join(_electron.app.getPath('userDat
 const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'common', 'oui', fileName);
 let ouiFileData = null;
 
+/**
+ * If we haven't downloaded a new copy of the mac vendor prefix list, use
+ * our built in one.
+ */
 function loadOUIfileIfNotLoaded() {
   if (ouiFileData) return Promise.resolve();
   return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(function (result) {
@@ -340,6 +344,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+
+/**
+ * https://linuxnet.ca/ieee/oui/
+ */
 function updateOUIfilePeriodically() {
   return;
 }exports.updateOUIfilePeriodically = updateOUIfilePeriodically;
@@ -401,7 +409,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -444,6 +452,7 @@ function omitInheritedProperties(obj, propertyFiltersArr = []) {
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
+exports.isObject = isObject;
 
 /***/ }),
 
@@ -817,24 +826,16 @@ process.on('unhandledRejection', _logging.logger.error);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// import _ from 'lodash'
+exports.handleScanResults = undefined;
 
-// import { logger } from '../common/logging/logging.lsc'
-// import { getSettings } from '../db/settings.lsc'
-// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-// import { lockSystem, checkIfShouldLock } from '../common/lockSystem.lsc'
-// import { scanforDevices } from './blueToothMain.lsc'
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
-// let lastTimeSawADeviceWeAreLookingFor = Date.now()
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
-function handleScanResults(host) {
-  console.log('handleScanResults');
-  console.log(host);
-} // logger.debug(`scanHost returned device active on ip: ${ activeHostIP }`)
+function handleScanResults(devices) {
+  console.dir(devices);
+} // logger.debug(`scan returned active device: ${ devices }`)
 
-// Check for duplicates in deviceList in case run in to this bug:
-// https://github.com/electron/electron/issues/10800
-// dedupedDeviceList = dedupeAndPreferName(deviceList)
 
 // logger.info('scan results', dedupedDeviceList)
 
@@ -845,22 +846,6 @@ function handleScanResults(host) {
 
 // if shouldLock: lockSystem()
 // if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
-
-
-/*****
-* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
-* that has a device name (sometimes they have an empty string for a device name).
-*/
-// dedupeAndPreferName(deviceList) ->
-//   deviceList.reduce((newDeviceList, newDevice) ->
-//     deviceId = newDevice.deviceId
-//     foundDeviceInNewList = _.find(newDeviceList, { deviceId })
-//     if !foundDeviceInNewList:
-//       return [...newDeviceList, newDevice]
-//     if !foundDeviceInNewList?.deviceName?.length and newDevice.deviceName.length:
-//       return [..._.filter(newDeviceList, item => item.deviceId !== deviceId ), newDevice]
-//     newDeviceList
-//   , [])
 
 
 exports.handleScanResults = handleScanResults;
@@ -908,13 +893,21 @@ var _internalIp = __webpack_require__(/*! internal-ip */ "internal-ip");
 
 var _internalIp2 = _interopRequireDefault(_internalIp);
 
-var _isIp = __webpack_require__(/*! is-ip */ "./node_modules/is-ip/index.js");
+var _isIp = __webpack_require__(/*! is-ip */ "is-ip");
 
 var _isIp2 = _interopRequireDefault(_isIp);
 
-var _nuo = __webpack_require__(/*! nuo */ "nuo");
+var _bluebird = __webpack_require__(/*! bluebird */ "bluebird");
 
-var _nuo2 = _interopRequireDefault(_nuo);
+var _bluebird2 = _interopRequireDefault(_bluebird);
+
+var _pMap = __webpack_require__(/*! p-map */ "./node_modules/p-map/index.js");
+
+var _pMap2 = _interopRequireDefault(_pMap);
+
+var _pSettle = __webpack_require__(/*! p-settle */ "./node_modules/p-settle/index.js");
+
+var _pSettle2 = _interopRequireDefault(_pSettle);
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
 
@@ -923,6 +916,8 @@ var _getOUIfile = __webpack_require__(/*! ../common/oui/getOUIfile.lsc */ "./app
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/networkScan/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
@@ -934,19 +929,16 @@ const scanInterval = (0, _ms2.default)('30 seconds');
 function scanNetwork() {
   _logging.logger.debug(`new scan started`);
 
-  _nuo2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(function (gatewayIP) {
-    const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
-    return generateHostIPs(gatewayIP, hostsScanRangeStart, hostsScanRangeEnd);
-  }).then(function (hostIPs) {
-    hostIPs.forEach(function (hostIP) {
-      scanHost(hostIP, (0, _settings.getSettings)().hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generateHostIPs).map(function (hostIP) {
+    return scanHost(hostIP, (0, _settings.getSettings)().hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(function (err) {
+      return  false ? undefined : void 0;
     });
-  }).catch(_logging.logger.error).finally(function () {
+  }).filter(_utils.isObject).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(function () {
     return setTimeout(scanNetwork, scanInterval);
   });
 } // http://bit.ly/2pzLeD3
 function scanHost(hostIP, hostScanTimeout) {
-  return new _nuo2.default(function (resolve, reject) {
+  return new _bluebird2.default(function (resolve, reject) {
     const socket = new _net.Socket();
 
     socket.setTimeout(hostScanTimeout);
@@ -958,6 +950,7 @@ function scanHost(hostIP, hostScanTimeout) {
     });
     socket.on('timeout', function () {
       socket.destroy();
+      reject(new Error(`socket timeout for ${hostIP}`));
     });
     socket.on('connect', function () {
       resolve(hostIP);
@@ -972,30 +965,34 @@ function scanHost(hostIP, hostScanTimeout) {
     return defaultGatewayIP;
   });
 }function getMacAdressForHostIP(activeHostIP) {
-  return pGetMAC(activeHostIP).catch(function (err) {
-    _logging.logger.error(`couldn't get MAC adress for: ${activeHostIP}`, err);
-  }).then(function (macAddress) {
+  return pGetMAC(activeHostIP).then(function (macAddress) {
     return { ipAddress: activeHostIP, macAddress };
   });
 }function getVendorInfoForMacAddress({ ipAddress, macAddress }) {
   if (!(0, _settings.getSettings)().privateSettings.canSearchForMacVendorInfo) {
     return { ipAddress, macAddress };
   }const ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6).toUpperCase();
-  // use a native for loop here cause the OUI file is over 20,000 lines long
-  // indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
   const ouiFileData = (0, _getOUIfile.getOUIfileData)();
+  /**
+   * use a native for loop here cause the OUI file is over 20,000 lines long.
+   * indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
+   */
   for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
     const line = ouiFileData[_i];
-    if (line.indexOf(ouiSansDelimeters) === 0) {
+    if ((line == null ? void 0 : typeof line.indexOf !== 'function' ? void 0 : line.indexOf(ouiSansDelimeters)) === 0) {
       const vendorName = line.split(ouiSansDelimeters)[1].trim();
-      return _nuo2.default.resolve({ ipAddress, macAddress, vendorName });
+      return _bluebird2.default.resolve({ ipAddress, macAddress, vendorName });
     }
-  }return _nuo2.default.resolve({ ipAddress, macAddress, vendorName: null });
-}function generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd) {
+  }return _bluebird2.default.resolve({ ipAddress, macAddress, vendorName: null });
+}function generateHostIPs(gateway) {
+  const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
   const internalIp = _internalIp2.default.v4.sync();
 
-  return _lodash2.default.range(hostsRangeStart, hostsRangeEnd).map(function (lastOctet) {
+  /**
+   * Lodash range doesn;t include the last number.
+   */
+  return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
     return `${networkOctects}.${lastOctet}`;
   }).filter(function (hostIP) {
     return hostIP !== gateway && hostIP !== internalIp;
@@ -1258,21 +1255,135 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/is-ip/index.js":
+/***/ "./node_modules/p-map/index.js":
 /*!*************************************!*\
-  !*** ./node_modules/is-ip/index.js ***!
+  !*** ./node_modules/p-map/index.js ***!
   \*************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const ipRegex = __webpack_require__(/*! ip-regex */ "ip-regex");
+module.exports = (iterable, mapper, opts) => new Promise((resolve, reject) => {
+	opts = Object.assign({
+		concurrency: Infinity
+	}, opts);
 
-const isIp = module.exports = x => ipRegex({exact: true}).test(x);
-isIp.v4 = x => ipRegex.v4({exact: true}).test(x);
-isIp.v6 = x => ipRegex.v6({exact: true}).test(x);
+	if (typeof mapper !== 'function') {
+		throw new TypeError('Mapper function is required');
+	}
 
+	const concurrency = opts.concurrency;
+
+	if (!(typeof concurrency === 'number' && concurrency >= 1)) {
+		throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${concurrency}\` (${typeof concurrency})`);
+	}
+
+	const ret = [];
+	const iterator = iterable[Symbol.iterator]();
+	let isRejected = false;
+	let iterableDone = false;
+	let resolvingCount = 0;
+	let currentIdx = 0;
+
+	const next = () => {
+		if (isRejected) {
+			return;
+		}
+
+		const nextItem = iterator.next();
+		const i = currentIdx;
+		currentIdx++;
+
+		if (nextItem.done) {
+			iterableDone = true;
+
+			if (resolvingCount === 0) {
+				resolve(ret);
+			}
+
+			return;
+		}
+
+		resolvingCount++;
+
+		Promise.resolve(nextItem.value)
+			.then(el => mapper(el, i))
+			.then(
+				val => {
+					ret[i] = val;
+					resolvingCount--;
+					next();
+				},
+				err => {
+					isRejected = true;
+					reject(err);
+				}
+			);
+	};
+
+	for (let i = 0; i < concurrency; i++) {
+		next();
+
+		if (iterableDone) {
+			break;
+		}
+	}
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/p-reflect/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/p-reflect/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = promise => Promise.resolve(promise).then(
+	value => ({
+		isFulfilled: true,
+		isRejected: false,
+		value
+	}),
+	reason => ({
+		isFulfilled: false,
+		isRejected: true,
+		reason
+	})
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/p-settle/index.js":
+/*!****************************************!*\
+  !*** ./node_modules/p-settle/index.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const pReflect = __webpack_require__(/*! p-reflect */ "./node_modules/p-reflect/index.js");
+
+module.exports = iterable => Promise.all(iterable.map(pReflect));
+
+
+/***/ }),
+
+/***/ "bluebird":
+/*!***************************!*\
+  !*** external "bluebird" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("bluebird");
 
 /***/ }),
 
@@ -1364,14 +1475,14 @@ module.exports = require("internal-ip");
 
 /***/ }),
 
-/***/ "ip-regex":
-/*!***************************!*\
-  !*** external "ip-regex" ***!
-  \***************************/
+/***/ "is-ip":
+/*!************************!*\
+  !*** external "is-ip" ***!
+  \************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = require("ip-regex");
+module.exports = require("is-ip");
 
 /***/ }),
 
@@ -1438,17 +1549,6 @@ module.exports = require("net");
 /***/ (function(module, exports) {
 
 module.exports = require("node-arp");
-
-/***/ }),
-
-/***/ "nuo":
-/*!**********************!*\
-  !*** external "nuo" ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("nuo");
 
 /***/ }),
 

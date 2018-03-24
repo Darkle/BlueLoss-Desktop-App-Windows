@@ -37,4 +37,5 @@ export {
   logSettingsUpdateInDev,
   omitInheritedProperties,
   recursiveOmitPropertiesFromObj,
+  isObject,
 }
