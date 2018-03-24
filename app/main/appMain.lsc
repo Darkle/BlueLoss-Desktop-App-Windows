@@ -7,15 +7,15 @@ import { noop } from '../common/utils.lsc'
 import { initTrayMenu } from '../tray/tray.lsc'
 import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { initScan } from '../networkScan/networkScanner.lsc'
+import { loadOUIfile, scanNetwork } from '../networkScan/networkScanner.lsc'
 
 electronApp.once('ready', ():void ->
   if electronApp.makeSingleInstance(noop): electronApp.quit()
   if ISDEV: setUpDev()
   if !getSettings().firstRun: electronApp.dock?.hide()
 
-  initScan().catch(logger.error)
   initTrayMenu()
+  loadOUIfile().then(scanNetwork).catch(logger.error)
 
   if getSettings().firstRun:
     updateSetting('firstRun', false)

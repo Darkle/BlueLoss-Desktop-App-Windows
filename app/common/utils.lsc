@@ -5,8 +5,8 @@ import { SettingsTypes } from '../types/types.lsc'
 
 noop() -> return
 
-omitGawkObserverFromSettings(settings) ->
-  omitInheritedProperties(settings, '__gawk__')
+recursiveOmitPropertiesFromObj(settings, properties:Array<string>) ->
+  omitInheritedProperties(settings, properties)
 
 logSettingsUpdateInDev(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   if ISDEV:
@@ -18,9 +18,10 @@ logSettingsUpdateInDev(newSettingKey: string, newSettingValue: SettingsTypes):vo
  * In the off-chance that an object key name is literally the word 'undefined',
  * set Symbol() as the default param.
  */
-omitInheritedProperties(obj: any, propFilter: string | Symbol = Symbol()) ->
+omitInheritedProperties(obj: any, propertiesFilter: Array<?string> = []) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
-    if propFilter === propName: return prev
+    for elem propertyToFilter in propertiesFilter:
+      if propertyToFilter === propName: return prev
     if isObject(obj[propName]):
       return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propFilter) }}
 
@@ -35,5 +36,5 @@ export {
   noop,
   logSettingsUpdateInDev,
   omitInheritedProperties,
-  omitGawkObserverFromSettings,
+  recursiveOmitPropertiesFromObj,
 }

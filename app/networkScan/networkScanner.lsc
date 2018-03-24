@@ -1,46 +1,44 @@
 import { Socket } from 'net'
 import util from 'util'
-// import fs from 'fs'
 
 import getDefaultGateway from 'default-gateway'
 import _ from 'lodash'
 import ms from 'ms'
 import arp from 'node-arp'
 import getInternalIP from 'internal-ip'
+import Promise from 'nuo'
 
 import { getSettings } from '../db/settings.lsc'
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
+import { DeviceType, DefaultGatewayType } from '../types/types.lsc'
 
 pGetMAC = util.promisify(arp.getMAC)
-// pReadFile = util.promisify(fs.readFile)
 scanInterval = ms('30 seconds')
-/**
- * defaultGateway.v4() Promise contains an object like:
- * { gateway: '192.168.1.1', interface: 'Ethernet' } if successful.
- */
-initScan():Promise<any> ->
-   getDefaultGateway.v4().then(scanNetwork)
 
-scanNetwork({gateway}):void ->
+scanNetwork():Promise<any> ->
+  logger.debug(`new scan started`)
   {
     hostsScanRange: { start: hostsRangeStart, end: hostsRangeEnd },
     hostScanTimeout
   } = getSettings()
 
-  logger.debug(`new scan started`)
-  logger.debug(`gateway ip: ${ gateway }`)
-
-  generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd)
-    .forEach((hostIP):void ->
-      scanHost(hostIP, hostScanTimeout)
-      .then(getMacAdressForHostIP)
-      // .then(getVendorInfoForMacAddress)
-      .then(handleScanResults)
-      .catch(logger.error)
+  Promise.resolve(getDefaultGateway.v4())
+    .then((defaultGateway: DefaultGatewayType) ->
+      logger.debug(`gateway ip: ${ defaultGateway }`)
+      generateHostIPs(defaultGateway, hostsRangeStart, hostsRangeEnd)
     )
+    .then(hostIPs => {
+      hostIPs.forEach(hostIP => {
+        scanHost(hostIP, hostScanTimeout)
+        .then(getMacAdressForHostIP)
+        .then(getVendorInfoForMacAddress)
+        .then(handleScanResults)
+        .catch(logger.error)
+      })
+    })
+    .finally(():void -> setTimeout(scanNetwork, scanInterval))
 
-  setTimeout(initScan, scanInterval)
 
 // http://bit.ly/2pzLeD3
 scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
@@ -55,9 +53,7 @@ scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
       if error.code === 'ECONNREFUSED': resolve(hostIP)
       else: reject(error)
     )
-
     socket.on('timeout', ():void -> socket.destroy())
-
     socket.on('connect', ():void ->
       resolve(hostIP)
       socket.destroy()
@@ -71,31 +67,30 @@ getMacAdressForHostIP(activeHostIP: string):Promise<any> ->
     )
     .then(macAddress -> ({ ipAddress: activeHostIP, macAddress }))
 
-getVendorInfoForMacAddress(hostDetails) -> return
-  // if !getSettings().getMacVendorInfo: return hostDetails
 
-  // apiAddress = `http://macvendors.co/api/${ hostDetails.macAddress.replace(/:([^:]{1}):/g, ':0$1:') }/json`
+getVendorInfoForMacAddress({ ipAddress, macAddress }):Promise<DeviceType> ->
+  if !getSettings().getMacVendorInfo: return { ipAddress, macAddress }
+  ouiSansDelimeters = macAddress.replace(/[.:-]/g, "").substring(0, 6)
+  // use a native for loop here cause the OUI file is over 20,000 lines long
+  // indexOf seems to be the fastest string checker: http://bit.ly/2pABrgG
+  getOUIfileData()
+  for elem line in ouiFileData:
+    if line.indexOf(ouiSansDelimeters) === 0:
+      vendorName = line.split(ouiSansDelimeters)[1].trim()
+      return Promise.resolve({ ipAddress, macAddress, vendorName })
+  Promise.resolve({ ipAddress, macAddress, vendorName: null })
 
-  // fetch(apiAddress)
-  //   .then(response -> response.json())
-  //   .then(json ->
-  //     {...hostDetails, ...{ vendorName: json?.result?.company }}
-  //   )
-  //   // don't want a fetch error to cancel everything, so catch here and continue.
-  //   .catch(err ->
-  //     logger.error(err)
-  //     {...hostDetails, ...{ vendorName: undefined }} // eslint-disable-line no-undefined
-  //   )
 
 generateHostIPs(gateway, hostsRangeStart, hostsRangeEnd):Array<string> ->
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   internalIp = getInternalIP.v4.sync()
 
   _.range(hostsRangeStart, hostsRangeEnd)
-    .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
-    .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
+      .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
+      .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
+
 
 
 export {
-  initScan
+  scanNetwork,
 }

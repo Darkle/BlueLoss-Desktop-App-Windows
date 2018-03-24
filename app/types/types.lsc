@@ -3,15 +3,24 @@
  * Settings Types
  *
  */
-type DeviceType = { vendorName: string, ipAddress: string, macAddress: string }
+type DeviceType = { vendorName?: string, ipAddress: string, macAddress: string }
 type HostsScanRangeType = { start: number, end: number }
 type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
+type PrivateSettingsType = { getMacVendorInfo: boolean }
 type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
 
+
+
+/**
+ * networkScanner types
+ */
+type DefaultGatewayType = { gateway: string, interface: string }
 
 export type {
   DeviceType,
   HostsScanRangeType,
   SettingsWindowPositionType,
   SettingsTypes,
+  DefaultGatewayType,
+  PrivateSettingsType,
 }

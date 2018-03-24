@@ -4,7 +4,7 @@ import { app as electronApp, BrowserWindow, Menu } from 'electron'
 
 import { getSettings, updateSetting } from '../db/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { omitGawkObserverFromSettings } from '../common/utils.lsc'
+import { recursiveOmitPropertiesFromObj } from '../common/utils.lsc'
 
 settingsHTMLpath = url.format({
   protocol: 'file',
@@ -41,16 +41,19 @@ showSettingsWindow():void ->
 
   /*****
   * We add the settings to a global each time we create a new settings window so we can easily
-  * load the inital app settings on renderer startup. This way we dont have to send a message from the renderer
-  * to the main processs to ask for the settings - or send them from main process on detection of the
-  * BrowserWindow 'ready-to-show' event, both of which might make the UI show nothing briefly before the settings.
+  * load the inital app settings on renderer startup. This way we dont have to send a message from the
+  * renderer to the main processs to ask for the settings - or send them from main process on detection
+  * of the BrowserWindow 'ready-to-show' event, both of which might make the UI show nothing briefly
+  * before the settings.
   *
-  * We can't use remote.require(../settings.lsc).getSettings() in the renderer because it doesn't seem to work
-  * with code that needs to be transpiled, as everything in settlings.lsc is compiled into appMain-compiled.js and the
-  * remote.require() looks for the .lsc file - it doesn't know that the settings module has been compiled and now lives
-  * inside of the appMain-compiled.js file.
+  * We can't use remote.require(../settings.lsc).getSettings() in the renderer because it doesn't seem
+  * to work with code that needs to be transpiled, as everything in settlings.lsc is compiled into
+  * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
+  * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = omitGawkObserverFromSettings(getSettings())
+  global.settingsWindowRendererInitialSettings = recursiveOmitPropertiesFromObj(
+    getSettings(), ['__gawk__', 'privateSettings']
+  )
 
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})
   settingsWindow.loadURL(settingsHTMLpath)
