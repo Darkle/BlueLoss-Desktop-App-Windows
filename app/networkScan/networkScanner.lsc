@@ -32,13 +32,13 @@ scanNetwork():void ->
     .finally(() -> setTimeout(scanNetwork, scanInterval))
 
 scanHost(hostIP: string): Promise<any> ->
-  openSocketToHost(hostIP)
+  connectToHostSocket(hostIP)
     .then(getMacAdressForHostIP)
     .then(getVendorInfoForMacAddress)
     .catch(err -> if !ISDEV: logger.debug(err))
 
 // http://bit.ly/2pzLeD3
-openSocketToHost(hostIP: string): Promise<any> ->
+connectToHostSocket(hostIP: string): Promise<any> ->
   new Promise((resolve, reject):void ->
     socket = new Socket()
 

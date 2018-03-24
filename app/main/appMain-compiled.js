@@ -925,11 +925,11 @@ function scanNetwork() {
     return setTimeout(scanNetwork, scanInterval);
   });
 }function scanHost(hostIP) {
-  return openSocketToHost(hostIP).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(function (err) {
+  return connectToHostSocket(hostIP).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(function (err) {
     return  false ? undefined : void 0;
   });
 } // http://bit.ly/2pzLeD3
-function openSocketToHost(hostIP) {
+function connectToHostSocket(hostIP) {
   return new _bluebird2.default(function (resolve, reject) {
     const socket = new _net.Socket();
 
