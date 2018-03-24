@@ -25,24 +25,24 @@ scanNetwork():void ->
   Promise.resolve(loadOUIfileIfNotLoaded())
     .then(getDefaultGatewayIP)
     .then(generateHostIPs)
-    .map(hostIP ->
-      scanHost(hostIP, getSettings().hostScanTimeout)
-        .then(getMacAdressForHostIP)
-        .then(getVendorInfoForMacAddress)
-        .catch(err -> if !ISDEV: logger.debug(err))
-    )
+    .map(scanHost)
     .filter(isObject)
     .then(handleScanResults)
     .catch(logger.error)
     .finally(() -> setTimeout(scanNetwork, scanInterval))
 
+scanHost(hostIP: string): Promise<any> ->
+  openSocketToHost(hostIP)
+    .then(getMacAdressForHostIP)
+    .then(getVendorInfoForMacAddress)
+    .catch(err -> if !ISDEV: logger.debug(err))
 
 // http://bit.ly/2pzLeD3
-scanHost(hostIP: string, hostScanTimeout: number): Promise<any> ->
+openSocketToHost(hostIP: string): Promise<any> ->
   new Promise((resolve, reject):void ->
     socket = new Socket()
 
-    socket.setTimeout(hostScanTimeout)
+    socket.setTimeout(getSettings().hostScanTimeout)
     socket.connect({ host: hostIP, port: 1 })
     socket.unref()
 

@@ -921,19 +921,19 @@ const scanInterval = (0, _ms2.default)('30 seconds');
 function scanNetwork() {
   _logging.logger.debug(`new scan started`);
 
-  _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generateHostIPs).map(function (hostIP) {
-    return scanHost(hostIP, (0, _settings.getSettings)().hostScanTimeout).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(function (err) {
-      return  false ? undefined : void 0;
-    });
-  }).filter(_utils.isObject).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(function () {
+  _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generateHostIPs).map(scanHost).filter(_utils.isObject).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(function () {
     return setTimeout(scanNetwork, scanInterval);
   });
+}function scanHost(hostIP) {
+  return openSocketToHost(hostIP).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(function (err) {
+    return  false ? undefined : void 0;
+  });
 } // http://bit.ly/2pzLeD3
-function scanHost(hostIP, hostScanTimeout) {
+function openSocketToHost(hostIP) {
   return new _bluebird2.default(function (resolve, reject) {
     const socket = new _net.Socket();
 
-    socket.setTimeout(hostScanTimeout);
+    socket.setTimeout((0, _settings.getSettings)().hostScanTimeout);
     socket.connect({ host: hostIP, port: 1 });
     socket.unref();
 
