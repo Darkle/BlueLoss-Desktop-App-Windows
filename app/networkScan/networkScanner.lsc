@@ -8,8 +8,6 @@ import arp from 'node-arp'
 import getInternalIP from 'internal-ip'
 import isIp from 'is-ip'
 import Promise from 'bluebird'
-import pMap from 'p-map'
-import pSettle from 'p-settle'
 
 import { getSettings } from '../db/settings.lsc'
 import { loadOUIfileIfNotLoaded, getOUIfileData } from '../common/oui/getOUIfile.lsc'
