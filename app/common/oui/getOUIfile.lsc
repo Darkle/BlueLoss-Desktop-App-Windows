@@ -1,6 +1,4 @@
-import fs from 'fs'
 import path from 'path'
-import util from 'util'
 import { app as electronApp } from 'electron'
 
 import jetpack from 'fs-jetpack'
@@ -8,8 +6,7 @@ import jetpack from 'fs-jetpack'
 import { updateSetting } from '../../db/settings.lsc'
 import { logger } from '../logging/logging.lsc'
 
-pReadFile = util.promisify(fs.readFile)
-fileName = 'lanlost-mac-vendor-prefixes.txt'
+fileName = 'lanlost-mac-vendor-prefixes.json'
 downloadedOUIfilePath = path.join(electronApp.getPath('userData'), fileName)
 initialOUIfilePath = path.resolve(__dirname, '..', 'common', 'oui', fileName)
 let ouiFileData = null
@@ -22,19 +19,20 @@ loadOUIfileIfNotLoaded():Promise<any> ->
   if ouiFileData: return Promise.resolve()
   jetpack.existsAsync(downloadedOUIfilePath)
     .then((result: string | false): Promise<any> ->
-      pReadFile(
-        result === 'file' ? downloadedOUIfilePath : initialOUIfilePath,
-        'utf8'
-      )
+      jetpack.readAsync(chooseOUIFilePath(result), 'json')
     )
     .then((fileData):void ->
-      now ouiFileData = fileData.split(/\r\n?|\n/)
+      now ouiFileData = fileData
     )
     .catch((err):void ->
       logger.error(`Couldn't load OUI file`, err)
       updateSetting('canSearchForMacVendorInfo', false)
     )
 
+
+chooseOUIFilePath(existsResult: string): string ->
+  if existsResult === 'file': return downloadedOUIfilePath
+  return initialOUIfilePath
 
 getOUIfileData() -> ouiFileData
 

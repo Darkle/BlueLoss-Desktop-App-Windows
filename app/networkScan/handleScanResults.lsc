@@ -1,15 +1,17 @@
-
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
+import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+
+// let lastTimeSawADeviceWeAreLookingFor = Date.now()
 
 handleScanResults(devices: Array<DeviceType>):void ->
-  console.dir(devices)
-  // logger.debug(`scan returned active device: ${ devices }`)
+  /**
+   * Dunno why, but you need an extra object at the end to make an array of objects
+   * print right in winston.
+   */
+  logger.debug(`scan returned these active devices: \n`, devices, {})
 
-
-  // logger.info('scan results', dedupedDeviceList)
-
-  // settingsWindow?.webContents?.send('mainprocess:update-of-bluetooth-devices-can-see', dedupedDeviceList)
+  settingsWindow?.webContents?.send('mainprocess:update-of-network-devices-can-see', devices)
 
   // sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
   // shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)

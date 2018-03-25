@@ -1,12 +1,58 @@
+import path from 'path'
+import { app as electronApp } from 'electron'
 
+import ms from 'ms'
+import got from 'got'
+import jetpack from 'fs-jetpack'
+
+import { getSettings } from '../../db/settings.lsc'
+import { logger } from '../logging/logging.lsc'
+
+ouiDownloadfilePath = path.join(electronApp.getPath('userData'), 'lanlost-mac-vendor-prefixes.json')
+twoWeeksTime = ms('2 weeks')
+twoDaysTime = ms('2 days')
+updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes'
+gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${ updateUrl }`
+gotRequestOptions= {
+  headers: {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
+  }
+}
 
 /**
  * https://linuxnet.ca/ieee/oui/
  */
-updateOUIfilePeriodically() -> return
+updateOUIfilePeriodically(): ?Function ->
+  // if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
+
+  got(updateUrl, gotRequestOptions)
+    .then((result): void ->
+      console.log(result)
+    )
+    .catch((err):void ->
+      logger.error(gotErrorMessage, err)
+    )
+// make sure to use writeASYNC <--
+//When downloading new oui file, check its not an empty text file or only has 1 line
+
+  // using a native for loop rather than reduce for speed here as the oui file is over
+  // 20,000 lines long.
+  // foo = {}
+  // for elem line in ouiFileData:
+  //   foo[`'${ line.slice(0, 6) }'`] = line.slice(6).trim()
+
+  scheduleOUIfileUpdate(twoDaysTime)
 
 
+scheduleOUIfileUpdate(interval = 0):void ->
+  setTimeout(updateOUIfilePeriodically, interval)
+
+shouldUpdate():boolean ->
+  { privateSettings: { dateLastCheckedForOUIupdate } } = getSettings()
+  if (Date.now() - dateLastCheckedForOUIupdate) > twoWeeksTime:
+    return true
+  false
 
 export {
-  updateOUIfilePeriodically,
+  scheduleOUIfileUpdate,
 }
