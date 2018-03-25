@@ -490,10 +490,8 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.ls
 
 const defaultSettings = {
   lanLostEnabled: true,
-  firstRun: true,
   runOnStartup: true,
   trayIconColor: 'white',
-  settingsWindowPosition: null,
   devicesToSearchFor: [],
   timeToLock: 2,
   reportErrors: true,
@@ -501,8 +499,11 @@ const defaultSettings = {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
+  disableOUIfileUpdate: false,
+  firstRun: true,
   canSearchForMacVendorInfo: true,
-  dateLastCheckedForOUIupdate: Date.now()
+  dateLastCheckedForOUIupdate: Date.now(),
+  settingsWindowPosition: null
 };
 
 exports.defaultSettings = defaultSettings;
@@ -1044,9 +1045,9 @@ const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generate
 const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
 
 function updateOUIfilePeriodically() {
-  if (!shouldUpdate()) return scheduleOUIfileUpdate(twoDaysTime);
-
-  (0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
+  if (!shouldUpdate() || (0, _settings.getSettings)().disableOUIfileUpdate) {
+    return scheduleOUIfileUpdate(twoDaysTime);
+  }(0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
     _logging.logger.error(gotErrorMessage, err);
   });
 

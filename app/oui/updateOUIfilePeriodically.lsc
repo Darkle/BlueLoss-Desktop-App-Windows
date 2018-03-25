@@ -25,7 +25,8 @@ checkResponseAndGenerateObj = pipe(checkResponseBody, generateObjFromResponseTex
 curriedJetPackWrite = curry(jetpack.writeAsync)(ouiDownloadfilePath)
 
 updateOUIfilePeriodically(): Function ->
-  if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
+  if !shouldUpdate() || getSettings().disableOUIfileUpdate:
+    return scheduleOUIfileUpdate(twoDaysTime)
 
   got(updateUrl, gotRequestOptions)
     .then(checkResponseAndGenerateObj)
