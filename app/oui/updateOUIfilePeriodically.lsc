@@ -5,13 +5,15 @@ import ms from 'ms'
 import got from 'got'
 import jetpack from 'fs-jetpack'
 
-import { getSettings } from '../../db/settings.lsc'
-import { logger } from '../logging/logging.lsc'
-import { pipe } from '../../common/utils.lsc'
+import { getSettings } from '../db/settings.lsc'
+import { logger } from '../common/logging/logging.lsc'
+import { pipe, curry } from '../common/utils.lsc'
+import { updateOUIfileDataInMemory } from './getOUIfile.lsc'
 
 ouiDownloadfilePath = path.join(electronApp.getPath('userData'), 'lanlost-mac-vendor-prefixes.json')
 twoWeeksTime = ms('2 weeks')
 twoDaysTime = ms('2 days')
+threeMinutesTime = ms('3 minutes')
 updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes'
 gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${ updateUrl }`
 gotRequestOptions= {
@@ -20,15 +22,15 @@ gotRequestOptions= {
   }
 }
 checkResponseAndGenerateObj = pipe(checkResponseBody, generateObjFromResponseText)
+curriedJetPackWrite = curry(jetpack.writeAsync)(ouiDownloadfilePath)
 
 updateOUIfilePeriodically(): ?Function ->
   if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
 
   got(updateUrl, gotRequestOptions)
     .then(checkResponseAndGenerateObj)
-    .then((obj):void ->
-      jetpack.writeAsync(ouiDownloadfilePath, obj)
-    )
+    .then(updateOUIfileDataInMemory)
+    .then(curriedJetPackWrite)
     .catch((err):void ->
       logger.error(gotErrorMessage, err)
     )
@@ -51,7 +53,12 @@ checkResponseBody(response: Object): ?string ->
     throw new Error('The response.body was not valid for oui file download')
   return response.body
 
-scheduleOUIfileUpdate(interval = 0):void ->
+/**
+ * Have a default of 3 mins for scheduleOUIfileUpdate call on startup
+ * so we dont have any issue with the app trying to load the recently
+ * updated file while it is trying to do a new update.
+ */
+scheduleOUIfileUpdate(interval = threeMinutesTime):void ->
   setTimeout(updateOUIfilePeriodically, interval)
 
 shouldUpdate():boolean ->

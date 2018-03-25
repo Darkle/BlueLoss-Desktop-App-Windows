@@ -32,6 +32,8 @@ isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
 
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 
+curry(f) -> (...a) -> (...b) -> f(...a, ...b)
+
 export {
   noop,
   logSettingsUpdateInDev,
@@ -39,4 +41,5 @@ export {
   recursiveOmitPropertiesFromObj,
   isObject,
   pipe,
+  curry,
 }

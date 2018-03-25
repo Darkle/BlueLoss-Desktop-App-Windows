@@ -264,157 +264,6 @@ UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, c
 
 /***/ }),
 
-/***/ "./app/common/oui/getOUIfile.lsc":
-/*!***************************************!*\
-  !*** ./app/common/oui/getOUIfile.lsc ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getOUIfileData = exports.loadOUIfileIfNotLoaded = undefined;
-
-var _path = __webpack_require__(/*! path */ "path");
-
-var _path2 = _interopRequireDefault(_path);
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _fsJetpack = __webpack_require__(/*! fs-jetpack */ "fs-jetpack");
-
-var _fsJetpack2 = _interopRequireDefault(_fsJetpack);
-
-var _settings = __webpack_require__(/*! ../../db/settings.lsc */ "./app/db/settings.lsc");
-
-var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/common/logging/logging.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const fileName = 'lanlost-mac-vendor-prefixes.json';
-const downloadedOUIfilePath = _path2.default.join(_electron.app.getPath('userData'), fileName);
-const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'common', 'oui', fileName);
-let ouiFileData = null;
-
-/**
- * If we haven't downloaded a new copy of the MAC vendor prefix list, use
- * our built in one. MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/
- */
-function loadOUIfileIfNotLoaded() {
-  if (ouiFileData) return Promise.resolve();
-  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(function (result) {
-    return _fsJetpack2.default.readAsync(chooseOUIFilePath(result), 'json');
-  }).then(function (fileData) {
-    ouiFileData = fileData;
-  }).catch(function (err) {
-    _logging.logger.error(`Couldn't load OUI file`, err);
-    (0, _settings.updateSetting)('canSearchForMacVendorInfo', false);
-  });
-}function chooseOUIFilePath(existsResult) {
-  if (existsResult === 'file') return downloadedOUIfilePath;
-  return initialOUIfilePath;
-}function getOUIfileData() {
-  return ouiFileData;
-}exports.loadOUIfileIfNotLoaded = loadOUIfileIfNotLoaded;
-exports.getOUIfileData = getOUIfileData;
-
-/***/ }),
-
-/***/ "./app/common/oui/updateOUIfilePeriodically.lsc":
-/*!******************************************************!*\
-  !*** ./app/common/oui/updateOUIfilePeriodically.lsc ***!
-  \******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.scheduleOUIfileUpdate = undefined;
-
-var _path = __webpack_require__(/*! path */ "path");
-
-var _path2 = _interopRequireDefault(_path);
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
-
-var _got = __webpack_require__(/*! got */ "got");
-
-var _got2 = _interopRequireDefault(_got);
-
-var _fsJetpack = __webpack_require__(/*! fs-jetpack */ "fs-jetpack");
-
-var _fsJetpack2 = _interopRequireDefault(_fsJetpack);
-
-var _settings = __webpack_require__(/*! ../../db/settings.lsc */ "./app/db/settings.lsc");
-
-var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/common/logging/logging.lsc");
-
-var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const ouiDownloadfilePath = _path2.default.join(_electron.app.getPath('userData'), 'lanlost-mac-vendor-prefixes.json');
-const twoWeeksTime = (0, _ms2.default)('2 weeks');
-const twoDaysTime = (0, _ms2.default)('2 days');
-const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
-const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
-const gotRequestOptions = {
-  headers: {
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
-  }
-};
-const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
-
-function updateOUIfilePeriodically() {
-  if (!shouldUpdate()) return scheduleOUIfileUpdate(twoDaysTime);
-
-  (0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(function (obj) {
-    _fsJetpack2.default.writeAsync(ouiDownloadfilePath, obj);
-  }).catch(function (err) {
-    _logging.logger.error(gotErrorMessage, err);
-  });
-
-  return scheduleOUIfileUpdate(twoDaysTime);
-}function generateObjFromResponseText(resultBodyText) {
-  /**
-  * using a native for loop rather than reduce for speed here as the oui file is over
-  * 20,000 lines long.
-  */
-  const ouiFileData = resultBodyText.split(/\r\n?|\n/);
-  const ouiFileDataAsObj = {};
-  for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
-    const line = ouiFileData[_i];
-    ouiFileDataAsObj[line.slice(0, 6)] = line.slice(6).trim();
-  }return ouiFileDataAsObj;
-}function checkResponseBody(response) {
-  var _response$body;
-
-  if (!(response == null ? void 0 : (_response$body = response.body) == null ? void 0 : typeof _response$body.split !== 'function' ? void 0 : _response$body.split(/\r\n?|\n/).length)) {
-    throw new Error('The response.body was not valid for oui file download');
-  }return response.body;
-}function scheduleOUIfileUpdate(interval = 0) {
-  setTimeout(updateOUIfilePeriodically, interval);
-}function shouldUpdate() {
-  const { privateSettings: { dateLastCheckedForOUIupdate } } = (0, _settings.getSettings)();
-  if (Date.now() - dateLastCheckedForOUIupdate > twoWeeksTime) {
-    return true;
-  }return false;
-}exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
-
-/***/ }),
-
 /***/ "./app/common/setUpDev.lsc":
 /*!*********************************!*\
   !*** ./app/common/setUpDev.lsc ***!
@@ -470,7 +319,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -515,12 +364,19 @@ function omitInheritedProperties(obj, propertyFiltersArr = []) {
       return fn(result);
     }, param);
   };
+}function curry(f) {
+  return function (...a) {
+    return function (...b) {
+      return f(...(a === void 0 ? [] : a), ...(b === void 0 ? [] : b));
+    };
+  };
 }exports.noop = noop;
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
 exports.isObject = isObject;
 exports.pipe = pipe;
+exports.curry = curry;
 
 /***/ }),
 
@@ -857,7 +713,7 @@ var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/c
 
 var _networkScanner = __webpack_require__(/*! ../networkScan/networkScanner.lsc */ "./app/networkScan/networkScanner.lsc");
 
-var _updateOUIfilePeriodically = __webpack_require__(/*! ../common/oui/updateOUIfilePeriodically.lsc */ "./app/common/oui/updateOUIfilePeriodically.lsc");
+var _updateOUIfilePeriodically = __webpack_require__(/*! ../oui/updateOUIfilePeriodically.lsc */ "./app/oui/updateOUIfilePeriodically.lsc");
 
 _electron.app.once('ready', function () {
   var _electronApp$dock;
@@ -976,13 +832,13 @@ var _bluebird = __webpack_require__(/*! bluebird */ "bluebird");
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
 
-var _ono = __webpack_require__(/*! ono */ "./node_modules/ono/lib/ono.js");
+var _ono = __webpack_require__(/*! ono */ "ono");
 
 var _ono2 = _interopRequireDefault(_ono);
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
 
-var _getOUIfile = __webpack_require__(/*! ../common/oui/getOUIfile.lsc */ "./app/common/oui/getOUIfile.lsc");
+var _getOUIfile = __webpack_require__(/*! ../oui/getOUIfile.lsc */ "./app/oui/getOUIfile.lsc");
 
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/networkScan/handleScanResults.lsc");
 
@@ -1064,6 +920,168 @@ function connectToHostSocket(hostIP) {
 }function findVendorInfoInOUIfile(device) {
   return (0, _getOUIfile.getOUIfileData)(device)[ouiSansDelimeters(device)];
 }exports.scanNetwork = scanNetwork;
+
+/***/ }),
+
+/***/ "./app/oui/getOUIfile.lsc":
+/*!********************************!*\
+  !*** ./app/oui/getOUIfile.lsc ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.updateOUIfileDataInMemory = exports.getOUIfileData = exports.loadOUIfileIfNotLoaded = undefined;
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _fsJetpack = __webpack_require__(/*! fs-jetpack */ "fs-jetpack");
+
+var _fsJetpack2 = _interopRequireDefault(_fsJetpack);
+
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const fileName = 'lanlost-mac-vendor-prefixes.json';
+const downloadedOUIfilePath = _path2.default.join(_electron.app.getPath('userData'), fileName);
+const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'oui', fileName);
+let ouiFileData = null;
+
+/**
+ * If we haven't downloaded a new copy of the MAC vendor prefix list, use
+ * our built in one. MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/
+ */
+function loadOUIfileIfNotLoaded() {
+  if (ouiFileData) return Promise.resolve();
+  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(function (result) {
+    return _fsJetpack2.default.readAsync(chooseOUIFilePath(result), 'json');
+  }).then(function (fileData) {
+    ouiFileData = fileData;
+  }).catch(function (err) {
+    _logging.logger.error(`Couldn't load OUI file`, err);
+    (0, _settings.updateSetting)('canSearchForMacVendorInfo', false);
+  });
+}function chooseOUIFilePath(existsResult) {
+  if (existsResult === 'file') return downloadedOUIfilePath;
+  return initialOUIfilePath;
+}function getOUIfileData() {
+  return ouiFileData;
+}function updateOUIfileDataInMemory(newData) {
+  ouiFileData = newData;
+  return ouiFileData;
+}exports.loadOUIfileIfNotLoaded = loadOUIfileIfNotLoaded;
+exports.getOUIfileData = getOUIfileData;
+exports.updateOUIfileDataInMemory = updateOUIfileDataInMemory;
+
+/***/ }),
+
+/***/ "./app/oui/updateOUIfilePeriodically.lsc":
+/*!***********************************************!*\
+  !*** ./app/oui/updateOUIfilePeriodically.lsc ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.scheduleOUIfileUpdate = undefined;
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _got = __webpack_require__(/*! got */ "got");
+
+var _got2 = _interopRequireDefault(_got);
+
+var _fsJetpack = __webpack_require__(/*! fs-jetpack */ "fs-jetpack");
+
+var _fsJetpack2 = _interopRequireDefault(_fsJetpack);
+
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
+var _getOUIfile = __webpack_require__(/*! ./getOUIfile.lsc */ "./app/oui/getOUIfile.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const ouiDownloadfilePath = _path2.default.join(_electron.app.getPath('userData'), 'lanlost-mac-vendor-prefixes.json');
+const twoWeeksTime = (0, _ms2.default)('2 weeks');
+const twoDaysTime = (0, _ms2.default)('2 days');
+const threeMinutesTime = (0, _ms2.default)('3 minutes');
+const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
+const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
+const gotRequestOptions = {
+  headers: {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
+  }
+};
+const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
+const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
+
+function updateOUIfilePeriodically() {
+  if (!shouldUpdate()) return scheduleOUIfileUpdate(twoDaysTime);
+
+  (0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
+    _logging.logger.error(gotErrorMessage, err);
+  });
+
+  return scheduleOUIfileUpdate(twoDaysTime);
+}function generateObjFromResponseText(resultBodyText) {
+  /**
+  * using a native for loop rather than reduce for speed here as the oui file is over
+  * 20,000 lines long.
+  */
+  const ouiFileData = resultBodyText.split(/\r\n?|\n/);
+  const ouiFileDataAsObj = {};
+  for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
+    const line = ouiFileData[_i];
+    ouiFileDataAsObj[line.slice(0, 6)] = line.slice(6).trim();
+  }return ouiFileDataAsObj;
+}function checkResponseBody(response) {
+  var _response$body;
+
+  if (!(response == null ? void 0 : (_response$body = response.body) == null ? void 0 : typeof _response$body.split !== 'function' ? void 0 : _response$body.split(/\r\n?|\n/).length)) {
+    throw new Error('The response.body was not valid for oui file download');
+  }return response.body;
+} /**
+   * Have a default of 3 mins for scheduleOUIfileUpdate call on startup
+   * so we dont have any issue with the app trying to load the recently
+   * updated file while it is trying to do a new update.
+   */
+function scheduleOUIfileUpdate(interval = threeMinutesTime) {
+  setTimeout(updateOUIfilePeriodically, interval);
+}function shouldUpdate() {
+  const { privateSettings: { dateLastCheckedForOUIupdate } } = (0, _settings.getSettings)();
+  if (Date.now() - dateLastCheckedForOUIupdate > twoWeeksTime) {
+    return true;
+  }return false;
+}exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
 
 /***/ }),
 
@@ -1321,331 +1339,6 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/format-util/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/format-util/index.js ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(/*! util */ "util").format;
-
-
-/***/ }),
-
-/***/ "./node_modules/ono/lib/ono.js":
-/*!*************************************!*\
-  !*** ./node_modules/ono/lib/ono.js ***!
-  \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var format = __webpack_require__(/*! format-util */ "./node_modules/format-util/index.js");
-var slice = Array.prototype.slice;
-var protectedProperties = ['name', 'message', 'stack'];
-var errorPrototypeProperties = [
-  'name', 'message', 'description', 'number', 'code', 'fileName', 'lineNumber', 'columnNumber',
-  'sourceURL', 'line', 'column', 'stack'
-];
-
-module.exports = create(Error);
-module.exports.error = create(Error);
-module.exports.eval = create(EvalError);
-module.exports.range = create(RangeError);
-module.exports.reference = create(ReferenceError);
-module.exports.syntax = create(SyntaxError);
-module.exports.type = create(TypeError);
-module.exports.uri = create(URIError);
-module.exports.formatter = format;
-
-/**
- * Creates a new {@link ono} function that creates the given Error class.
- *
- * @param {Class} Klass - The Error subclass to create
- * @returns {ono}
- */
-function create (Klass) {
-  /**
-   * @param {Error}   [err]     - The original error, if any
-   * @param {object}  [props]   - An object whose properties will be added to the error object
-   * @param {string}  [message] - The error message. May contain {@link util#format} placeholders
-   * @param {...*}    [params]  - Parameters that map to the `message` placeholders
-   * @returns {Error}
-   */
-  return function onoFactory (err, props, message, params) {   // eslint-disable-line no-unused-vars
-    var formatArgs = [];
-    var formattedMessage = '';
-
-    // Determine which arguments were actually specified
-    if (typeof err === 'string') {
-      formatArgs = slice.call(arguments);
-      err = props = undefined;
-    }
-    else if (typeof props === 'string') {
-      formatArgs = slice.call(arguments, 1);
-      props = undefined;
-    }
-    else if (typeof message === 'string') {
-      formatArgs = slice.call(arguments, 2);
-    }
-
-    // If there are any format arguments, then format the error message
-    if (formatArgs.length > 0) {
-      formattedMessage = module.exports.formatter.apply(null, formatArgs);
-    }
-
-    if (err && err.message) {
-      // The inner-error's message will be added to the new message
-      formattedMessage += (formattedMessage ? ' \n' : '') + err.message;
-    }
-
-    // Create the new error
-    // NOTE: DON'T move this to a separate function! We don't want to pollute the stack trace
-    var newError = new Klass(formattedMessage);
-
-    // Extend the new error with the additional properties
-    extendError(newError, err);   // Copy properties of the original error
-    extendToJSON(newError);       // Replace the original toJSON method
-    extend(newError, props);      // Copy custom properties, possibly including a custom toJSON method
-
-    return newError;
-  };
-}
-
-/**
- * Extends the targetError with the properties of the source error.
- *
- * @param {Error}   targetError - The error object to extend
- * @param {?Error}  sourceError - The source error object, if any
- */
-function extendError (targetError, sourceError) {
-  extendStack(targetError, sourceError);
-  extend(targetError, sourceError);
-}
-
-/**
- * JavaScript engines differ in how errors are serialized to JSON - especially when it comes
- * to custom error properties and stack traces.  So we add our own toJSON method that ALWAYS
- * outputs every property of the error.
- */
-function extendToJSON (error) {
-  error.toJSON = errorToJSON;
-
-  // Also add an inspect() method, for compatibility with Node.js' `util.inspect()` method
-  error.inspect = errorToString;
-}
-
-/**
- * Extends the target object with the properties of the source object.
- *
- * @param {object}  target - The object to extend
- * @param {?source} source - The object whose properties are copied
- */
-function extend (target, source) {
-  if (source && typeof source === 'object') {
-    var keys = Object.keys(source);
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-
-      // Don't copy "protected" properties, since they have special meaning/behavior
-      // and are set by the onoFactory function
-      if (protectedProperties.indexOf(key) >= 0) {
-        continue;
-      }
-
-      try {
-        target[key] = source[key];
-      }
-      catch (e) {
-        // This property is read-only, so it can't be copied
-      }
-    }
-  }
-}
-
-/**
- * Custom JSON serializer for Error objects.
- * Returns all built-in error properties, as well as extended properties.
- *
- * @returns {object}
- */
-function errorToJSON () {
-  var json = {};
-
-  // Get all the properties of this error
-  var keys = Object.keys(this);
-
-  // Also include properties from the Error prototype
-  keys = keys.concat(errorPrototypeProperties);
-
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var value = this[key];
-    var type = typeof value;
-    if (type !== 'undefined' && type !== 'function') {
-      json[key] = value;
-    }
-  }
-
-  return json;
-}
-
-/**
- * Serializes Error objects as human-readable JSON strings for debugging/logging purposes.
- *
- * @returns {string}
- */
-function errorToString () {
-  return JSON.stringify(this, null, 2).replace(/\\n/g, '\n');
-}
-
-/**
- * Extend the error stack to include its cause
- *
- * @param {Error} targetError
- * @param {Error} sourceError
- */
-function extendStack (targetError, sourceError) {
-  if (hasLazyStack(targetError)) {
-    if (sourceError) {
-      lazyJoinStacks(targetError, sourceError);
-    }
-    else {
-      lazyPopStack(targetError);
-    }
-  }
-  else {
-    if (sourceError) {
-      targetError.stack = joinStacks(targetError.stack, sourceError.stack);
-    }
-    else {
-      targetError.stack = popStack(targetError.stack);
-    }
-  }
-}
-
-/**
- * Appends the original {@link Error#stack} property to the new Error's stack.
- *
- * @param {string} newStack
- * @param {string} originalStack
- * @returns {string}
- */
-function joinStacks (newStack, originalStack) {
-  newStack = popStack(newStack);
-
-  if (newStack && originalStack) {
-    return newStack + '\n\n' + originalStack;
-  }
-  else {
-    return newStack || originalStack;
-  }
-}
-
-/**
- * Removes Ono from the stack, so that the stack starts at the original error location
- *
- * @param {string} stack
- * @returns {string}
- */
-function popStack (stack) {
-  if (stack) {
-    var lines = stack.split('\n');
-
-    if (lines.length < 2) {
-      // The stack only has one line, so there's nothing we can remove
-      return stack;
-    }
-
-    // Find the `onoFactory` call in the stack, and remove it
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (line.indexOf('onoFactory') >= 0) {
-        lines.splice(i, 1);
-        return lines.join('\n');
-      }
-    }
-
-    // If we get here, then the stack doesn't contain a call to `onoFactory`.
-    // This may be due to minification or some optimization of the JS engine.
-    // So just return the stack as-is.
-    return stack;
-  }
-}
-
-/**
- * Does a one-time determination of whether this JavaScript engine
- * supports lazy `Error.stack` properties.
- */
-var supportsLazyStack = (function () {
-  return !!(
-    // ES5 property descriptors must be supported
-    Object.getOwnPropertyDescriptor && Object.defineProperty &&
-
-    // Chrome on Android doesn't support lazy stacks :(
-    (typeof navigator === 'undefined' || !/Android/.test(navigator.userAgent))
-  );
-}());
-
-/**
- * Does this error have a lazy stack property?
- *
- * @param {Error} err
- * @returns {boolean}
- */
-function hasLazyStack (err) {
-  if (!supportsLazyStack) {
-    return false;
-  }
-
-  var descriptor = Object.getOwnPropertyDescriptor(err, 'stack');
-  if (!descriptor) {
-    return false;
-  }
-  return typeof descriptor.get === 'function';
-}
-
-/**
- * Calls {@link joinStacks} lazily, when the {@link Error#stack} property is accessed.
- *
- * @param {Error} targetError
- * @param {Error} sourceError
- */
-function lazyJoinStacks (targetError, sourceError) {
-  var targetStack = Object.getOwnPropertyDescriptor(targetError, 'stack');
-
-  Object.defineProperty(targetError, 'stack', {
-    get: function () {
-      return joinStacks(targetStack.get.apply(targetError), sourceError.stack);
-    },
-    enumerable: false,
-    configurable: true
-  });
-}
-
-/**
- * Calls {@link popStack} lazily, when the {@link Error#stack} property is accessed.
- *
- * @param {Error} error
- */
-function lazyPopStack (error) {
-  var targetStack = Object.getOwnPropertyDescriptor(error, 'stack');
-
-  Object.defineProperty(error, 'stack', {
-    get: function () {
-      return popStack(targetStack.get.apply(error));
-    },
-    enumerable: false,
-    configurable: true
-  });
-}
-
-
-/***/ }),
-
 /***/ "bluebird":
 /*!***************************!*\
   !*** external "bluebird" ***!
@@ -1819,6 +1512,17 @@ module.exports = require("net");
 /***/ (function(module, exports) {
 
 module.exports = require("node-arp");
+
+/***/ }),
+
+/***/ "ono":
+/*!**********************!*\
+  !*** external "ono" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("ono");
 
 /***/ }),
 
