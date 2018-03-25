@@ -1092,7 +1092,7 @@ const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
 const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
 const gotRequestOptions = {
   headers: {
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
+    'user-agent': 'Mozilla/5.0 LANLost'
   }
 };
 const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
