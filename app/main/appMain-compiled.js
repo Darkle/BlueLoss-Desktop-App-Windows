@@ -1082,10 +1082,10 @@ function updateOUIfilePeriodically() {
 function scheduleOUIfileUpdate(interval = threeMinutesTime) {
   setTimeout(updateOUIfilePeriodically, interval);
 }function shouldUpdate() {
-  if (Date.now() - (0, _settings.getSettings)().dateLastCheckedForOUIupdate > twoWeeksTime) {
-    return true;
-  }return false;
-}exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
+  return Date.now() - (0, _settings.getSettings)().dateLastCheckedForOUIupdate > twoWeeksTime;
+}
+
+exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
 
 /***/ }),
 
