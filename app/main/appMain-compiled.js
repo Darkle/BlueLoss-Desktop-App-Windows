@@ -319,7 +319,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -370,6 +370,12 @@ function omitInheritedProperties(obj, propertyFiltersArr = []) {
       return f(...(a === void 0 ? [] : a), ...(b === void 0 ? [] : b));
     };
   };
+}function curryRight(f) {
+  return function (...a) {
+    return function (...b) {
+      return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
+    };
+  };
 }exports.noop = noop;
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
@@ -377,6 +383,7 @@ exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
 exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
+exports.curryRight = curryRight;
 
 /***/ }),
 
@@ -952,12 +959,15 @@ var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const fileName = 'lanlost-mac-vendor-prefixes.json';
 const downloadedOUIfilePath = _path2.default.join(_electron.app.getPath('userData'), fileName);
 const initialOUIfilePath = _path2.default.resolve(__dirname, '..', 'oui', fileName);
 let ouiFileData = null;
+const curriedJetpackRead = (0, _utils.curryRight)(_fsJetpack2.default.readAsync)('json');
 
 /**
  * If we haven't downloaded a new copy of the MAC vendor prefix list, use
@@ -965,9 +975,7 @@ let ouiFileData = null;
  */
 function loadOUIfileIfNotLoaded() {
   if (ouiFileData) return Promise.resolve();
-  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(function (result) {
-    return _fsJetpack2.default.readAsync(chooseOUIFilePath(result), 'json');
-  }).then(function (fileData) {
+  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(chooseOUIFilePath).then(curriedJetpackRead).then(function (fileData) {
     ouiFileData = fileData;
   }).catch(function (err) {
     _logging.logger.error(`Couldn't load OUI file`, err);

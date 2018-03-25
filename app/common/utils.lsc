@@ -29,10 +29,9 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
 
 
 isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
-
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
-
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
+curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 
 export {
   noop,
@@ -42,4 +41,5 @@ export {
   isObject,
   pipe,
   curry,
+  curryRight,
 }

@@ -5,11 +5,13 @@ import jetpack from 'fs-jetpack'
 
 import { updateSetting } from '../db/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
+import { curryRight } from '../common/utils.lsc'
 
 fileName = 'lanlost-mac-vendor-prefixes.json'
 downloadedOUIfilePath = path.join(electronApp.getPath('userData'), fileName)
 initialOUIfilePath = path.resolve(__dirname, '..', 'oui', fileName)
 let ouiFileData = null
+curriedJetpackRead = curryRight(jetpack.readAsync)('json')
 
 /**
  * If we haven't downloaded a new copy of the MAC vendor prefix list, use
@@ -18,9 +20,8 @@ let ouiFileData = null
 loadOUIfileIfNotLoaded():Promise<any> ->
   if ouiFileData: return Promise.resolve()
   jetpack.existsAsync(downloadedOUIfilePath)
-    .then((result: string | false): Promise<any> ->
-      jetpack.readAsync(chooseOUIFilePath(result), 'json')
-    )
+    .then(chooseOUIFilePath)
+    .then(curriedJetpackRead)
     .then((fileData):void ->
       now ouiFileData = fileData
     )
@@ -28,7 +29,6 @@ loadOUIfileIfNotLoaded():Promise<any> ->
       logger.error(`Couldn't load OUI file`, err)
       updateSetting('canSearchForMacVendorInfo', false)
     )
-
 
 chooseOUIFilePath(existsResult: string): string ->
   if existsResult === 'file': return downloadedOUIfilePath
