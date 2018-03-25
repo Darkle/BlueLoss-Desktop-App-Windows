@@ -6,6 +6,7 @@ import { getSettings, updateSetting } from '../db/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { recursiveOmitPropertiesFromObj } from '../common/utils.lsc'
 
+settingsToOmit = ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']
 settingsHTMLpath = url.format({
   protocol: 'file',
   slashes: true,
@@ -52,8 +53,7 @@ showSettingsWindow():void ->
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
   global.settingsWindowRendererInitialSettings = recursiveOmitPropertiesFromObj(
-    getSettings(),
-    ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']
+    getSettings(), settingsToOmit
   )
 
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})

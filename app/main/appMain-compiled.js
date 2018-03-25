@@ -1124,6 +1124,7 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const settingsToOmit = ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate'];
 const settingsHTMLpath = _url2.default.format({
   protocol: 'file',
   slashes: true,
@@ -1168,7 +1169,7 @@ function showSettingsWindow() {
   * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']);
+  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitPropertiesFromObj)((0, _settings.getSettings)(), settingsToOmit);
 
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);
