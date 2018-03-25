@@ -23,9 +23,7 @@ loadOUIfileIfNotLoaded():Promise<any> ->
   jetpack.existsAsync(downloadedOUIfilePath)
     .then(chooseOUIFilePath)
     .then(curriedJetpackRead)
-    .then((fileData):void ->
-      now ouiFileData = fileData
-    )
+    .then(updateOUIfileDataInMemory)
     .catch((err):void ->
       logger.error(`Couldn't load OUI file`, err)
       updateSetting('canSearchForMacVendorInfo', false)

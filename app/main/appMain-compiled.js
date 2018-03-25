@@ -976,9 +976,7 @@ const curriedJetpackRead = (0, _utils.curryRight)(_fsJetpack2.default.readAsync)
 function loadOUIfileIfNotLoaded() {
   if (ouiFileData) return Promise.resolve();
 
-  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(chooseOUIFilePath).then(curriedJetpackRead).then(function (fileData) {
-    ouiFileData = fileData;
-  }).catch(function (err) {
+  return _fsJetpack2.default.existsAsync(downloadedOUIfilePath).then(chooseOUIFilePath).then(curriedJetpackRead).then(updateOUIfileDataInMemory).catch(function (err) {
     _logging.logger.error(`Couldn't load OUI file`, err);
     (0, _settings.updateSetting)('canSearchForMacVendorInfo', false);
   });
