@@ -319,11 +319,9 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _qI = __webpack_require__(/*! q-i */ "q-i");
 
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
@@ -331,23 +329,17 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
+var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function noop() {
   return;
 }function recursiveOmitPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
-}function logSettingsUpdateInDev(newSettingKey, newSettingValue) {
-  if (true) {
-    console.log('======================updateSetting======================');
-    console.log(newSettingKey);
-    (0, _qI.print)(newSettingValue);
-  }
-} /**
-   * In the off-chance that an object key name is literally the word 'undefined',
-   * set Symbol() as the default param.
-   */
-function omitInheritedProperties(obj, propertyFiltersArr = []) {
+}function logSettingsUpdate(newSettingKey, newSettingValue) {
+  _logging.logger.debug('======================updateSetting======================\n', `updated ${newSettingKey} with: `, newSettingValue, {});
+}function omitInheritedProperties(obj, propertyFiltersArr = []) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
       const propertyToFilter = propertyFiltersArr[_i];
@@ -377,7 +369,7 @@ function omitInheritedProperties(obj, propertyFiltersArr = []) {
     };
   };
 }exports.noop = noop;
-exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
+exports.logSettingsUpdate = logSettingsUpdate;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
 exports.isObject = isObject;
@@ -412,8 +404,6 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _qI = __webpack_require__(/*! q-i */ "q-i");
-
 var _gawk = __webpack_require__(/*! gawk */ "gawk");
 
 var _gawk2 = _interopRequireDefault(_gawk);
@@ -436,6 +426,8 @@ var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./a
 
 var _settingsIPClisteners = __webpack_require__(/*! ./settingsIPClisteners.lsc */ "./app/db/settingsIPClisteners.lsc");
 
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const settingsDBpath = _path2.default.join(_electron.app.getPath('userData'), 'lanlost-settings.json');
@@ -448,12 +440,13 @@ const settings = (0, _gawk2.default)(db.getState());
 
 (0, _settingsObservers.initSettingsObservers)(settings);
 (0, _settingsIPClisteners.initSettingsIPClisteners)();
-if (true) (0, _qI.print)(settings);
+
+_logging.logger.debug('Settings Loaded At Startup:\n', settings, {});
 
 function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
-  (0, _utils.logSettingsUpdateInDev)(newSettingKey, newSettingValue);
+  (0, _utils.logSettingsUpdate)(newSettingKey, newSettingValue);
   settings[newSettingKey] = newSettingValue;
   db.set(newSettingKey, newSettingValue).write();
 }function addNewDeviceToSearchFor(deviceToAdd) {
@@ -1083,9 +1076,7 @@ function scheduleOUIfileUpdate(interval = threeMinutesTime) {
   setTimeout(updateOUIfilePeriodically, interval);
 }function shouldUpdate() {
   return Date.now() - (0, _settings.getSettings)().dateLastCheckedForOUIupdate > twoWeeksTime;
-}
-
-exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
+}exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
 
 /***/ }),
 
@@ -1539,17 +1530,6 @@ module.exports = require("ono");
 /***/ (function(module, exports) {
 
 module.exports = require("path");
-
-/***/ }),
-
-/***/ "q-i":
-/*!**********************!*\
-  !*** external "q-i" ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("q-i");
 
 /***/ }),
 

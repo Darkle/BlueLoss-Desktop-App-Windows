@@ -62,7 +62,7 @@ scheduleOUIfileUpdate(interval = threeMinutesTime):void ->
   setTimeout(updateOUIfilePeriodically, interval)
 
 shouldUpdate():boolean ->
-  ((Date.now() - getSettings().dateLastCheckedForOUIupdate) > twoWeeksTime)
+  (Date.now() - getSettings().dateLastCheckedForOUIupdate) > twoWeeksTime
 
 export {
   scheduleOUIfileUpdate,

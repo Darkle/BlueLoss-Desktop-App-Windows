@@ -1,23 +1,21 @@
-import { print as prettyPrintObj } from 'q-i'
 import _ from 'lodash'
 
 import { SettingsTypes } from '../types/types.lsc'
+import { logger } from './logging/logging.lsc'
 
 noop() -> return
 
 recursiveOmitPropertiesFromObj(settings, properties:Array<string>) ->
   omitInheritedProperties(settings, properties)
 
-logSettingsUpdateInDev(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if ISDEV:
-    console.log('======================updateSetting======================')
-    console.log(newSettingKey)
-    prettyPrintObj(newSettingValue)
+logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
+  logger.debug(
+    '======================updateSetting======================\n',
+    `updated ${ newSettingKey } with: `,
+    newSettingValue,
+    {}
+  )
 
-/**
- * In the off-chance that an object key name is literally the word 'undefined',
- * set Symbol() as the default param.
- */
 omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
     for elem propertyToFilter in propertyFiltersArr:
@@ -35,7 +33,7 @@ curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 
 export {
   noop,
-  logSettingsUpdateInDev,
+  logSettingsUpdate,
   omitInheritedProperties,
   recursiveOmitPropertiesFromObj,
   isObject,

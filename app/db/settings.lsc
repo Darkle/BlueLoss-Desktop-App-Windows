@@ -2,16 +2,16 @@ import path from 'path'
 import { app as electronApp } from 'electron'
 
 import _ from 'lodash'
-import { print as prettyPrintObj } from 'q-i'
 import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 
-import { logSettingsUpdateInDev } from '../common/utils.lsc'
+import { logSettingsUpdate } from '../common/utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
+import { logger } from '../common/logging/logging.lsc'
 
 settingsDBpath = path.join(electronApp.getPath('userData'), 'lanlost-settings.json')
 adapter = new FileSync(settingsDBpath)
@@ -23,12 +23,13 @@ settings = gawk(db.getState())
 
 initSettingsObservers(settings)
 initSettingsIPClisteners()
-if ISDEV: prettyPrintObj(settings)
+
+logger.debug('Settings Loaded At Startup:\n', settings, {})
 
 getSettings() -> settings
 
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  logSettingsUpdateInDev(newSettingKey, newSettingValue)
+  logSettingsUpdate(newSettingKey, newSettingValue)
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
 
