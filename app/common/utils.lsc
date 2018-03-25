@@ -30,10 +30,13 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
 
 isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
 
+pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
+
 export {
   noop,
   logSettingsUpdateInDev,
   omitInheritedProperties,
   recursiveOmitPropertiesFromObj,
   isObject,
+  pipe,
 }

@@ -361,6 +361,8 @@ var _settings = __webpack_require__(/*! ../../db/settings.lsc */ "./app/db/setti
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const ouiDownloadfilePath = _path2.default.join(_electron.app.getPath('userData'), 'lanlost-mac-vendor-prefixes.json');
@@ -372,28 +374,36 @@ const gotRequestOptions = {
   headers: {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
   }
+};
+const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
 
-  /**
-   * https://linuxnet.ca/ieee/oui/
-   */
-};function updateOUIfilePeriodically() {
-  // if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
+function updateOUIfilePeriodically() {
+  if (!shouldUpdate()) return scheduleOUIfileUpdate(twoDaysTime);
 
-  (0, _got2.default)(updateUrl, gotRequestOptions).then(function (result) {
-    console.log(result);
+  (0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(function (obj) {
+    _fsJetpack2.default.writeAsync(ouiDownloadfilePath, obj);
   }).catch(function (err) {
     _logging.logger.error(gotErrorMessage, err);
   });
-  // make sure to use writeASYNC <--
-  //When downloading new oui file, check its not an empty text file or only has 1 line
-
-  // using a native for loop rather than reduce for speed here as the oui file is over
-  // 20,000 lines long.
-  // foo = {}
-  // for elem line in ouiFileData:
-  //   foo[`'${ line.slice(0, 6) }'`] = line.slice(6).trim()
 
   return scheduleOUIfileUpdate(twoDaysTime);
+}function generateObjFromResponseText(resultBodyText) {
+  /**
+  * using a native for loop rather than reduce for speed here as the oui file is over
+  * 20,000 lines long.
+  */
+  const ouiFileData = resultBodyText.split(/\r\n?|\n/);
+  const ouiFileDataAsObj = {};
+  for (let _i = 0, _len = ouiFileData.length; _i < _len; _i++) {
+    const line = ouiFileData[_i];
+    ouiFileDataAsObj[line.slice(0, 6)] = line.slice(6).trim();
+  }return ouiFileDataAsObj;
+}function checkResponseBody(response) {
+  var _response$body;
+
+  if (!(response == null ? void 0 : (_response$body = response.body) == null ? void 0 : typeof _response$body.split !== 'function' ? void 0 : _response$body.split(/\r\n?|\n/).length)) {
+    throw new Error('The response.body was not valid for oui file download');
+  }return response.body;
 }function scheduleOUIfileUpdate(interval = 0) {
   setTimeout(updateOUIfilePeriodically, interval);
 }function shouldUpdate() {
@@ -460,7 +470,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
+exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdateInDev = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -499,11 +509,18 @@ function omitInheritedProperties(obj, propertyFiltersArr = []) {
   }, {});
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj);
+}function pipe(...fns) {
+  return function (param) {
+    return fns.reduce(function (result, fn) {
+      return fn(result);
+    }, param);
+  };
 }exports.noop = noop;
 exports.logSettingsUpdateInDev = logSettingsUpdateInDev;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
 exports.isObject = isObject;
+exports.pipe = pipe;
 
 /***/ }),
 

@@ -7,6 +7,7 @@ import jetpack from 'fs-jetpack'
 
 import { getSettings } from '../../db/settings.lsc'
 import { logger } from '../logging/logging.lsc'
+import { pipe } from '../../common/utils.lsc'
 
 ouiDownloadfilePath = path.join(electronApp.getPath('userData'), 'lanlost-mac-vendor-prefixes.json')
 twoWeeksTime = ms('2 weeks')
@@ -18,31 +19,37 @@ gotRequestOptions= {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
   }
 }
+checkResponseAndGenerateObj = pipe(checkResponseBody, generateObjFromResponseText)
 
-/**
- * https://linuxnet.ca/ieee/oui/
- */
 updateOUIfilePeriodically(): ?Function ->
-  // if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
+  if !shouldUpdate(): return scheduleOUIfileUpdate(twoDaysTime)
 
   got(updateUrl, gotRequestOptions)
-    .then((result): void ->
-      console.log(result)
+    .then(checkResponseAndGenerateObj)
+    .then((obj):void ->
+      jetpack.writeAsync(ouiDownloadfilePath, obj)
     )
     .catch((err):void ->
       logger.error(gotErrorMessage, err)
     )
-// make sure to use writeASYNC <--
-//When downloading new oui file, check its not an empty text file or only has 1 line
-
-  // using a native for loop rather than reduce for speed here as the oui file is over
-  // 20,000 lines long.
-  // foo = {}
-  // for elem line in ouiFileData:
-  //   foo[`'${ line.slice(0, 6) }'`] = line.slice(6).trim()
 
   scheduleOUIfileUpdate(twoDaysTime)
 
+generateObjFromResponseText(resultBodyText: string):Object ->
+  /**
+  * using a native for loop rather than reduce for speed here as the oui file is over
+  * 20,000 lines long.
+  */
+  ouiFileData = resultBodyText.split(/\r\n?|\n/)
+  ouiFileDataAsObj = {}
+  for elem line in ouiFileData:
+    ouiFileDataAsObj[line.slice(0, 6)] = line.slice(6).trim()
+  ouiFileDataAsObj
+
+checkResponseBody(response: Object): ?string ->
+  if !response?.body?.split?(/\r\n?|\n/).length:
+    throw new Error('The response.body was not valid for oui file download')
+  return response.body
 
 scheduleOUIfileUpdate(interval = 0):void ->
   setTimeout(updateOUIfilePeriodically, interval)
