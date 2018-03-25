@@ -71,6 +71,38 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/common/lockSystem.lsc":
+/*!***********************************!*\
+  !*** ./app/common/lockSystem.lsc ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shouldLock = exports.lockSystem = undefined;
+
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function lockSystem() {
+  if (!(0, _settings.getSettings)().lanLostEnabled) return;
+}function shouldLock(lastTimeSawADeviceWeAreLookingFor) {
+  return Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
+}exports.lockSystem = lockSystem;
+exports.shouldLock = shouldLock;
+
+/***/ }),
+
 /***/ "./app/common/logging/customRollbarTransport.lsc":
 /*!*******************************************************!*\
   !*** ./app/common/logging/customRollbarTransport.lsc ***!
@@ -751,13 +783,25 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleScanResults = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
-// let lastTimeSawADeviceWeAreLookingFor = Date.now()
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let lastTimeSawADeviceWeAreLookingFor = Date.now();
 
 function handleScanResults(devices) {
   var _settingsWindow$webCo;
@@ -768,15 +812,25 @@ function handleScanResults(devices) {
    */
   _logging.logger.debug(`scan returned these active devices: \n`, devices, {});
 
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', devices);
-} // sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
-// shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)
+  /**
+   * We use the lastSeen time in the UI to show the user the last time we have
+   * seen the devices we are looking for.
+   */
+  const devicesWithTimeData = addCurrentTimeToDevices(devices);
 
-// if shouldLock: lockSystem()
-// if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
+  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', devicesWithTimeData);
 
+  const sawADeviceWeAreLookingFor = _lodash2.default.intersectionBy((0, _settings.getSettings)().devicesToSearchFor, devicesWithTimeData, 'macAddress');
 
-exports.handleScanResults = handleScanResults;
+  if (sawADeviceWeAreLookingFor.length) {
+    lastTimeSawADeviceWeAreLookingFor = Date.now();
+    return;
+  }if ((0, _lockSystem.shouldLock)(lastTimeSawADeviceWeAreLookingFor)) (0, _lockSystem.lockSystem)();
+}function addCurrentTimeToDevices(devices) {
+  return devices.map(function (device) {
+    return _extends({}, device, { lastSeen: Date.now() });
+  });
+}exports.handleScanResults = handleScanResults;
 
 /***/ }),
 

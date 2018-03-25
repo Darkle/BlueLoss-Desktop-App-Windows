@@ -7,10 +7,12 @@ import { getSettings } from '../db/settings.lsc'
 lockSystem():void ->
   if !getSettings().lanLostEnabled: return
 
-checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor) ->
-  !sawDeviceWeAreLookingFor && (Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`)) )
+shouldLock(lastTimeSawADeviceWeAreLookingFor: number):boolean ->
+  Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
+
+
 
 export{
   lockSystem,
-  checkIfShouldLock,
+  shouldLock,
 }

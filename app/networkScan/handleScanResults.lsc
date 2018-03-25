@@ -1,8 +1,12 @@
+import _ from 'lodash'
+
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import { getSettings } from '../db/settings.lsc'
+import { shouldLock, lockSystem } from '../common/lockSystem.lsc'
 
-// let lastTimeSawADeviceWeAreLookingFor = Date.now()
+let lastTimeSawADeviceWeAreLookingFor = Date.now()
 
 handleScanResults(devices: Array<DeviceType>):void ->
   /**
@@ -11,15 +15,25 @@ handleScanResults(devices: Array<DeviceType>):void ->
    */
   logger.debug(`scan returned these active devices: \n`, devices, {})
 
-  settingsWindow?.webContents?.send('mainprocess:update-of-network-devices-can-see', devices)
+  /**
+   * We use the lastSeen time in the UI to show the user the last time we have
+   * seen the devices we are looking for.
+   */
+  devicesWithTimeData = addCurrentTimeToDevices(devices)
 
-  // sawDeviceWeAreLookingFor = dedupedDeviceList.some(({deviceId}) -> _.find(getSettings().devicesToSearchFor, { deviceId }))
-  // shouldLock = checkIfShouldLock(sawDeviceWeAreLookingFor, lastTimeSawADeviceWeAreLookingFor)
+  settingsWindow?.webContents?.send('mainprocess:update-of-network-devices-can-see', devicesWithTimeData)
 
-  // if shouldLock: lockSystem()
-  // if sawDeviceWeAreLookingFor: now lastTimeSawADeviceWeAreLookingFor = Date.now()
+  sawADeviceWeAreLookingFor = _.intersectionBy(getSettings().devicesToSearchFor, devicesWithTimeData, 'macAddress')
+
+  if sawADeviceWeAreLookingFor.length:
+    now lastTimeSawADeviceWeAreLookingFor = Date.now()
+    return
+
+  if shouldLock(lastTimeSawADeviceWeAreLookingFor): lockSystem()
 
 
+addCurrentTimeToDevices(devices: Array<Object>):Array<Object> ->
+  devices.map(device -> {...device, ...{ lastSeen: Date.now() }})
 
 export {
   handleScanResults
