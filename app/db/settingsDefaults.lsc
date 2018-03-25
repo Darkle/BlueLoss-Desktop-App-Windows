@@ -1,4 +1,4 @@
-import { SettingsWindowPositionType, DeviceType, PrivateSettingsType } from '../types/types.lsc'
+import { SettingsWindowPositionType, DeviceType } from '../types/types.lsc'
 
 defaultSettings: {
   lanLostEnabled: boolean,
@@ -14,10 +14,12 @@ defaultSettings: {
   hostsScanRangeEnd: boolean,
   hostScanTimeout: number,
   /**
-   * Some settings are just used internally and never exposed to the user. e.g. canGetMacVendorInfo - if
-   * there is an issue loading the OUI file, we don't want to try to get the vendor info from file.
+   * Some settings are just used internally and never exposed to the user -
+   * e.g. canSearchForMacVendorInfo - which is for if there is an issue
+   * loading the OUI file, we don't want to try to get the vendor info from file.
    */
-  privateSettings: PrivateSettingsType,
+  canSearchForMacVendorInfo: boolean,
+  dateLastCheckedForOUIupdate: number,
 } = {
   lanLostEnabled: true,
   firstRun: true,
@@ -31,10 +33,8 @@ defaultSettings: {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
-  privateSettings: {
-    canSearchForMacVendorInfo: true,
-    dateLastCheckedForOUIupdate: Date.now()
-  }
+  canSearchForMacVendorInfo: true,
+  dateLastCheckedForOUIupdate: Date.now(),
 }
 
 export {

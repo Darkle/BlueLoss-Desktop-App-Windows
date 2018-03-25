@@ -508,10 +508,8 @@ const defaultSettings = {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
-  privateSettings: {
-    canSearchForMacVendorInfo: true,
-    dateLastCheckedForOUIupdate: Date.now()
-  }
+  canSearchForMacVendorInfo: true,
+  dateLastCheckedForOUIupdate: Date.now()
 };
 
 exports.defaultSettings = defaultSettings;
@@ -898,7 +896,7 @@ function connectToHostSocket(hostIP) {
     return { ipAddress, macAddress };
   });
 }function getVendorInfoForMacAddress(device) {
-  if (!(0, _settings.getSettings)().privateSettings.canSearchForMacVendorInfo) {
+  if (!(0, _settings.getSettings)().canSearchForMacVendorInfo) {
     return device;
   }return _bluebird2.default.resolve(_extends({}, device, {
     vendorName: findVendorInfoInOUIfile(device)
@@ -1084,8 +1082,7 @@ function updateOUIfilePeriodically() {
 function scheduleOUIfileUpdate(interval = threeMinutesTime) {
   setTimeout(updateOUIfilePeriodically, interval);
 }function shouldUpdate() {
-  const { privateSettings: { dateLastCheckedForOUIupdate } } = (0, _settings.getSettings)();
-  if (Date.now() - dateLastCheckedForOUIupdate > twoWeeksTime) {
+  if (Date.now() - (0, _settings.getSettings)().dateLastCheckedForOUIupdate > twoWeeksTime) {
     return true;
   }return false;
 }exports.scheduleOUIfileUpdate = scheduleOUIfileUpdate;
@@ -1171,7 +1168,7 @@ function showSettingsWindow() {
   * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'privateSettings']);
+  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']);
 
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);

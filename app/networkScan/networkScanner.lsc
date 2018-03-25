@@ -74,13 +74,12 @@ getMacAdressForHostIP(ipAddress: string):Promise<any> ->
     .then(macAddress -> ({ ipAddress, macAddress }))
 
 getVendorInfoForMacAddress(device: DeviceType):Promise<DeviceType> ->
-  if !getSettings().privateSettings.canSearchForMacVendorInfo:
+  if !getSettings().canSearchForMacVendorInfo:
     return device
   Promise.resolve({
     ...device,
     vendorName: findVendorInfoInOUIfile(device)
   })
-
 
 generateHostIPs(gateway: string):Array<string> ->
   { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
@@ -92,7 +91,6 @@ generateHostIPs(gateway: string):Array<string> ->
   _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
     .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
     .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
-
 
 handleHostScanError(err):void ->
   if err?.socketTimeout: return

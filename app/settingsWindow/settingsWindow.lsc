@@ -52,7 +52,8 @@ showSettingsWindow():void ->
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
   global.settingsWindowRendererInitialSettings = recursiveOmitPropertiesFromObj(
-    getSettings(), ['__gawk__', 'privateSettings']
+    getSettings(),
+    ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']
   )
 
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})
