@@ -75,7 +75,7 @@ getMacAdressForHostIP(ipAddress: string):Promise<any> ->
 
 getVendorInfoForMacAddress(device: DeviceType):Promise<DeviceType> ->
   if !getSettings().canSearchForMacVendorInfo:
-    return device
+    return Promise.resolve(device)
   Promise.resolve({
     ...device,
     vendorName: findVendorInfoInOUIfile(device)

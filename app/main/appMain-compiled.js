@@ -890,7 +890,7 @@ function connectToHostSocket(hostIP) {
   });
 }function getVendorInfoForMacAddress(device) {
   if (!(0, _settings.getSettings)().canSearchForMacVendorInfo) {
-    return device;
+    return _bluebird2.default.resolve(device);
   }return _bluebird2.default.resolve(_extends({}, device, {
     vendorName: findVendorInfoInOUIfile(device)
   }));
