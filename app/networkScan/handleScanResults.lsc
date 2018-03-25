@@ -1,10 +1,11 @@
 import _ from 'lodash'
+import ms from 'ms'
+import lockSystem from 'lock-system'
 
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { getSettings } from '../db/settings.lsc'
-import { shouldLock, lockSystem } from '../common/lockSystem.lsc'
 
 let lastTimeSawADeviceWeAreLookingFor = Date.now()
 
@@ -29,11 +30,15 @@ handleScanResults(devices: Array<DeviceType>):void ->
     now lastTimeSawADeviceWeAreLookingFor = Date.now()
     return
 
-  if shouldLock(lastTimeSawADeviceWeAreLookingFor): lockSystem()
+  if shouldLock() and getSettings().lanLostEnabled:
+    lockSystem()
 
 
 addCurrentTimeToDevices(devices: Array<Object>):Array<Object> ->
   devices.map(device -> {...device, ...{ lastSeen: Date.now() }})
+
+shouldLock():boolean ->
+  Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
 
 export {
   handleScanResults

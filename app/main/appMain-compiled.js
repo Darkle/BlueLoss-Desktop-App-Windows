@@ -71,38 +71,6 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/common/lockSystem.lsc":
-/*!***********************************!*\
-  !*** ./app/common/lockSystem.lsc ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.shouldLock = exports.lockSystem = undefined;
-
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
-
-var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function lockSystem() {
-  if (!(0, _settings.getSettings)().lanLostEnabled) return;
-}function shouldLock(lastTimeSawADeviceWeAreLookingFor) {
-  return Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
-}exports.lockSystem = lockSystem;
-exports.shouldLock = shouldLock;
-
-/***/ }),
-
 /***/ "./app/common/logging/customRollbarTransport.lsc":
 /*!*******************************************************!*\
   !*** ./app/common/logging/customRollbarTransport.lsc ***!
@@ -789,6 +757,14 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _lockSystem = __webpack_require__(/*! lock-system */ "./node_modules/lock-system/index.js");
+
+var _lockSystem2 = _interopRequireDefault(_lockSystem);
+
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
@@ -796,8 +772,6 @@ var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/c
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
-
-var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -825,11 +799,15 @@ function handleScanResults(devices) {
   if (sawADeviceWeAreLookingFor.length) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
-  }if ((0, _lockSystem.shouldLock)(lastTimeSawADeviceWeAreLookingFor)) (0, _lockSystem.lockSystem)();
+  }if (shouldLock() && (0, _settings.getSettings)().lanLostEnabled) {
+    (0, _lockSystem2.default)();
+  }
 }function addCurrentTimeToDevices(devices) {
   return devices.map(function (device) {
     return _extends({}, device, { lastSeen: Date.now() });
   });
+}function shouldLock() {
+  return Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.handleScanResults = handleScanResults;
 
 /***/ }),
@@ -1090,11 +1068,7 @@ const twoDaysTime = (0, _ms2.default)('2 days');
 const threeMinutesTime = (0, _ms2.default)('3 minutes');
 const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
 const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
-const gotRequestOptions = {
-  headers: {
-    'user-agent': 'Mozilla/5.0 LANLost'
-  }
-};
+const gotRequestOptions = { headers: { 'user-agent': 'Mozilla/5.0 LANLost' } };
 const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
 const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
 
@@ -1391,6 +1365,76 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
+/***/ "./node_modules/lock-system/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lock-system/index.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(/*! path */ "path");
+const childProcess = __webpack_require__(/*! child_process */ "child_process");
+
+const getExistingLinuxCommand = () => {
+	// See: https://askubuntu.com/questions/184728/how-do-i-lock-the-screen-from-a-terminal
+	const commands = [{
+		name: 'xdg-screensaver',
+		arg: 'lock'
+	}, {
+		name: 'gnome-screensaver-command',
+		arg: '--lock'
+	}, {
+		name: 'cinnamon-screensaver-command',
+		arg: '--lock'
+	}, {
+		name: 'dm-tool',
+		arg: 'lock'
+	}];
+
+	return commands.find(command => {
+		try {
+			const result = childProcess.execFileSync('which', [command.name], {encoding: 'utf8'});
+			return result && result.length > 0;
+		} catch (err) {
+			return false;
+		}
+	});
+};
+
+module.exports = () => {
+	switch (process.platform) {
+		case 'darwin': {
+			// Binary: https://github.com/sindresorhus/macos-lock
+			childProcess.execFileSync(path.join(__dirname, 'lock'));
+			break;
+		}
+		case 'win32': {
+			// See: https://superuser.com/questions/21179/command-line-cmd-command-to-lock-a-windows-machine
+			childProcess.execFileSync('rundll32.exe', ['user32.dll,LockWorkStation']);
+			break;
+		}
+		case 'linux': {
+			const existingCommand = getExistingLinuxCommand();
+
+			if (existingCommand) {
+				childProcess.execFileSync(existingCommand.name, [existingCommand.arg]);
+			} else {
+				throw new Error('No applicable command found. Please consider installing xdg-screensaver, gnome-screensaver, cinnamon-screensaver, or dm-tool, and try again.');
+			}
+
+			break;
+		}
+		default: {
+			throw new Error(`Unsupported OS '${process.platform}'`);
+		}
+	}
+};
+
+
+/***/ }),
+
 /***/ "bluebird":
 /*!***************************!*\
   !*** external "bluebird" ***!
@@ -1399,6 +1443,17 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /***/ (function(module, exports) {
 
 module.exports = require("bluebird");
+
+/***/ }),
+
+/***/ "child_process":
+/*!********************************!*\
+  !*** external "child_process" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("child_process");
 
 /***/ }),
 

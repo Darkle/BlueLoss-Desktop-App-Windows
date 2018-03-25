@@ -16,11 +16,7 @@ twoDaysTime = ms('2 days')
 threeMinutesTime = ms('3 minutes')
 updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes'
 gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${ updateUrl }`
-gotRequestOptions= {
-  headers: {
-    'user-agent': 'Mozilla/5.0 LANLost'
-  }
-}
+gotRequestOptions= { headers: { 'user-agent': 'Mozilla/5.0 LANLost' } }
 checkResponseAndGenerateObj = pipe(checkResponseBody, generateObjFromResponseText)
 curriedJetPackWrite = curry(jetpack.writeAsync)(ouiDownloadfilePath)
 
