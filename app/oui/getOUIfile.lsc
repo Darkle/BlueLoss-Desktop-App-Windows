@@ -19,6 +19,7 @@ curriedJetpackRead = curryRight(jetpack.readAsync)('json')
  */
 loadOUIfileIfNotLoaded():Promise<any> ->
   if ouiFileData: return Promise.resolve()
+
   jetpack.existsAsync(downloadedOUIfilePath)
     .then(chooseOUIFilePath)
     .then(curriedJetpackRead)
