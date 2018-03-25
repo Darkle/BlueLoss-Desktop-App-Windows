@@ -25,7 +25,7 @@ scanNetwork():void ->
 
   Promise.resolve(loadOUIfileIfNotLoaded())
     .then(getDefaultGatewayIP)
-    .then(generateHostIPs)
+    .then(generatePossibleHostIPs)
     .map(scanHost)
     .filter(isDevice)
     .then(handleScanResults)
@@ -81,16 +81,18 @@ getVendorInfoForMacAddress(device: DeviceType):Promise<DeviceType> ->
     vendorName: findVendorInfoInOUIfile(device)
   })
 
-generateHostIPs(gateway: string):Array<string> ->
+generatePossibleHostIPs(gateway: string):Promise<Array<string>> ->
   { hostsScanRangeStart, hostsScanRangeEnd } = getSettings()
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
-  internalIp = getInternalIP.v4.sync()
-  /**
-   * Lodash range doesn't include the last number.
-   */
-  _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
-    .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
-    .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
+  getInternalIP.v4()
+    .then(internalIp ->
+      /**
+       * Lodash range doesn't include the last number.
+       */
+      _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
+        .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
+        .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
+    )
 
 handleHostScanError(err):void ->
   if err?.socketTimeout: return

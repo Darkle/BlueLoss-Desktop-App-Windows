@@ -854,7 +854,7 @@ const scanInterval = (0, _ms2.default)('30 seconds');
 function scanNetwork() {
   _logging.logger.debug(`new scan started`);
 
-  _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generateHostIPs).map(scanHost).filter(isDevice).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(scanNetworkIn30Seconds);
+  _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generatePossibleHostIPs).map(scanHost).filter(isDevice).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(scanNetworkIn30Seconds);
 }function scanHost(hostIP) {
   return connectToHostSocket(hostIP).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(handleHostScanError);
 } // http://bit.ly/2pzLeD3
@@ -894,17 +894,18 @@ function connectToHostSocket(hostIP) {
   }return _bluebird2.default.resolve(_extends({}, device, {
     vendorName: findVendorInfoInOUIfile(device)
   }));
-}function generateHostIPs(gateway) {
+}function generatePossibleHostIPs(gateway) {
   const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
-  const internalIp = _internalIp2.default.v4.sync();
-  /**
-   * Lodash range doesn't include the last number.
-   */
-  return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
-    return `${networkOctects}.${lastOctet}`;
-  }).filter(function (hostIP) {
-    return hostIP !== gateway && hostIP !== internalIp;
+  return _internalIp2.default.v4().then(function (internalIp) {
+    /**
+     * Lodash range doesn't include the last number.
+     */
+    return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
+      return `${networkOctects}.${lastOctet}`;
+    }).filter(function (hostIP) {
+      return hostIP !== gateway && hostIP !== internalIp;
+    });
   });
 }function handleHostScanError(err) {
   if (err == null ? void 0 : err.socketTimeout) return;
