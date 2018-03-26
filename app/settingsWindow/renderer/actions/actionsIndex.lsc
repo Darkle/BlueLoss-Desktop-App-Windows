@@ -7,6 +7,7 @@ import updateStateOnIpcMessage from './updateStateOnIpcMessage.lsc'
 import changeTrayIconColor from './changeTrayIconColor.lsc'
 import removeDevice from './removeDevice.lsc'
 import addNewDevice from './addNewDevice.lsc'
+import toggleDebugWindow from './toggleDebugWindow.lsc'
 
 export default {
   minimizeSettingsWindow,
@@ -19,4 +20,5 @@ export default {
   changeTrayIconColor,
   removeDevice,
   addNewDevice,
+  toggleDebugWindow,
 }

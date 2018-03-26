@@ -31,14 +31,15 @@ if ISDEV:
     handleExceptions: true,
     humanReadableUnhandledException: true,
   })
-
 // dont send errors to rollbar in dev && only if enabled.
 if !ISDEV and getSettings().reportErrors:
   addRollbarLogging()
 
+logger.add(UserDebugLoggerTransport, userDebugTransportOptions)
 /**
-* We also need to enable/disable rollbar itself as well as it is set to
-* report uncaught exceptions as well as logging caught errors.
+* We also need to enable/disable the rollbar module itself as well,
+* as it is set to report uncaught exceptions as well as logging
+* caught errors.
 */
 addRollbarLogging():void ->
   rollbarLogger.configure({enabled: true})
@@ -48,21 +49,13 @@ removeRollbarLogging():void ->
   rollbarLogger.configure({enabled: false})
   logger.remove(CustomRollbarTransport)
 
-addUserDebugLogger():void ->
-  logger.add(UserDebugLoggerTransport, userDebugTransportOptions)
-
-removeUserDebugLogger():void ->
-  logger.remove(UserDebugLoggerTransport)
-
-ipcMain.on('settings-renderer:error-sent', (event, arg) => {
-  logger.error('settings-renderer:error-sent', arg)
-})
+ipcMain.on('settings-renderer:error-sent', (event, error):void ->
+  logger.error('settings-renderer:error-sent', error)
+)
 
 
 export {
   logger,
-  addUserDebugLogger,
-  removeUserDebugLogger,
   addRollbarLogging,
   removeRollbarLogging,
 }

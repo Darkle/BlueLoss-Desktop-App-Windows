@@ -151,7 +151,7 @@ exports.rollbarLogger = rollbarLogger;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeRollbarLogging = exports.addRollbarLogging = exports.removeUserDebugLogger = exports.addUserDebugLogger = exports.logger = undefined;
+exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
@@ -192,27 +192,23 @@ if (true) {
     humanReadableUnhandledException: true
   });
 } // dont send errors to rollbar in dev && only if enabled.
-if (false) {} /**
-  * We also need to enable/disable rollbar itself as well as it is set to
-  * report uncaught exceptions as well as logging caught errors.
-  */
+if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
+/**
+* We also need to enable/disable the rollbar module itself as well,
+* as it is set to report uncaught exceptions as well as logging
+* caught errors.
+*/
 function addRollbarLogging() {
   _customRollbarTransport.rollbarLogger.configure({ enabled: true });
   logger.add(_customRollbarTransport.CustomRollbarTransport, rollbarTransportOptions);
 }function removeRollbarLogging() {
   _customRollbarTransport.rollbarLogger.configure({ enabled: false });
   logger.remove(_customRollbarTransport.CustomRollbarTransport);
-}function addUserDebugLogger() {
-  logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
-}function removeUserDebugLogger() {
-  logger.remove(_userDebugLogger.UserDebugLoggerTransport);
-}_electron.ipcMain.on('settings-renderer:error-sent', (event, arg) => {
-  return logger.error('settings-renderer:error-sent', arg);
+}_electron.ipcMain.on('settings-renderer:error-sent', function (event, error) {
+  logger.error('settings-renderer:error-sent', error);
 });
 
 exports.logger = logger;
-exports.addUserDebugLogger = addUserDebugLogger;
-exports.removeUserDebugLogger = removeUserDebugLogger;
 exports.addRollbarLogging = addRollbarLogging;
 exports.removeRollbarLogging = removeRollbarLogging;
 
@@ -294,11 +290,15 @@ const settingsWindowHTMLfilePath = _path2.default.join(settingsWindowDirPath, 's
 const settingsWindowCSSfilePath = _path2.default.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css');
 const settingsWindowJSfilePath = _path2.default.join(settingsWindowDirPath, 'settingsWindowRendererMain-compiled.js');
 const settingsWindowIconFiles = _path2.default.join(settingsWindowDirPath, 'assets', 'icons', '*.*');
+const debugWindowDirPath = _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer');
+const debugWindowHTMLfilePath = _path2.default.join(debugWindowDirPath, 'debugWindow.html');
+const debugWindowCSSfilePath = _path2.default.join(debugWindowDirPath, 'assets', 'styles', 'css', 'debugWindowCss.css');
+const debugWindowJSfilePath = _path2.default.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js');
 const devtronPath = _path2.default.resolve(__dirname, '..', '..', 'node_modules', 'devtron');
 
 function setUpDev() {
   if (false) {}
-  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles]);
+  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowCSSfilePath, debugWindowJSfilePath]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
   (0, _settingsWindow.showSettingsWindow)();
@@ -319,7 +319,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
+exports.omitGawkFromSettings = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -335,6 +335,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function noop() {
   return;
+}function omitGawkFromSettings(settings) {
+  return recursiveOmitPropertiesFromObj(settings, ['__gawk__']);
 }function recursiveOmitPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
 }function logSettingsUpdate(newSettingKey, newSettingValue) {
@@ -376,6 +378,7 @@ exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
+exports.omitGawkFromSettings = omitGawkFromSettings;
 
 /***/ }),
 
@@ -392,7 +395,9 @@ exports.curryRight = curryRight;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = undefined;
+exports.logStartupSettings = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -437,11 +442,17 @@ const db = (0, _lowdb2.default)(adapter);
 db.defaults(_settingsDefaults.defaultSettings).write();
 
 const settings = (0, _gawk2.default)(db.getState());
+/**
+ * settingsLoadedOnStartup is for the debug window, as it loads way after
+ * startup and the settings could have changed since then, so store a copy
+ * of the settings loaded on startup.
+ */
+const settingsLoadedOnStartup = _extends({}, (0, _utils.omitGawkFromSettings)(settings));
 
 (0, _settingsObservers.initSettingsObservers)(settings);
 (0, _settingsIPClisteners.initSettingsIPClisteners)();
 
-_logging.logger.debug('Settings Loaded At Startup:\n', settings, {});
+logStartupSettings();
 
 function getSettings() {
   return settings;
@@ -464,10 +475,22 @@ function getSettings() {
   */
 function findDeviceInDevicesToSearchFor(macAddress) {
   return _lodash2.default.find(settings.devicesToSearchFor, { macAddress });
+} /**
+   * This is a bit nasty, but we were running in to circular dependancy issues
+   * because we want to log the settings loaded on startup to help debug any issues,
+   * but the logger.lsc module also needs to import the settings.lsc file for the getSettings
+   * function so it can know wheater it should load the rollbar logger or not.
+   * ఠ_ఠ
+   */
+function logStartupSettings() {
+  return process.nextTick(function () {
+    _logging.logger.debug('Settings Loaded At Startup:\n', settingsLoadedOnStartup, {});
+  });
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
+exports.logStartupSettings = logStartupSettings;
 
 /***/ }),
 
@@ -495,7 +518,6 @@ const defaultSettings = {
   devicesToSearchFor: [],
   timeToLock: 2,
   reportErrors: true,
-  userDebug: false,
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
@@ -568,8 +590,6 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
-var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/debugWindow/debugWindow.lsc");
-
 var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -582,15 +602,6 @@ function initSettingsObservers(settings) {
   });
   _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
     if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
-  });
-  _gawk2.default.watch(settings, ['userDebug'], function (enabled) {
-    if (enabled) {
-      (0, _logging.addUserDebugLogger)();
-      (0, _debugWindow.showDebugWindow)();
-    } else {
-      (0, _logging.removeUserDebugLogger)();
-      (0, _debugWindow.closeDebugWindow)();
-    }
   });
   _gawk2.default.watch(settings, ['trayIconColor'], _tray.changeTrayIcon);
 }exports.initSettingsObservers = initSettingsObservers;
@@ -626,6 +637,10 @@ var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const debugWindowHTMLpath = _url2.default.format({
@@ -641,7 +656,6 @@ const debugWindowProperties = _extends({
   resizable: false,
   fullscreenable: false,
   fullscreen: false,
-  frame: false,
   show: false,
   webPreferences: {
     textAreasAreResizable: true,
@@ -664,21 +678,33 @@ function showDebugWindow() {
 
   if (true) debugWindow.webContents.openDevTools({ mode: 'undocked' });
 
-  debugWindow.once('close', function () {
-    (0, _logging.removeUserDebugLogger)();
-  });
-
   debugWindow.once('ready-to-show', function () {
     debugWindow.show();
-    (0, _logging.addUserDebugLogger)();
   });
+  debugWindow.once('close', function () {
+    var _settingsWindow$webCo;
 
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { userDebug: false });
+  });
   debugWindow.once('closed', function () {
     exports.debugWindow = debugWindow = null;
   });
+  debugWindow.webContents.once('dom-ready', function () {
+    (0, _settings.logStartupSettings)();
+  });
+  debugWindow.webContents.once('crashed', function (event) {
+    _logging.logger.error('debugWindow.webContents crashed', event);
+  });
+  debugWindow.once('unresponsive', function (event) {
+    _logging.logger.error('debugWindow unresponsive', event);
+  });
 }function closeDebugWindow() {
   debugWindow.close();
-}exports.debugWindow = debugWindow;
+}_electron.ipcMain.on('renderer:user-debug-toggled', function (event, userDebug) {
+  if (userDebug) showDebugWindow();else debugWindow == null ? void 0 : typeof debugWindow.close !== 'function' ? void 0 : debugWindow.close();
+});
+
+exports.debugWindow = debugWindow;
 exports.showDebugWindow = showDebugWindow;
 exports.closeDebugWindow = closeDebugWindow;
 
@@ -698,6 +724,8 @@ __webpack_require__(/*! ../../config/env.lsc */ "./config/env.lsc");
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
 var _setUpDev = __webpack_require__(/*! ../common/setUpDev.lsc */ "./app/common/setUpDev.lsc");
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
@@ -707,8 +735,6 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/tray/tray.lsc");
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
-
-var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _networkScanner = __webpack_require__(/*! ../networkScan/networkScanner.lsc */ "./app/networkScan/networkScanner.lsc");
 
@@ -761,7 +787,7 @@ var _ms = __webpack_require__(/*! ms */ "ms");
 
 var _ms2 = _interopRequireDefault(_ms);
 
-var _lockSystem = __webpack_require__(/*! lock-system */ "./node_modules/lock-system/index.js");
+var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
 
 var _lockSystem2 = _interopRequireDefault(_lockSystem);
 
@@ -791,23 +817,30 @@ function handleScanResults(devices) {
    * seen the devices we are looking for.
    */
   const devicesWithTimeData = addCurrentTimeToDevices(devices);
+  const { devicesToSearchFor } = (0, _settings.getSettings)();
 
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', devicesWithTimeData);
+  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devicesWithTimeData });
 
-  const sawADeviceWeAreLookingFor = _lodash2.default.intersectionBy((0, _settings.getSettings)().devicesToSearchFor, devicesWithTimeData, 'macAddress');
+  if (!devicesToSearchFor.length) return;
+
+  const sawADeviceWeAreLookingFor = _lodash2.default.intersectionBy(devicesToSearchFor, devicesWithTimeData, 'macAddress');
 
   if (sawADeviceWeAreLookingFor.length) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
-  }if (shouldLock() && (0, _settings.getSettings)().lanLostEnabled) {
-    (0, _lockSystem2.default)();
+  }if (shouldLock()) {
+    try {
+      (0, _lockSystem2.default)();
+    } catch (err) {
+      _logging.logger.error('Error occured trying locking the system : ', err);
+    }
   }
 }function addCurrentTimeToDevices(devices) {
   return devices.map(function (device) {
     return _extends({}, device, { lastSeen: Date.now() });
   });
 }function shouldLock() {
-  return Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
+  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.handleScanResults = handleScanResults;
 
 /***/ }),
@@ -1203,22 +1236,18 @@ function showSettingsWindow() {
   settingsWindow.once('close', function () {
     (0, _settings.updateSetting)('settingsWindowPosition', settingsWindow.getBounds());
   });
-
   settingsWindow.once('ready-to-show', function () {
     settingsWindow.show();
   });
-
   settingsWindow.once('closed', function () {
     var _electronApp$dock2;
 
     exports.settingsWindow = settingsWindow = null;
     (_electronApp$dock2 = _electron.app.dock) == null ? void 0 : _electronApp$dock2.hide();
   });
-
   settingsWindow.webContents.once('crashed', function (event) {
     _logging.logger.error('settingsWindow.webContents crashed', event);
   });
-
   settingsWindow.once('unresponsive', function (event) {
     _logging.logger.error('settingsWindow unresponsive', event);
   });
@@ -1365,76 +1394,6 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/lock-system/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/lock-system/index.js ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const path = __webpack_require__(/*! path */ "path");
-const childProcess = __webpack_require__(/*! child_process */ "child_process");
-
-const getExistingLinuxCommand = () => {
-	// See: https://askubuntu.com/questions/184728/how-do-i-lock-the-screen-from-a-terminal
-	const commands = [{
-		name: 'xdg-screensaver',
-		arg: 'lock'
-	}, {
-		name: 'gnome-screensaver-command',
-		arg: '--lock'
-	}, {
-		name: 'cinnamon-screensaver-command',
-		arg: '--lock'
-	}, {
-		name: 'dm-tool',
-		arg: 'lock'
-	}];
-
-	return commands.find(command => {
-		try {
-			const result = childProcess.execFileSync('which', [command.name], {encoding: 'utf8'});
-			return result && result.length > 0;
-		} catch (err) {
-			return false;
-		}
-	});
-};
-
-module.exports = () => {
-	switch (process.platform) {
-		case 'darwin': {
-			// Binary: https://github.com/sindresorhus/macos-lock
-			childProcess.execFileSync(path.join(__dirname, 'lock'));
-			break;
-		}
-		case 'win32': {
-			// See: https://superuser.com/questions/21179/command-line-cmd-command-to-lock-a-windows-machine
-			childProcess.execFileSync('rundll32.exe', ['user32.dll,LockWorkStation']);
-			break;
-		}
-		case 'linux': {
-			const existingCommand = getExistingLinuxCommand();
-
-			if (existingCommand) {
-				childProcess.execFileSync(existingCommand.name, [existingCommand.arg]);
-			} else {
-				throw new Error('No applicable command found. Please consider installing xdg-screensaver, gnome-screensaver, cinnamon-screensaver, or dm-tool, and try again.');
-			}
-
-			break;
-		}
-		default: {
-			throw new Error(`Unsupported OS '${process.platform}'`);
-		}
-	}
-};
-
-
-/***/ }),
-
 /***/ "bluebird":
 /*!***************************!*\
   !*** external "bluebird" ***!
@@ -1443,17 +1402,6 @@ module.exports = () => {
 /***/ (function(module, exports) {
 
 module.exports = require("bluebird");
-
-/***/ }),
-
-/***/ "child_process":
-/*!********************************!*\
-  !*** external "child_process" ***!
-  \********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("child_process");
 
 /***/ }),
 
@@ -1553,6 +1501,17 @@ module.exports = require("internal-ip");
 /***/ (function(module, exports) {
 
 module.exports = require("is-ip");
+
+/***/ }),
+
+/***/ "lock-system":
+/*!******************************!*\
+  !*** external "lock-system" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lock-system");
 
 /***/ }),
 

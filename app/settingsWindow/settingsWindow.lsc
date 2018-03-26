@@ -67,20 +67,16 @@ showSettingsWindow():void ->
   settingsWindow.once('close', ():void ->
     updateSetting('settingsWindowPosition', settingsWindow.getBounds())
   )
-
   settingsWindow.once('ready-to-show', ():void ->
     settingsWindow.show()
   )
-
   settingsWindow.once('closed', ():void ->
     now settingsWindow = null
     electronApp.dock?.hide()
   )
-
   settingsWindow.webContents.once('crashed', (event):void ->
     logger.error('settingsWindow.webContents crashed', event)
   )
-
   settingsWindow.once('unresponsive', (event):void ->
     logger.error('settingsWindow unresponsive', event)
   )

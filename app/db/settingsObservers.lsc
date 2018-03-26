@@ -2,13 +2,7 @@
 import gawk from 'gawk'
 
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import {
-  addRollbarLogging,
-  removeRollbarLogging,
-  addUserDebugLogger,
-  removeUserDebugLogger
-} from '../common/logging/logging.lsc'
-import { showDebugWindow, closeDebugWindow } from '../debugWindow/debugWindow.lsc'
+import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
 import { changeTrayIcon } from '../tray/tray.lsc'
 
 initSettingsObservers(settings):void ->
@@ -18,14 +12,6 @@ initSettingsObservers(settings):void ->
   gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
     if enabled: addRollbarLogging()
     else: removeRollbarLogging()
-  )
-  gawk.watch(settings, ['userDebug'], (enabled: boolean):void ->
-    if enabled:
-      addUserDebugLogger()
-      showDebugWindow()
-    else:
-      removeUserDebugLogger()
-      closeDebugWindow()
   )
   gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 

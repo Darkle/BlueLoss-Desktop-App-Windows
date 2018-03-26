@@ -9,6 +9,8 @@ const mainDir = path.join(appDir, 'main')
 const mainAppEntryPoint = path.join(mainDir, 'appMain.lsc')
 const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer')
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
+const debugWindowRendererDir = path.join(appDir, 'debugWindow', 'renderer')
+const debugWindowRendererEntryPoint = path.join(debugWindowRendererDir, 'debugWindowRendererMain.lsc')
 const isDev = process.env.NODE_ENV !== 'production'
 const debugging = isDev && process.env.nodeDebug === 'true'
 
@@ -97,7 +99,20 @@ const electronSettingsRendererWebpackOptions = {
   }
 }
 
+const debugWindowRendererWebpackOptions = {
+  ...commonWebpackOptions,
+  ...{
+    target: 'electron-renderer',
+    entry: debugWindowRendererEntryPoint,
+    output: {
+      filename: 'debugWindowRendererMain-compiled.js',
+      path: debugWindowRendererDir
+    }
+  }
+}
+
 module.exports = [
   electronMainWebpackOptions,
   electronSettingsRendererWebpackOptions,
+  debugWindowRendererWebpackOptions,
 ]

@@ -5,6 +5,9 @@ import { logger } from './logging/logging.lsc'
 
 noop() -> return
 
+omitGawkFromSettings(settings) ->
+  recursiveOmitPropertiesFromObj(settings, ['__gawk__'])
+
 recursiveOmitPropertiesFromObj(settings, properties:Array<string>) ->
   omitInheritedProperties(settings, properties)
 
@@ -40,4 +43,5 @@ export {
   pipe,
   curry,
   curryRight,
+  omitGawkFromSettings,
 }

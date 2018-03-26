@@ -21,24 +21,34 @@ handleScanResults(devices: Array<DeviceType>):void ->
    * seen the devices we are looking for.
    */
   devicesWithTimeData = addCurrentTimeToDevices(devices)
+  { devicesToSearchFor } = getSettings()
 
-  settingsWindow?.webContents?.send('mainprocess:update-of-network-devices-can-see', devicesWithTimeData)
+  settingsWindow?.webContents?.send(
+    'mainprocess:update-of-network-devices-can-see',
+    { devicesCanSee: devicesWithTimeData }
+  )
 
-  sawADeviceWeAreLookingFor = _.intersectionBy(getSettings().devicesToSearchFor, devicesWithTimeData, 'macAddress')
+  if !devicesToSearchFor.length: return
+
+  sawADeviceWeAreLookingFor = _.intersectionBy(devicesToSearchFor, devicesWithTimeData, 'macAddress')
 
   if sawADeviceWeAreLookingFor.length:
     now lastTimeSawADeviceWeAreLookingFor = Date.now()
     return
 
-  if shouldLock() and getSettings().lanLostEnabled:
-    lockSystem()
+  if shouldLock():
+    try:
+      lockSystem()
+    catch(err):
+      logger.error('Error occured trying locking the system : ', err)
 
 
 addCurrentTimeToDevices(devices: Array<Object>):Array<Object> ->
   devices.map(device -> {...device, ...{ lastSeen: Date.now() }})
 
 shouldLock():boolean ->
-  Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
+  getSettings().lanLostEnabled and
+    Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
 
 export {
   handleScanResults

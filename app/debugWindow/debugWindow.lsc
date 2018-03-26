@@ -1,9 +1,10 @@
 import path from 'path'
 import url from 'url'
+import { BrowserWindow, Menu, ipcMain } from 'electron'
 
-import { BrowserWindow, Menu } from 'electron'
-
-import { addUserDebugLogger, removeUserDebugLogger } from '../common/logging/logging.lsc'
+import { logger } from '../common/logging/logging.lsc'
+import { logStartupSettings } from '../db/settings.lsc'
+import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
 debugWindowHTMLpath = url.format({
   protocol: 'file',
@@ -19,7 +20,6 @@ debugWindowProperties = {
     resizable: false,
     fullscreenable: false,
     fullscreen: false,
-    frame: false,
     show: false,
     webPreferences: {
       textAreasAreResizable: true,
@@ -43,21 +43,32 @@ showDebugWindow():void ->
 
   if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  debugWindow.once('close', ():void ->
-    removeUserDebugLogger()
-  )
-
   debugWindow.once('ready-to-show', ():void ->
     debugWindow.show()
-    addUserDebugLogger()
   )
-
+  debugWindow.once('close', ():void ->
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {userDebug: false})
+  )
   debugWindow.once('closed', ():void ->
     now debugWindow = null
+  )
+  debugWindow.webContents.once('dom-ready', ():void ->
+    logStartupSettings()
+  )
+  debugWindow.webContents.once('crashed', (event):void ->
+    logger.error('debugWindow.webContents crashed', event)
+  )
+  debugWindow.once('unresponsive', (event):void ->
+    logger.error('debugWindow unresponsive', event)
   )
 
 closeDebugWindow():void ->
   debugWindow.close()
+
+ipcMain.on('renderer:user-debug-toggled', (event, userDebug: boolean):void ->
+  if userDebug: showDebugWindow()
+  else: debugWindow?.close?()
+)
 
 export {
   debugWindow,

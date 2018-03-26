@@ -11,7 +11,8 @@ getInitialSettingsFromMainProcess() ->
   ({
     ...{
       activeTab: 'statusTab',
-      devicesCanSee: []
+      devicesCanSee: [],
+      userDebug: false,
     },
     ...omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
   })

@@ -9,6 +9,10 @@ settingsWindowHTMLfilePath = path.join(settingsWindowDirPath, 'settingsWindow.ht
 settingsWindowCSSfilePath = path.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
 settingsWindowJSfilePath = path.join(settingsWindowDirPath, 'settingsWindowRendererMain-compiled.js')
 settingsWindowIconFiles = path.join(settingsWindowDirPath, 'assets', 'icons', '*.*')
+debugWindowDirPath = path.resolve(__dirname, '..', 'debugWindow', 'renderer')
+debugWindowHTMLfilePath = path.join(debugWindowDirPath, 'debugWindow.html')
+debugWindowCSSfilePath = path.join(debugWindowDirPath, 'assets', 'styles', 'css', 'debugWindowCss.css')
+debugWindowJSfilePath = path.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js')
 devtronPath = path.resolve(__dirname, '..', '..', 'node_modules', 'devtron')
 
 setUpDev():void ->
@@ -18,6 +22,9 @@ setUpDev():void ->
     settingsWindowCSSfilePath,
     settingsWindowJSfilePath,
     settingsWindowIconFiles,
+    debugWindowHTMLfilePath,
+    debugWindowCSSfilePath,
+    debugWindowJSfilePath,
   ])
   BrowserWindow.addDevToolsExtension(devtronPath)
   // auto open the settings window in dev so dont have to manually open it each time electron restarts

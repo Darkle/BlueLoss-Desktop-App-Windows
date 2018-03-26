@@ -71,6 +71,44 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/db/settingsDefaults.lsc":
+/*!*************************************!*\
+  !*** ./app/db/settingsDefaults.lsc ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultSettings = undefined;
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+
+const defaultSettings = {
+  lanLostEnabled: true,
+  runOnStartup: true,
+  trayIconColor: 'white',
+  devicesToSearchFor: [],
+  timeToLock: 2,
+  reportErrors: true,
+  hostsScanRangeStart: 2,
+  hostsScanRangeEnd: 254,
+  hostScanTimeout: 3000,
+  disableOUIfileUpdate: false,
+  firstRun: true,
+  canSearchForMacVendorInfo: true,
+  dateLastCheckedForOUIupdate: Date.now(),
+  settingsWindowPosition: null
+};
+
+exports.defaultSettings = defaultSettings;
+
+/***/ }),
+
 /***/ "./app/settingsWindow/renderer/actions/actionsIndex.lsc":
 /*!**************************************************************!*\
   !*** ./app/settingsWindow/renderer/actions/actionsIndex.lsc ***!
@@ -119,6 +157,10 @@ var _addNewDevice = __webpack_require__(/*! ./addNewDevice.lsc */ "./app/setting
 
 var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
 
+var _toggleDebugWindow = __webpack_require__(/*! ./toggleDebugWindow.lsc */ "./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc");
+
+var _toggleDebugWindow2 = _interopRequireDefault(_toggleDebugWindow);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -131,7 +173,8 @@ exports.default = {
   updateStateOnIpcMessage: _updateStateOnIpcMessage2.default,
   changeTrayIconColor: _changeTrayIconColor2.default,
   removeDevice: _removeDevice2.default,
-  addNewDevice: _addNewDevice2.default
+  addNewDevice: _addNewDevice2.default,
+  toggleDebugWindow: _toggleDebugWindow2.default
 };
 
 /***/ }),
@@ -283,6 +326,34 @@ exports.default = function removeDevice(deviceToRemove) {
     return { devicesToSearchFor: [state.devicesToSearchFor.filter(function ({ macAddress }) {
         return macAddress !== deviceToRemove.macAddress;
       })] };
+  };
+};
+
+/***/ }),
+
+/***/ "./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc":
+/*!*******************************************************************!*\
+  !*** ./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+exports.default = function toggleDebugWindow(element) {
+  return function (state) {
+    const toggled = element.currentTarget.toggled;
+    _electron.ipcRenderer.send('renderer:user-debug-toggled', toggled);
+    return _extends({}, state, { userDebug: toggled });
   };
 };
 
@@ -552,7 +623,8 @@ function identity(param) {
   */
   return _extends({
     activeTab: 'statusTab',
-    devicesCanSee: []
+    devicesCanSee: [],
+    userDebug: false
   }, omitInheritedProperties(_electron.remote.getGlobal('settingsWindowRendererInitialSettings')));
 }
 
@@ -854,6 +926,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
+var _settingsDefaults = __webpack_require__(/*! ../../../db/settingsDefaults.lsc */ "./app/db/settingsDefaults.lsc");
+
+const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
+
 exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'settingsTab' ? 'flex' : 'none';
   const iconColorIsWhite = state.trayIconColor === 'white';
@@ -872,8 +948,9 @@ exports.default = function ({ actions, state }) {
           value: state.timeToLock,
           suffix: ' mins',
           min: '2',
-          onchange: function (event) {
-            actions.updateSetting({ settingName: 'timeToLock', settingValue: event.currentTarget.value });
+          onchange: function ({ currentTarget: { value } }) {
+            const newTimeToLock = value < minTimeToLock ? minTimeToLock : value;
+            actions.updateSetting({ settingName: 'timeToLock', settingValue: newTimeToLock });
           }
         },
         (0, _hyperapp.h)('x-stepper', null)
@@ -972,7 +1049,7 @@ exports.default = function ({ actions, state }) {
           (0, _hyperapp.h)(
             'x-label',
             null,
-            'Any errors generated by the app will be sent to rollbar. This helps development of the app.'
+            'Any errors generated by the app will be sent to rollbar.com. This helps development of the app.'
           )
         )
       )
@@ -1004,6 +1081,15 @@ exports.default = function ({ actions, state }) {
           )
         )
       )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
+      (0, _hyperapp.h)('x-switch', {
+        id: 'userDebugSwitch',
+        toggled: state.userDebug,
+        onchange: actions.toggleDebugWindow
+      })
     )
   );
 };
