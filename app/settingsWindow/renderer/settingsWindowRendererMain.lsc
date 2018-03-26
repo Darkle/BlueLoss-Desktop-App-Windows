@@ -2,11 +2,7 @@ import { ipcRenderer } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
 
-import {
-  getInitialSettingsFromMainProcess as getInitialState,
-  identity,
-  handleRendererWindowError
-} from './utils.lsc'
+import { getInitialSettingsFromMainProcess as getInitialState, identity, handleRendererWindowError } from './utils.lsc'
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
