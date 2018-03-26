@@ -3,11 +3,11 @@ import _ from 'lodash'
 
 identity(param) -> param
 
+/**
+* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
+* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
+*/
 getInitialSettingsFromMainProcess() ->
-  /**
-  * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
-  * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
-  */
   ({
     ...{
       activeTab: 'statusTab',
