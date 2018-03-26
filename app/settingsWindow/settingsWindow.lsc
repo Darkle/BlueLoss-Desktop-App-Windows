@@ -59,9 +59,7 @@ showSettingsWindow():void ->
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})
   settingsWindow.loadURL(settingsHTMLpath)
   settingsWindow.setMenu(settingsWindowMenu)
-
   electronApp.dock?.show()
-
   if ISDEV: settingsWindow.webContents.openDevTools({ mode: 'undocked'})
 
   settingsWindow.once('close', ():void ->

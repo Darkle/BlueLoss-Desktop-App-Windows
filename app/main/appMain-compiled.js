@@ -668,7 +668,6 @@ function showDebugWindow() {
   exports.debugWindow = debugWindow = new _electron.BrowserWindow(debugWindowProperties);
   debugWindow.loadURL(debugWindowHTMLpath);
   debugWindow.setMenu(debugWindowMenu);
-
   if (true) debugWindow.webContents.openDevTools({ mode: 'undocked' });
 
   debugWindow.once('ready-to-show', function () {
@@ -1221,9 +1220,7 @@ function showSettingsWindow() {
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);
   settingsWindow.setMenu(settingsWindowMenu);
-
   (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.show();
-
   if (true) settingsWindow.webContents.openDevTools({ mode: 'undocked' });
 
   settingsWindow.once('close', function () {

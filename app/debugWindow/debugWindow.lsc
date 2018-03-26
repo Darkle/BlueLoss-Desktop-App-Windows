@@ -39,7 +39,6 @@ showDebugWindow():void ->
   now debugWindow = new BrowserWindow(debugWindowProperties)
   debugWindow.loadURL(debugWindowHTMLpath)
   debugWindow.setMenu(debugWindowMenu)
-
   if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
   debugWindow.once('ready-to-show', ():void ->
