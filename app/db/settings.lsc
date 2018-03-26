@@ -21,16 +21,14 @@ db.defaults(defaultSettings).write()
 
 settings = gawk(db.getState())
 /**
- * settingsLoadedOnStartup is for the debug window, as it loads way after
- * startup and the settings could have changed since then, so store a copy
- * of the settings loaded on startup.
+ * settingsLoadedOnStartup is for the debug window - on debug window load, we show
+ * the settings loaded on startup as well as the current settings now to help debug any
+ * settings issues.
  */
 settingsLoadedOnStartup = {...omitGawkFromSettings(settings)}
 
 initSettingsObservers(settings)
 initSettingsIPClisteners()
-
-logStartupSettings()
 
 getSettings() -> settings
 
@@ -54,17 +52,8 @@ removeNewDeviceToSearchFor({macAddress: macAddressOfDeviceToRemove}):void ->
 findDeviceInDevicesToSearchFor(macAddress) ->
   _.find(settings.devicesToSearchFor, { macAddress })
 
-/**
- * This is a bit nasty, but we were running in to circular dependancy issues
- * because we want to log the settings loaded on startup to help debug any issues,
- * but the logger.lsc module also needs to import the settings.lsc file for the getSettings
- * function so it can know wheater it should load the rollbar logger or not.
- * ఠ_ఠ
- */
 logStartupSettings() ->
-  process.nextTick(():void ->
-    logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
-  )
+  logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
 
 
 export {

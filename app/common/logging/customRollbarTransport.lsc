@@ -29,7 +29,6 @@ rollbarLogger = new Rollbar(rollbarConfig)
 CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
     Object.assign(this, options)
 
-
 util.inherits(CustomRollbarTransport, winston.Transport)
 
 CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void ->
@@ -37,7 +36,6 @@ CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void -
   if level !== 'error': return
   rollbarLogger.error(msg, error)
   callback(null, true)
-
 
 
 export{

@@ -1,3 +1,9 @@
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1b5299;
+}
 body {
   overflow: hidden;
   display: flex;

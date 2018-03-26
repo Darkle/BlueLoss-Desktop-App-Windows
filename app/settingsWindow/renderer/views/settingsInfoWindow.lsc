@@ -96,7 +96,7 @@ export default ({ actions, state }) ->
       <x-label for="ouiUpdateCheckbox" id="ouiUpdateCheckboxLabel">
         <x-box vertical>
           <x-label>
-            <strong>OUI File Update</strong>
+            <strong>Download OUI File Updates</strong>
           </x-label>
           <x-label>LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.</x-label>
         </x-box>

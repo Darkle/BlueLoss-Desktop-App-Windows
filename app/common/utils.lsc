@@ -4,17 +4,15 @@ import { SettingsTypes } from '../types/types.lsc'
 import { logger } from './logging/logging.lsc'
 import { getSettings } from '../db/settings.lsc'
 
-noop() -> return
+logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
+  logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
+  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
 
 omitGawkFromSettings(settings) ->
   recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__'])
 
 recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties:Array<string>) ->
   omitInheritedProperties(settings, properties)
-
-logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
-  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
 
 omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
@@ -25,20 +23,20 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
-
+noop() -> return
 isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 
 export {
-  noop,
   logSettingsUpdate,
-  omitInheritedProperties,
+  omitGawkFromSettings,
   recursiveOmitFilterAndInheritedPropertiesFromObj,
+  omitInheritedProperties,
+  noop,
   isObject,
   pipe,
   curry,
   curryRight,
-  omitGawkFromSettings,
 }

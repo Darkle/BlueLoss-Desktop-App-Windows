@@ -8,8 +8,6 @@ import { recursiveOmitFilterAndInheritedPropertiesFromObj } from '../utils.lsc'
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
 * window. The log data is sent to the debug window renderer and displayed there.
-*
-* The transports need a param (options) or they throw an error, even if you don't use it.
 */
 UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->
     Object.assign(this, options)

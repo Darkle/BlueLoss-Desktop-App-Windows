@@ -16,11 +16,8 @@ userDebugTransportOptions = {
   handleExceptions: true,
   humanReadableUnhandledException: true
 }
-/*****
-* https://github.com/winstonjs/winston/tree/2.4.0
-* Winston log levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5 }
-* So can use logger.error(), logger.warn(), logger.info(), logger.verbose(), logger.debug()
-*/
+
+// https://github.com/winstonjs/winston/tree/2.4.0
 logger = new winston.Logger({
   level: 'debug',
   exitOnError: false
