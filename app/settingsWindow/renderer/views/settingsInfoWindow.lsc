@@ -86,12 +86,86 @@ export default ({ actions, state }) ->
       </x-label>
     </x-box>
     <x-box>
+      <x-checkbox
+        id="ouiUpdateCheckbox"
+        toggled={ state.enableOUIfileUpdate }
+        onchange={(event):void ->
+          actions.updateSetting({ settingName: 'enableOUIfileUpdate', settingValue: event.currentTarget.toggled})
+        }
+      ></x-checkbox>
+      <x-label for="ouiUpdateCheckbox" id="ouiUpdateCheckboxLabel">
+        <x-box vertical>
+          <x-label>
+            <strong>OUI File Update</strong>
+          </x-label>
+          <x-label>LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.</x-label>
+        </x-box>
+      </x-label>
+    </x-box>
+    <x-box>
       <x-switch
         id="userDebugSwitch"
         toggled={ state.userDebug }
         onchange={ actions.toggleDebugWindow }
       ></x-switch>
-
+      <x-label for="userDebugSwitch" id="userDebugSwitchLabel">
+        <x-box vertical>
+          <strong>User Debugger</strong>
+          <span>Enabling this will show a debug window with information that may help you diagnose any issues.</span>
+        </x-box>
+      </x-label>
+    </x-box>
+    <x-box>
+      <x-switch
+        id="userDebugSwitch"
+        toggled={ state.userDebug }
+        onchange={ actions.toggleDebugWindow }
+      ></x-switch>
+      <x-label for="userDebugSwitch" id="userDebugSwitchLabel">
+        <x-box vertical>
+          <strong>User Debugger</strong>
+          <span>Enabling this will show a debug window with information that may help you diagnose any issues.</span>
+        </x-box>
+      </x-label>
+    </x-box>
+    <x-box>
+      <x-switch
+        id="userDebugSwitch"
+        toggled={ state.userDebug }
+        onchange={ actions.toggleDebugWindow }
+      ></x-switch>
+      <x-label for="userDebugSwitch" id="userDebugSwitchLabel">
+        <x-box vertical>
+          <strong>User Debugger</strong>
+          <span>Enabling this will show a debug window with information that may help you diagnose any issues.</span>
+        </x-box>
+      </x-label>
+    </x-box>
+    <x-box>
+      <x-switch
+        id="userDebugSwitch"
+        toggled={ state.userDebug }
+        onchange={ actions.toggleDebugWindow }
+      ></x-switch>
+      <x-label for="userDebugSwitch" id="userDebugSwitchLabel">
+        <x-box vertical>
+          <strong>User Debugger</strong>
+          <span>Enabling this will show a debug window with information that may help you diagnose any issues.</span>
+        </x-box>
+      </x-label>
+    </x-box>
+    <x-box>
+      <x-switch
+        id="userDebugSwitch"
+        toggled={ state.userDebug }
+        onchange={ actions.toggleDebugWindow }
+      ></x-switch>
+      <x-label for="userDebugSwitch" id="userDebugSwitchLabel">
+        <x-box vertical>
+          <strong>User Debugger</strong>
+          <span>Enabling this will show a debug window with information that may help you diagnose any issues.</span>
+        </x-box>
+      </x-label>
     </x-box>
   </div>
 

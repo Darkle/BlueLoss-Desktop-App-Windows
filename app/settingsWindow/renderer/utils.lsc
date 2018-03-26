@@ -43,5 +43,6 @@ isObject(obj) ->
 export {
   getInitialSettingsFromMainProcess,
   handleRendererWindowError,
-  identity
+  identity,
+  omitInheritedProperties,
 }

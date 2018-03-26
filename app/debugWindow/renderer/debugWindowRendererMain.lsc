@@ -4,6 +4,8 @@ import stringifyObject from 'stringify-object'
 import addLineNumbers from 'add-line-numbers'
 import _ from 'lodash'
 
+import { omitInheritedProperties } from '../../settingsWindow/renderer/utils.lsc'
+
 preElem = document.querySelector('#debugOutput')
 
 let loggingTextSansLineNumbers = ''
@@ -27,3 +29,13 @@ createLoggingSansLineNumbers(msg, meta):string ->
 
 isDebugWindowOpeningMessage(msg):boolean ->
   msg === 'Settings Loaded At LANLost Startup:'
+
+
+handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->
+  ipcRenderer.send('debug-window-renderer:error-sent',
+    { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
+  )
+
+window.onerror = handleRendererWindowError
+window.onunhandledrejection = handleRendererWindowError
+

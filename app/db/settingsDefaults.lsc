@@ -10,7 +10,7 @@ defaultSettings: {
   hostsScanRangeStart: boolean,
   hostsScanRangeEnd: boolean,
   hostScanTimeout: number,
-  disableOUIfileUpdate: boolean,
+  enableOUIfileUpdate: boolean,
   /**
    * Some settings are just used internally and never exposed to the user -
    * e.g. firstRun, canSearchForMacVendorInfo, dateLastCheckedForOUIupdate,
@@ -30,7 +30,7 @@ defaultSettings: {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
-  disableOUIfileUpdate: false,
+  enableOUIfileUpdate: true,
   firstRun: true,
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),

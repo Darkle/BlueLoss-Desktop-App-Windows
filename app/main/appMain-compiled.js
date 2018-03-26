@@ -208,6 +208,9 @@ function addRollbarLogging() {
 }_electron.ipcMain.on('settings-renderer:error-sent', function (event, error) {
   logger.error('settings-renderer:error-sent', error);
 });
+_electron.ipcMain.on('debug-window-renderer:error-sent', function (event, error) {
+  logger.error('debug-window-renderer:error-sent', error);
+});
 
 exports.logger = logger;
 exports.addRollbarLogging = addRollbarLogging;
@@ -527,7 +530,7 @@ const defaultSettings = {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
-  disableOUIfileUpdate: false,
+  enableOUIfileUpdate: true,
   firstRun: true,
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
@@ -1115,7 +1118,7 @@ const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generate
 const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
 
 function updateOUIfilePeriodically() {
-  if (!shouldUpdate() || (0, _settings.getSettings)().disableOUIfileUpdate) {
+  if (!shouldUpdate() || !(0, _settings.getSettings)().enableOUIfileUpdate) {
     return scheduleOUIfileUpdate(twoDaysTime);
   }(0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
     _logging.logger.error(gotErrorMessage, err);

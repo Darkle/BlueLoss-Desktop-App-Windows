@@ -1,10 +1,10 @@
 #settingsTabInfoWindow {
   width: 639px;
   height: 100%;
-  margin-top: 16px;
   display: none;
   flex-direction: column;
   align-items: center;
+  overflow: auto;
 }
 
 #settingsTabInfoWindow > *:first-child {
@@ -14,6 +14,7 @@
 #settingsTabInfoWindow > x-box {
   margin-top: 30px;
   width: 514px;
+  min-height: 17%;
 }
 
 #timeToLockSetting {
@@ -29,6 +30,10 @@
 
 #timeToLockLabel {
   width: 400px;
+}
+
+#timeToLockLabel > x-box > x-label:last-child {
+  margin-top: 5px;
 }
 
 #iconColorDropdownContainer {
@@ -57,8 +62,33 @@
   width: 35px;
 }
 
+#erroReportingCheckboxLabel > x-box > x-label:last-child {
+  margin-top: 5px;
+}
+
 #runOnStartupCheckbox {
   margin-left: 76px;
   margin-top: 11px;
   margin-right: 13px;
+}
+
+#ouiUpdateCheckbox {
+  margin-left: 76px;
+  margin-right: 13px;
+  margin-top: -38px;
+}
+
+#ouiUpdateCheckboxLabel {
+  width: 398px;
+}
+
+#userDebugSwitch {
+  margin-bottom: 28px;
+  margin-right: 11px;
+  margin-left: 73px;
+  width: 50px;
+}
+
+#userDebugSwitchLabel > x-box > span {
+  margin-top: 5px;
 }

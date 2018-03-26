@@ -98,7 +98,7 @@ const defaultSettings = {
   hostsScanRangeStart: 2,
   hostsScanRangeEnd: 254,
   hostScanTimeout: 3000,
-  disableOUIfileUpdate: false,
+  enableOUIfileUpdate: true,
   firstRun: true,
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
@@ -602,7 +602,7 @@ window.onunhandledrejection = _utils.handleRendererWindowError;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
+exports.omitInheritedProperties = exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -645,6 +645,7 @@ function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNum
 }exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
 exports.handleRendererWindowError = handleRendererWindowError;
 exports.identity = identity;
+exports.omitInheritedProperties = omitInheritedProperties;
 
 /***/ }),
 
@@ -1085,11 +1086,170 @@ exports.default = function ({ actions, state }) {
     (0, _hyperapp.h)(
       'x-box',
       null,
+      (0, _hyperapp.h)('x-checkbox', {
+        id: 'ouiUpdateCheckbox',
+        toggled: state.enableOUIfileUpdate,
+        onchange: function (event) {
+          actions.updateSetting({ settingName: 'enableOUIfileUpdate', settingValue: event.currentTarget.toggled });
+        }
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'ouiUpdateCheckbox', id: 'ouiUpdateCheckboxLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            (0, _hyperapp.h)(
+              'strong',
+              null,
+              'OUI File Update'
+            )
+          ),
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            'LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
       (0, _hyperapp.h)('x-switch', {
         id: 'userDebugSwitch',
         toggled: state.userDebug,
         onchange: actions.toggleDebugWindow
-      })
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'strong',
+            null,
+            'User Debugger'
+          ),
+          (0, _hyperapp.h)(
+            'span',
+            null,
+            'Enabling this will show a debug window with information that may help you diagnose any issues.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
+      (0, _hyperapp.h)('x-switch', {
+        id: 'userDebugSwitch',
+        toggled: state.userDebug,
+        onchange: actions.toggleDebugWindow
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'strong',
+            null,
+            'User Debugger'
+          ),
+          (0, _hyperapp.h)(
+            'span',
+            null,
+            'Enabling this will show a debug window with information that may help you diagnose any issues.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
+      (0, _hyperapp.h)('x-switch', {
+        id: 'userDebugSwitch',
+        toggled: state.userDebug,
+        onchange: actions.toggleDebugWindow
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'strong',
+            null,
+            'User Debugger'
+          ),
+          (0, _hyperapp.h)(
+            'span',
+            null,
+            'Enabling this will show a debug window with information that may help you diagnose any issues.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
+      (0, _hyperapp.h)('x-switch', {
+        id: 'userDebugSwitch',
+        toggled: state.userDebug,
+        onchange: actions.toggleDebugWindow
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'strong',
+            null,
+            'User Debugger'
+          ),
+          (0, _hyperapp.h)(
+            'span',
+            null,
+            'Enabling this will show a debug window with information that may help you diagnose any issues.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      null,
+      (0, _hyperapp.h)('x-switch', {
+        id: 'userDebugSwitch',
+        toggled: state.userDebug,
+        onchange: actions.toggleDebugWindow
+      }),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'strong',
+            null,
+            'User Debugger'
+          ),
+          (0, _hyperapp.h)(
+            'span',
+            null,
+            'Enabling this will show a debug window with information that may help you diagnose any issues.'
+          )
+        )
+      )
     )
   );
 };

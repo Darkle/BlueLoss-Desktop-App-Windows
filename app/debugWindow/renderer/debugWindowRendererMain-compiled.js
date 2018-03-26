@@ -95,6 +95,8 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _utils = __webpack_require__(/*! ../../settingsWindow/renderer/utils.lsc */ "./app/settingsWindow/renderer/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const preElem = document.querySelector('#debugOutput');
@@ -118,7 +120,70 @@ function createMetaObjForLogging(meta) {
   }return logString;
 }function isDebugWindowOpeningMessage(msg) {
   return msg === 'Settings Loaded At LANLost Startup:';
+}function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('debug-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
+
+/***/ }),
+
+/***/ "./app/settingsWindow/renderer/utils.lsc":
+/*!***********************************************!*\
+  !*** ./app/settingsWindow/renderer/utils.lsc ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.omitInheritedProperties = exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function identity(param) {
+  return param;
+}function getInitialSettingsFromMainProcess() {
+  /**
+  * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
+  * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
+  */
+  return _extends({
+    activeTab: 'statusTab',
+    devicesCanSee: [],
+    userDebug: false
+  }, omitInheritedProperties(_electron.remote.getGlobal('settingsWindowRendererInitialSettings')));
 }
+
+/**
+* https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+* https://stackoverflow.com/a/43911292/2785644
+*/
+function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) });
+}function omitInheritedProperties(obj) {
+  return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
+    if (isObject(obj[propName])) {
+      return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
+    }return _extends({}, prev, { [propName]: obj[propName] });
+  }, {});
+}function isObject(obj) {
+  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
+}exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
+exports.handleRendererWindowError = handleRendererWindowError;
+exports.identity = identity;
+exports.omitInheritedProperties = omitInheritedProperties;
 
 /***/ }),
 
