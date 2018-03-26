@@ -12,9 +12,7 @@ import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
-
 settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
-
 /**
  * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
  * for that.
