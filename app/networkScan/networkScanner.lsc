@@ -70,8 +70,7 @@ getDefaultGatewayIP():Promise<any> ->
     )
 
 getMacAdressForHostIP(ipAddress: string):Promise<any> ->
-  pGetMAC(ipAddress)
-    .then(macAddress -> ({ ipAddress, macAddress }))
+  pGetMAC(ipAddress).then(macAddress -> ({ ipAddress, macAddress }))
 
 getVendorInfoForMacAddress(device: DeviceType):Promise<DeviceType> ->
   if !getSettings().canSearchForMacVendorInfo:
@@ -86,9 +85,7 @@ generatePossibleHostIPs(gateway: string):Promise<Array<string>> ->
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   getInternalIP.v4()
     .then(internalIp ->
-      /**
-       * Lodash range doesn't include the last number.
-       */
+      // Lodash range doesn't include the last number.
       _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
         .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
         .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)

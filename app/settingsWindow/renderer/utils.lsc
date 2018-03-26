@@ -16,8 +16,6 @@ getInitialSettingsFromMainProcess() ->
     },
     ...omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
   })
-
-
 /**
 * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
 * https://stackoverflow.com/a/43911292/2785644
@@ -27,7 +25,6 @@ handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, erro
     { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
   )
 
-
 omitInheritedProperties(obj) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
     if isObject(obj[propName]):
@@ -35,7 +32,6 @@ omitInheritedProperties(obj) ->
 
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
-
 
 isObject(obj) ->
   _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj) and !_.isString(obj)
