@@ -657,10 +657,8 @@ const debugWindowProperties = _extends({
     devTools: true
   }
 });
-/****
-* Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
-* Reload is for dev so we can easily reload the browserwindow with Ctrl+R
-*/
+
+// Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
 const debugWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
 let debugWindow = null;
 
@@ -1330,20 +1328,16 @@ function getNewTrayIconPath(trayIconColor) {
 }function createContextMenu() {
   return _electron.Menu.buildFromTemplate([{
     label: 'Open LANLost Settings',
-    click() {
-      return (0, _settingsWindow.showSettingsWindow)();
-    }
+    click: _settingsWindow.showSettingsWindow
   }, {
-    label: `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`,
-    click() {
-      return (0, _toggleEnabledFromTray.toggleEnabledFromTray)();
-    }
+    label: generateEnabledDisabledLabel(),
+    click: _toggleEnabledFromTray.toggleEnabledFromTray
   }, {
     label: 'Quit LANLost',
-    click() {
-      return _electron.app.quit();
-    }
+    click: _electron.app.quit
   }]);
+}function generateEnabledDisabledLabel() {
+  return `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`;
 }function changeTrayIcon(newTrayIconColor) {
   tray.setImage(getNewTrayIconPath(newTrayIconColor));
 }function updateTrayMenu() {

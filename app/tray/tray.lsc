@@ -17,28 +17,26 @@ initTrayMenu():void ->
   tray.setToolTip('LANLost')
   tray.on('double-click', toggleSettingsWindow)
 
-createContextMenu() -> Menu.buildFromTemplate(
-  [
-    {
-      label: 'Open LANLost Settings',
-      click() {
-        showSettingsWindow()
+createContextMenu() ->
+  Menu.buildFromTemplate(
+    [
+      {
+        label: 'Open LANLost Settings',
+        click: showSettingsWindow
+      },
+      {
+        label: generateEnabledDisabledLabel(),
+        click: toggleEnabledFromTray
+      },
+      {
+        label: 'Quit LANLost',
+        click: electronApp.quit
       }
-    },
-    {
-      label: `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`,
-      click(){
-        toggleEnabledFromTray()
-      }
-    },
-    {
-      label: 'Quit LANLost',
-      click(){
-        electronApp.quit()
-      }
-    }
-  ]
-)
+    ]
+  )
+
+generateEnabledDisabledLabel():string ->
+  `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`
 
 changeTrayIcon(newTrayIconColor: string):void ->
   tray.setImage(getNewTrayIconPath(newTrayIconColor))
