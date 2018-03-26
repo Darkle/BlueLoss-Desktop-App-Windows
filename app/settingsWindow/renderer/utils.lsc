@@ -28,7 +28,6 @@ omitInheritedProperties(obj) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
     if isObject(obj[propName]):
       return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
-
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
