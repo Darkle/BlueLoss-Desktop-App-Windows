@@ -35,9 +35,9 @@ logStartupSettings()
 getSettings() -> settings
 
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  logSettingsUpdate(newSettingKey, newSettingValue)
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
+  logSettingsUpdate(newSettingKey, newSettingValue)
 
 addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
   if findDeviceInDevicesToSearchFor(deviceToAdd.macAddress): return
@@ -63,7 +63,7 @@ findDeviceInDevicesToSearchFor(macAddress) ->
  */
 logStartupSettings() ->
   process.nextTick(():void ->
-    logger.debug('Settings Loaded At LANLost Startup:\n', settingsLoadedOnStartup)
+    logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
   )
 
 

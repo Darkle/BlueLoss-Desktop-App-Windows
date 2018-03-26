@@ -2,21 +2,19 @@ import _ from 'lodash'
 
 import { SettingsTypes } from '../types/types.lsc'
 import { logger } from './logging/logging.lsc'
+import { getSettings } from '../db/settings.lsc'
 
 noop() -> return
 
 omitGawkFromSettings(settings) ->
-  recursiveOmitPropertiesFromObj(settings, ['__gawk__'])
+  recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__'])
 
-recursiveOmitPropertiesFromObj(settings, properties:Array<string>) ->
+recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties:Array<string>) ->
   omitInheritedProperties(settings, properties)
 
 logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  logger.debug(
-    '======================updateSetting======================\n',
-    `updated ${ newSettingKey } with: `,
-    newSettingValue
-  )
+  logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
+  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
 
 omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
@@ -37,7 +35,7 @@ export {
   noop,
   logSettingsUpdate,
   omitInheritedProperties,
-  recursiveOmitPropertiesFromObj,
+  recursiveOmitFilterAndInheritedPropertiesFromObj,
   isObject,
   pipe,
   curry,

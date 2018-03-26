@@ -240,6 +240,8 @@ var _winston2 = _interopRequireDefault(_winston);
 
 var _debugWindow = __webpack_require__(/*! ../../debugWindow/debugWindow.lsc */ "./app/debugWindow/debugWindow.lsc");
 
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /****
@@ -255,7 +257,7 @@ const UserDebugLoggerTransport = _winston2.default.transports.CustomLogger = fun
 UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, callback) {
   var _debugWindow$webConte;
 
-  _debugWindow.debugWindow == null ? void 0 : (_debugWindow$webConte = _debugWindow.debugWindow.webContents) == null ? void 0 : typeof _debugWindow$webConte.send !== 'function' ? void 0 : _debugWindow$webConte.send('mainprocess:debug-info-sent', { level, msg, meta });
+  _debugWindow.debugWindow == null ? void 0 : (_debugWindow$webConte = _debugWindow.debugWindow.webContents) == null ? void 0 : typeof _debugWindow$webConte.send !== 'function' ? void 0 : _debugWindow$webConte.send('mainprocess:debug-info-sent', { level, msg, meta: (0, _utils.recursiveOmitFilterAndInheritedPropertiesFromObj)(meta, ['__stackCleaned__']) });
   callback(null, true);
 };exports.UserDebugLoggerTransport = UserDebugLoggerTransport;
 
@@ -320,7 +322,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.omitGawkFromSettings = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
+exports.omitGawkFromSettings = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -332,16 +334,19 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.ls
 
 var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function noop() {
   return;
 }function omitGawkFromSettings(settings) {
-  return recursiveOmitPropertiesFromObj(settings, ['__gawk__']);
-}function recursiveOmitPropertiesFromObj(settings, properties) {
+  return recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__']);
+}function recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
 }function logSettingsUpdate(newSettingKey, newSettingValue) {
-  _logging.logger.debug('======================updateSetting======================\n', `updated ${newSettingKey} with: `, newSettingValue);
+  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
+  _logging.logger.debug(`Settings Are Now: `, omitGawkFromSettings((0, _settings.getSettings)()));
 }function omitInheritedProperties(obj, propertyFiltersArr = []) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
@@ -374,7 +379,7 @@ function noop() {
 }exports.noop = noop;
 exports.logSettingsUpdate = logSettingsUpdate;
 exports.omitInheritedProperties = omitInheritedProperties;
-exports.recursiveOmitPropertiesFromObj = recursiveOmitPropertiesFromObj;
+exports.recursiveOmitFilterAndInheritedPropertiesFromObj = recursiveOmitFilterAndInheritedPropertiesFromObj;
 exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
@@ -458,9 +463,9 @@ logStartupSettings();
 function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
-  (0, _utils.logSettingsUpdate)(newSettingKey, newSettingValue);
   settings[newSettingKey] = newSettingValue;
   db.set(newSettingKey, newSettingValue).write();
+  (0, _utils.logSettingsUpdate)(newSettingKey, newSettingValue);
 }function addNewDeviceToSearchFor(deviceToAdd) {
   var _ref;
 
@@ -485,7 +490,7 @@ function findDeviceInDevicesToSearchFor(macAddress) {
    */
 function logStartupSettings() {
   return process.nextTick(function () {
-    _logging.logger.debug('Settings Loaded At LANLost Startup:\n', settingsLoadedOnStartup);
+    _logging.logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup);
   });
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
@@ -642,6 +647,8 @@ var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const debugWindowHTMLpath = _url2.default.format({
@@ -692,6 +699,7 @@ function showDebugWindow() {
   });
   debugWindow.webContents.once('dom-ready', function () {
     (0, _settings.logStartupSettings)();
+    _logging.logger.debug('Current LANLost settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
   });
   debugWindow.webContents.once('crashed', function (event) {
     _logging.logger.error('debugWindow.webContents crashed', event);
@@ -1179,7 +1187,6 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const settingsToOmit = ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate'];
 const settingsHTMLpath = _url2.default.format({
   protocol: 'file',
   slashes: true,
@@ -1224,7 +1231,7 @@ function showSettingsWindow() {
   * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitPropertiesFromObj)((0, _settings.getSettings)(), settingsToOmit);
+  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitFilterAndInheritedPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']);
 
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);

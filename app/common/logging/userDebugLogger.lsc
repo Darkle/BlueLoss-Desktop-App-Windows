@@ -3,6 +3,7 @@ import util from 'util'
 import winston from 'winston'
 
 import { debugWindow } from '../../debugWindow/debugWindow.lsc'
+import { recursiveOmitFilterAndInheritedPropertiesFromObj } from '../utils.lsc'
 
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
@@ -16,7 +17,10 @@ UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->
 util.inherits(UserDebugLoggerTransport, winston.Transport)
 
 UserDebugLoggerTransport.prototype.log = (level, msg = '', meta = {}, callback):void ->
-  debugWindow?.webContents?.send?('mainprocess:debug-info-sent', {level, msg, meta})
+  debugWindow?.webContents?.send?(
+    'mainprocess:debug-info-sent',
+    { level, msg, meta: recursiveOmitFilterAndInheritedPropertiesFromObj(meta, ['__stackCleaned__']) }
+  )
   callback(null, true)
 
 

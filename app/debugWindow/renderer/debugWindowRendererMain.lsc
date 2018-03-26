@@ -9,9 +9,21 @@ preElem = document.querySelector('#debugOutput')
 let loggingTextSansLineNumbers = ''
 
 ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void ->
-  metaObj = if _.isEmpty(meta): '' else: stringifyObject(meta)
-  now loggingTextSansLineNumbers = `${ loggingTextSansLineNumbers }${ msg + metaObj }\n`
+  now loggingTextSansLineNumbers = createLoggingSansLineNumbers(msg, meta)
   preElem.textContent = addLineNumbers(loggingTextSansLineNumbers)
 )
 
+createMetaObjForLogging(meta):string ->
+  if _.isEmpty(meta): return ''
+  if meta.stack: meta.stack = meta.stack.split(/\r\n?|\n/)
+  stringifyObject(meta).replace(/'/g, '')
 
+createLoggingSansLineNumbers(msg, meta):string ->
+  metaObj = createMetaObjForLogging(meta)
+  let logString = `${ loggingTextSansLineNumbers }${ msg + metaObj }\n`
+  if isDebugWindowOpeningMessage(msg):
+    now logString = `${ logString }Please Wait...\n`
+  logString
+
+isDebugWindowOpeningMessage(msg):boolean ->
+  msg === 'Settings Loaded At LANLost Startup:'
