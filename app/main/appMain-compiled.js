@@ -1262,30 +1262,6 @@ exports.settingsWindow = settingsWindow;
 
 /***/ }),
 
-/***/ "./app/tray/toggleEnabledFromTray.lsc":
-/*!********************************************!*\
-  !*** ./app/tray/toggleEnabledFromTray.lsc ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.toggleEnabledFromTray = undefined;
-
-var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
-
-function toggleEnabledFromTray() {
-  const toggledLanLostEnabled = !(0, _settings.getSettings)().lanLostEnabled;
-  (0, _settings.updateSetting)('lanLostEnabled', toggledLanLostEnabled);
-}exports.toggleEnabledFromTray = toggleEnabledFromTray;
-
-/***/ }),
-
 /***/ "./app/tray/tray.lsc":
 /*!***************************!*\
   !*** ./app/tray/tray.lsc ***!
@@ -1309,8 +1285,6 @@ var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
-var _toggleEnabledFromTray = __webpack_require__(/*! ./toggleEnabledFromTray.lsc */ "./app/tray/toggleEnabledFromTray.lsc");
-
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -1331,7 +1305,7 @@ function getNewTrayIconPath(trayIconColor) {
     click: _settingsWindow.showSettingsWindow
   }, {
     label: generateEnabledDisabledLabel(),
-    click: _toggleEnabledFromTray.toggleEnabledFromTray
+    click: toggleEnabledFromTray
   }, {
     label: 'Quit LANLost',
     click: _electron.app.quit
@@ -1342,6 +1316,9 @@ function getNewTrayIconPath(trayIconColor) {
   tray.setImage(getNewTrayIconPath(newTrayIconColor));
 }function updateTrayMenu() {
   tray.setContextMenu(createContextMenu());
+}function toggleEnabledFromTray() {
+  const toggledLanLostEnabled = !(0, _settings.getSettings)().lanLostEnabled;
+  (0, _settings.updateSetting)('lanLostEnabled', toggledLanLostEnabled);
 }exports.initTrayMenu = initTrayMenu;
 exports.changeTrayIcon = changeTrayIcon;
 exports.createContextMenu = createContextMenu;
