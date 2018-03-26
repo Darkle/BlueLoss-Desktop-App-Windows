@@ -1105,7 +1105,7 @@ exports.default = function ({ actions, state }) {
             (0, _hyperapp.h)(
               'strong',
               null,
-              'OUI File Update'
+              'Download OUI File Updates'
             )
           ),
           (0, _hyperapp.h)(

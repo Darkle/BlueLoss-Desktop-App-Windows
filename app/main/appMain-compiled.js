@@ -176,11 +176,8 @@ const userDebugTransportOptions = {
   level: 'debug',
   handleExceptions: true,
   humanReadableUnhandledException: true
-  /*****
-  * https://github.com/winstonjs/winston/tree/2.4.0
-  * Winston log levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5 }
-  * So can use logger.error(), logger.warn(), logger.info(), logger.verbose(), logger.debug()
-  */
+
+  // https://github.com/winstonjs/winston/tree/2.4.0
 };const logger = new _winston2.default.Logger({
   level: 'debug',
   exitOnError: false
@@ -250,8 +247,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
 * window. The log data is sent to the debug window renderer and displayed there.
-*
-* The transports need a param (options) or they throw an error, even if you don't use it.
 */
 const UserDebugLoggerTransport = _winston2.default.transports.CustomLogger = function (options) {
   Object.assign(this, options);
@@ -298,13 +293,12 @@ const settingsWindowJSfilePath = _path2.default.join(settingsWindowDirPath, 'set
 const settingsWindowIconFiles = _path2.default.join(settingsWindowDirPath, 'assets', 'icons', '*.*');
 const debugWindowDirPath = _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer');
 const debugWindowHTMLfilePath = _path2.default.join(debugWindowDirPath, 'debugWindow.html');
-const debugWindowCSSfilePath = _path2.default.join(debugWindowDirPath, 'assets', 'styles', 'css', 'debugWindowCss.css');
 const debugWindowJSfilePath = _path2.default.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js');
 const devtronPath = _path2.default.resolve(__dirname, '..', '..', 'node_modules', 'devtron');
 
 function setUpDev() {
   if (false) {}
-  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowCSSfilePath, debugWindowJSfilePath]);
+  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
   (0, _settingsWindow.showSettingsWindow)();
@@ -325,7 +319,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.omitGawkFromSettings = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitInheritedProperties = exports.logSettingsUpdate = exports.noop = undefined;
+exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = exports.logSettingsUpdate = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -341,15 +335,13 @@ var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function noop() {
-  return;
+function logSettingsUpdate(newSettingKey, newSettingValue) {
+  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
+  _logging.logger.debug(`Settings Are Now: `, omitGawkFromSettings((0, _settings.getSettings)()));
 }function omitGawkFromSettings(settings) {
   return recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__']);
 }function recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
-}function logSettingsUpdate(newSettingKey, newSettingValue) {
-  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
-  _logging.logger.debug(`Settings Are Now: `, omitGawkFromSettings((0, _settings.getSettings)()));
 }function omitInheritedProperties(obj, propertyFiltersArr = []) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
@@ -359,6 +351,8 @@ function noop() {
       return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) });
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
+}function noop() {
+  return;
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj);
 }function pipe(...fns) {
@@ -379,15 +373,15 @@ function noop() {
       return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
     };
   };
-}exports.noop = noop;
-exports.logSettingsUpdate = logSettingsUpdate;
-exports.omitInheritedProperties = omitInheritedProperties;
+}exports.logSettingsUpdate = logSettingsUpdate;
+exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.recursiveOmitFilterAndInheritedPropertiesFromObj = recursiveOmitFilterAndInheritedPropertiesFromObj;
+exports.omitInheritedProperties = omitInheritedProperties;
+exports.noop = noop;
 exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
-exports.omitGawkFromSettings = omitGawkFromSettings;
 
 /***/ }),
 
@@ -452,16 +446,14 @@ db.defaults(_settingsDefaults.defaultSettings).write();
 
 const settings = (0, _gawk2.default)(db.getState());
 /**
- * settingsLoadedOnStartup is for the debug window, as it loads way after
- * startup and the settings could have changed since then, so store a copy
- * of the settings loaded on startup.
+ * settingsLoadedOnStartup is for the debug window - on debug window load, we show
+ * the settings loaded on startup as well as the current settings now to help debug any
+ * settings issues.
  */
 const settingsLoadedOnStartup = _extends({}, (0, _utils.omitGawkFromSettings)(settings));
 
 (0, _settingsObservers.initSettingsObservers)(settings);
 (0, _settingsIPClisteners.initSettingsIPClisteners)();
-
-logStartupSettings();
 
 function getSettings() {
   return settings;
@@ -484,17 +476,8 @@ function getSettings() {
   */
 function findDeviceInDevicesToSearchFor(macAddress) {
   return _lodash2.default.find(settings.devicesToSearchFor, { macAddress });
-} /**
-   * This is a bit nasty, but we were running in to circular dependancy issues
-   * because we want to log the settings loaded on startup to help debug any issues,
-   * but the logger.lsc module also needs to import the settings.lsc file for the getSettings
-   * function so it can know wheater it should load the rollbar logger or not.
-   * ఠ_ఠ
-   */
-function logStartupSettings() {
-  return process.nextTick(function () {
-    _logging.logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup);
-  });
+}function logStartupSettings() {
+  return _logging.logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup);
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
@@ -608,6 +591,7 @@ function initSettingsObservers(settings) {
     var _settingsWindow$webCo;
 
     _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { lanLostEnabled: enabled });
+    (0, _tray.updateTrayMenu)();
   });
   _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
     if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
@@ -1317,7 +1301,7 @@ function toggleEnabledFromTray() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.changeTrayIcon = exports.initTrayMenu = undefined;
+exports.updateTrayMenu = exports.createContextMenu = exports.changeTrayIcon = exports.initTrayMenu = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -1352,8 +1336,7 @@ function getNewTrayIconPath(trayIconColor) {
   }, {
     label: `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`,
     click() {
-      (0, _toggleEnabledFromTray.toggleEnabledFromTray)();
-      return tray.setContextMenu(createContextMenu());
+      return (0, _toggleEnabledFromTray.toggleEnabledFromTray)();
     }
   }, {
     label: 'Quit LANLost',
@@ -1363,8 +1346,12 @@ function getNewTrayIconPath(trayIconColor) {
   }]);
 }function changeTrayIcon(newTrayIconColor) {
   tray.setImage(getNewTrayIconPath(newTrayIconColor));
+}function updateTrayMenu() {
+  tray.setContextMenu(createContextMenu());
 }exports.initTrayMenu = initTrayMenu;
 exports.changeTrayIcon = changeTrayIcon;
+exports.createContextMenu = createContextMenu;
+exports.updateTrayMenu = updateTrayMenu;
 
 /***/ }),
 

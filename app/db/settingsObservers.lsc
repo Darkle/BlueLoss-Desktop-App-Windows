@@ -3,11 +3,12 @@ import gawk from 'gawk'
 
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
-import { changeTrayIcon } from '../tray/tray.lsc'
+import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
 
 initSettingsObservers(settings):void ->
   gawk.watch(settings, ['lanLostEnabled'], (enabled: boolean):void ->
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {lanLostEnabled: enabled})
+    updateTrayMenu()
   )
   gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
     if enabled: addRollbarLogging()

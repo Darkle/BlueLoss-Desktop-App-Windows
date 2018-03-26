@@ -29,7 +29,6 @@ createContextMenu() -> Menu.buildFromTemplate(
       label: `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`,
       click(){
         toggleEnabledFromTray()
-        tray.setContextMenu(createContextMenu())
       }
     },
     {
@@ -44,8 +43,13 @@ createContextMenu() -> Menu.buildFromTemplate(
 changeTrayIcon(newTrayIconColor: string):void ->
   tray.setImage(getNewTrayIconPath(newTrayIconColor))
 
+updateTrayMenu():void ->
+  tray.setContextMenu(createContextMenu())
+
 
 export {
   initTrayMenu,
-  changeTrayIcon
+  changeTrayIcon,
+  createContextMenu,
+  updateTrayMenu,
 }
