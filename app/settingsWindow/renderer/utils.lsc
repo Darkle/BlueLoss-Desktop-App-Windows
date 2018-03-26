@@ -1,8 +1,6 @@
 import { remote, ipcRenderer } from 'electron'
 import _ from 'lodash'
 
-identity(param) -> param
-
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
@@ -33,6 +31,7 @@ omitInheritedProperties(obj) ->
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
+identity(param) -> param
 isObject(obj) ->
   _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj) and !_.isRegExp(obj) and !_.isString(obj)
 
