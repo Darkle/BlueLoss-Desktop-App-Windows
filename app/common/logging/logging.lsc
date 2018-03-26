@@ -30,6 +30,7 @@ if ISDEV:
   logger.add(winston.transports.Console, {
     handleExceptions: true,
     humanReadableUnhandledException: true,
+    json: true
   })
 // dont send errors to rollbar in dev && only if enabled.
 if !ISDEV and getSettings().reportErrors:

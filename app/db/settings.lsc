@@ -63,7 +63,7 @@ findDeviceInDevicesToSearchFor(macAddress) ->
  */
 logStartupSettings() ->
   process.nextTick(():void ->
-    logger.debug('Settings Loaded At Startup:\n', settingsLoadedOnStartup, {})
+    logger.debug('Settings Loaded At LANLost Startup:\n', settingsLoadedOnStartup)
   )
 
 

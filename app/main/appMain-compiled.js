@@ -189,7 +189,8 @@ const userDebugTransportOptions = {
 if (true) {
   logger.add(_winston2.default.transports.Console, {
     handleExceptions: true,
-    humanReadableUnhandledException: true
+    humanReadableUnhandledException: true,
+    json: true
   });
 } // dont send errors to rollbar in dev && only if enabled.
 if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
@@ -340,7 +341,7 @@ function noop() {
 }function recursiveOmitPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
 }function logSettingsUpdate(newSettingKey, newSettingValue) {
-  _logging.logger.debug('======================updateSetting======================\n', `updated ${newSettingKey} with: `, newSettingValue, {});
+  _logging.logger.debug('======================updateSetting======================\n', `updated ${newSettingKey} with: `, newSettingValue);
 }function omitInheritedProperties(obj, propertyFiltersArr = []) {
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
@@ -484,7 +485,7 @@ function findDeviceInDevicesToSearchFor(macAddress) {
    */
 function logStartupSettings() {
   return process.nextTick(function () {
-    _logging.logger.debug('Settings Loaded At Startup:\n', settingsLoadedOnStartup, {});
+    _logging.logger.debug('Settings Loaded At LANLost Startup:\n', settingsLoadedOnStartup);
   });
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
@@ -810,7 +811,7 @@ function handleScanResults(devices) {
    * Dunno why, but you need an extra object at the end to make an array of objects
    * print right in winston.
    */
-  _logging.logger.debug(`scan returned these active devices: \n`, devices, {});
+  _logging.logger.debug(`scan returned these active devices: \n`, devices);
 
   /**
    * We use the lastSeen time in the UI to show the user the last time we have

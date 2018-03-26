@@ -14,7 +14,7 @@ handleScanResults(devices: Array<DeviceType>):void ->
    * Dunno why, but you need an extra object at the end to make an array of objects
    * print right in winston.
    */
-  logger.debug(`scan returned these active devices: \n`, devices, {})
+  logger.debug(`scan returned these active devices: \n`, devices)
 
   /**
    * We use the lastSeen time in the UI to show the user the last time we have

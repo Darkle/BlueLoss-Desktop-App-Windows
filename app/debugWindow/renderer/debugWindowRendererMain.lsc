@@ -1,1 +1,17 @@
-console.log('debug window renderer')
+import { ipcRenderer } from 'electron'
+
+import stringifyObject from 'stringify-object'
+import addLineNumbers from 'add-line-numbers'
+import _ from 'lodash'
+
+preElem = document.querySelector('#debugOutput')
+
+let loggingTextSansLineNumbers = ''
+
+ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void ->
+  metaObj = if _.isEmpty(meta): '' else: stringifyObject(meta)
+  now loggingTextSansLineNumbers = `${ loggingTextSansLineNumbers }${ msg + metaObj }\n`
+  preElem.textContent = addLineNumbers(loggingTextSansLineNumbers)
+)
+
+

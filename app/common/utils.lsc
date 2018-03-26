@@ -15,8 +15,7 @@ logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   logger.debug(
     '======================updateSetting======================\n',
     `updated ${ newSettingKey } with: `,
-    newSettingValue,
-    {}
+    newSettingValue
   )
 
 omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
