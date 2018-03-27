@@ -4,6 +4,7 @@ import gawk from 'gawk'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
 import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
+import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
 
 initSettingsObservers(settings):void ->
   gawk.watch(settings, ['lanLostEnabled'], (enabled: boolean):void ->
@@ -13,6 +14,10 @@ initSettingsObservers(settings):void ->
   gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
     if enabled: addRollbarLogging()
     else: removeRollbarLogging()
+  )
+  gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
+    if enabled: enableRunOnStartup()
+    else: disableRunOnStartup()
   )
   gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 
