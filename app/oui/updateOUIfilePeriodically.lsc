@@ -55,7 +55,7 @@ checkResponseBody(response: Object): ?string ->
  * so we dont have any issue with the app trying to load the recently
  * updated file while it is trying to do a new update.
  */
-scheduleOUIfileUpdate(interval = threeMinutesTime):void ->
+scheduleOUIfileUpdate(interval: number = threeMinutesTime):void ->
   setTimeout(updateOUIfilePeriodically, interval)
 
 shouldUpdate():boolean ->
