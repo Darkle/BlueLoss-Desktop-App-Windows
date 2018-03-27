@@ -204,7 +204,8 @@ var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/ty
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
-* If you need to use the state & actions and return data, you need to use (value) => (state, actions)
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
 * https://github.com/hyperapp/hyperapp#actions
 */
 exports.default = function addNewDevice(newDevice) {

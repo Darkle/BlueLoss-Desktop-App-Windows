@@ -1307,9 +1307,7 @@ function showSettingsWindow() {
   const settingsWindowPosition = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition;
   if (!settingsWindowPosition) return {};
   return { x: settingsWindowPosition.x, y: settingsWindowPosition.y };
-}
-
-function toggleSettingsWindow() {
+}function toggleSettingsWindow() {
   if (!settingsWindow) {
     showSettingsWindow();
   } else if (settingsWindow.isVisible()) {

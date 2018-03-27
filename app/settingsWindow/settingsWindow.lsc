@@ -81,7 +81,7 @@ showSettingsWindow():void ->
 getStoredWindowPosition() ->
   settingsWindowPosition = getSettings?().settingsWindowPosition
   if !settingsWindowPosition: return {}
-  ({ x: settingsWindowPosition.x, y: settingsWindowPosition.y })
+  { x: settingsWindowPosition.x, y: settingsWindowPosition.y }
 
 toggleSettingsWindow():void ->
   if !settingsWindow:
