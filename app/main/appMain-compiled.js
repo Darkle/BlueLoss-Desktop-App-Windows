@@ -1309,7 +1309,9 @@ function showSettingsWindow() {
     x: (0, _settings.getSettings)().settingsWindowPosition.x,
     y: (0, _settings.getSettings)().settingsWindowPosition.y
   };
-}function toggleSettingsWindow() {
+}
+
+function toggleSettingsWindow() {
   if (!settingsWindow) {
     showSettingsWindow();
   } else if (settingsWindow.isVisible()) {
