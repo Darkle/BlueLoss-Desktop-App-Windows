@@ -29,7 +29,7 @@ loadOUIfileIfNotLoaded():Promise<any> ->
       updateSetting('canSearchForMacVendorInfo', false)
     )
 
-chooseOUIFilePath(existsResult: string): string ->
+chooseOUIFilePath(existsResult: string | boolean): string ->
   if existsResult === 'file': return downloadedOUIfilePath
   return initialOUIfilePath
 
