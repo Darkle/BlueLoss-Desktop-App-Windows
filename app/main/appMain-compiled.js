@@ -1304,11 +1304,9 @@ function showSettingsWindow() {
     _logging.logger.error('settingsWindow unresponsive', event);
   });
 }function getStoredWindowPosition() {
-  if (!(typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition)) return {};
-  return {
-    x: (0, _settings.getSettings)().settingsWindowPosition.x,
-    y: (0, _settings.getSettings)().settingsWindowPosition.y
-  };
+  const settingsWindowPosition = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition;
+  if (!settingsWindowPosition) return {};
+  return { x: settingsWindowPosition.x, y: settingsWindowPosition.y };
 }
 
 function toggleSettingsWindow() {
