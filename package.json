@@ -7,10 +7,8 @@
   "scripts": {
     "webpackWatch": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
     "electronWatch": "cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config ./nodemon.json",
-    "ele": "cross-env NODE_ENV=development electron app/main/appMain-compiled.js",
     "styleWatch": "cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c ./.eslintrc.json --color --clear",
-    "updateTypes": "typesync ./package.json && npm install",
     "debug": "cross-env NODE_ENV=development,nodeDebug=true sleepms 3000 && electron --inspect-brk ./app/main/appMain-compiled.js",
     "build": "cross-env NODE_ENV=production,webpackBuild=true parallel-webpack",
     "start": "cross-env NODE_ENV=production electron ./app/main/appMain-compiled.js",
