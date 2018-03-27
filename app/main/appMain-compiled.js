@@ -1256,7 +1256,7 @@ const settingsWindowProperties = _extends({
 }, getStoredWindowPosition());
 /****
 * Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
-* Reload is for dev so we can easily reload the browserwindow with Ctrl+R
+* Reload is for dev so we can easily reload the browserwindow with Ctrl+R.
 */
 const settingsWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
 let settingsWindow = null;
@@ -1265,7 +1265,6 @@ function showSettingsWindow() {
   var _electronApp$dock;
 
   if (settingsWindow) return settingsWindow.show();
-
   /*****
   * We add the settings to a global each time we create a new settings window so we can easily
   * load the inital app settings on renderer startup. This way we dont have to send a message from the
