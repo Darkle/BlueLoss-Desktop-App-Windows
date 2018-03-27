@@ -10,7 +10,7 @@ import { recursiveOmitFilterAndInheritedPropertiesFromObj } from '../utils.lsc'
 * window. The log data is sent to the debug window renderer and displayed there.
 */
 UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->
-    Object.assign(this, options)
+  Object.assign(this, options)
 
 util.inherits(UserDebugLoggerTransport, winston.Transport)
 

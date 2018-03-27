@@ -27,7 +27,7 @@ rollbarConfig = {
 rollbarLogger = new Rollbar(rollbarConfig)
 
 CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
-    Object.assign(this, options)
+  Object.assign(this, options)
 
 util.inherits(CustomRollbarTransport, winston.Transport)
 
