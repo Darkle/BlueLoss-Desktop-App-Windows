@@ -1366,8 +1366,7 @@ function getNewTrayIconPath(trayIconColor) {
 }function updateTrayMenu() {
   tray.setContextMenu(createContextMenu());
 }function toggleEnabledFromTray() {
-  const toggledLanLostEnabled = !(0, _settings.getSettings)().lanLostEnabled;
-  (0, _settings.updateSetting)('lanLostEnabled', toggledLanLostEnabled);
+  (0, _settings.updateSetting)('lanLostEnabled', !(0, _settings.getSettings)().lanLostEnabled);
 }exports.initTrayMenu = initTrayMenu;
 exports.changeTrayIcon = changeTrayIcon;
 exports.createContextMenu = createContextMenu;

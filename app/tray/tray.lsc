@@ -44,8 +44,7 @@ updateTrayMenu():void ->
   tray.setContextMenu(createContextMenu())
 
 toggleEnabledFromTray():void ->
-  toggledLanLostEnabled = !getSettings().lanLostEnabled
-  updateSetting('lanLostEnabled', toggledLanLostEnabled)
+  updateSetting('lanLostEnabled', !getSettings().lanLostEnabled)
 
 export {
   initTrayMenu,
