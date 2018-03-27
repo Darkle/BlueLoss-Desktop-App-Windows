@@ -1162,7 +1162,9 @@ const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ou
 function updateOUIfilePeriodically() {
   if (!shouldUpdate() || !(0, _settings.getSettings)().enableOUIfileUpdate) {
     return scheduleOUIfileUpdate(twoDaysTime);
-  }(0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
+  }(0, _settings.updateSetting)('dateLastCheckedForOUIupdate', Date.now());
+
+  (0, _got2.default)(updateUrl, gotRequestOptions).then(checkResponseAndGenerateObj).then(_getOUIfile.updateOUIfileDataInMemory).then(curriedJetPackWrite).catch(function (err) {
     _logging.logger.error(gotErrorMessage, err);
   });
 
@@ -1276,7 +1278,7 @@ function showSettingsWindow() {
   * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitFilterAndInheritedPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']);
+  global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitFilterAndInheritedPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate', 'firstRun']);
 
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
   settingsWindow.loadURL(settingsHTMLpath);

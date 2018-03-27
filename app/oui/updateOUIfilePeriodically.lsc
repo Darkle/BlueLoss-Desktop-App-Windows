@@ -5,7 +5,7 @@ import ms from 'ms'
 import got from 'got'
 import jetpack from 'fs-jetpack'
 
-import { getSettings } from '../db/settings.lsc'
+import { getSettings, updateSetting } from '../db/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { pipe, curry } from '../common/utils.lsc'
 import { updateOUIfileDataInMemory } from './getOUIfile.lsc'
@@ -23,6 +23,8 @@ curriedJetPackWrite = curry(jetpack.writeAsync)(ouiDownloadfilePath)
 updateOUIfilePeriodically(): Function ->
   if !shouldUpdate() || !getSettings().enableOUIfileUpdate:
     return scheduleOUIfileUpdate(twoDaysTime)
+
+  updateSetting('dateLastCheckedForOUIupdate', Date.now())
 
   got(updateUrl, gotRequestOptions)
     .then(checkResponseAndGenerateObj)

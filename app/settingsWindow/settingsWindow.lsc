@@ -53,7 +53,7 @@ showSettingsWindow():void ->
   */
   global.settingsWindowRendererInitialSettings = recursiveOmitFilterAndInheritedPropertiesFromObj(
     getSettings(),
-    ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate']
+    ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate', 'firstRun']
   )
 
   now settingsWindow = new BrowserWindow({...settingsWindowProperties, ...getStoredWindowPosition()})

@@ -30,7 +30,6 @@ createLoggingSansLineNumbers(msg, meta):string ->
 isDebugWindowOpeningMessage(msg):boolean ->
   msg === 'Current LANLost settings:'
 
-
 handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->
   ipcRenderer.send('debug-window-renderer:error-sent',
     { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
