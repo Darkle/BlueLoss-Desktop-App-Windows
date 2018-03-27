@@ -706,8 +706,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.closeDebugWindow = exports.showDebugWindow = exports.debugWindow = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
@@ -733,7 +731,7 @@ const debugWindowHTMLpath = _url2.default.format({
   slashes: true,
   pathname: _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
 });
-const debugWindowProperties = _extends({
+const debugWindowProperties = {
   width: 786,
   height: 616,
   title: 'LANLost',
@@ -746,10 +744,9 @@ const debugWindowProperties = _extends({
     textAreasAreResizable: true,
     devTools: true
   }
-});
 
-// Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
-const debugWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
+  // Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+};const debugWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
 let debugWindow = null;
 
 function showDebugWindow() {

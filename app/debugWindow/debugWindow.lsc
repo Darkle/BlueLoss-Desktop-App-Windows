@@ -13,19 +13,17 @@ debugWindowHTMLpath = url.format({
   pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
 })
 debugWindowProperties = {
-  ...{
-    width: 786,
-    height: 616,
-    title: 'LANLost',
-    autoHideMenuBar: true,
-    resizable: false,
-    fullscreenable: false,
-    fullscreen: false,
-    show: false,
-    webPreferences: {
-      textAreasAreResizable: true,
-      devTools: ISDEV,
-    }
+  width: 786,
+  height: 616,
+  title: 'LANLost',
+  autoHideMenuBar: true,
+  resizable: false,
+  fullscreenable: false,
+  fullscreen: false,
+  show: false,
+  webPreferences: {
+    textAreasAreResizable: true,
+    devTools: ISDEV,
   }
 }
 
