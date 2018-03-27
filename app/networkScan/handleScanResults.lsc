@@ -25,9 +25,8 @@ handleScanResults(devices: Array<DeviceType>):void ->
 
   locksSystemIfShouldLock(lastTimeSawADeviceWeAreLookingFor)
 
-foundADeviceWeAreLookingFor(devicesToSearchFor, devices):boolean ->
+foundADeviceWeAreLookingFor(devicesToSearchFor:Array<any>, devices:Array<any>):boolean ->
    _.intersectionBy(devicesToSearchFor, devices, 'macAddress').length
-
 
 
 export {
