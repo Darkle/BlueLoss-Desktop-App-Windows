@@ -15,7 +15,7 @@ curriedJetpackRead = curryRight(jetpack.readAsync)('json')
 
 /**
  * If we haven't downloaded a new copy of the MAC vendor prefix list, use
- * our built in one. MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/
+ * our built in one (MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/).
  */
 loadOUIfileIfNotLoaded():Promise<any> ->
   if ouiFileData: return Promise.resolve()
@@ -33,7 +33,7 @@ chooseOUIFilePath(existsResult: string | boolean): string ->
   if existsResult === 'file': return downloadedOUIfilePath
   return initialOUIfilePath
 
-getOUIfileData() -> ouiFileData
+getOUIfileData():Object -> ouiFileData
 
 updateOUIfileDataInMemory(newData):Object ->
   now ouiFileData = newData

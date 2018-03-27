@@ -1074,7 +1074,7 @@ const curriedJetpackRead = (0, _utils.curryRight)(_fsJetpack2.default.readAsync)
 
 /**
  * If we haven't downloaded a new copy of the MAC vendor prefix list, use
- * our built in one. MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/
+ * our built in one (MAC vendor prefix file from: https://linuxnet.ca/ieee/oui/).
  */
 function loadOUIfileIfNotLoaded() {
   if (ouiFileData) return Promise.resolve();
