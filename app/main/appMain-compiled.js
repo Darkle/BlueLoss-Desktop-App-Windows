@@ -1341,9 +1341,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let tray = null; // might need to be outside to avoid being garbage collected. https://electron.atom.io/docs/api/tray/
 const trayIconsFolderPath = _path2.default.resolve(__dirname, '..', '..', 'resources', 'icons');
 
-function getNewTrayIconPath(trayIconColor) {
-  return _path2.default.join(trayIconsFolderPath, trayIconColor, `LANLost-${trayIconColor}-128x128.png`);
-}function initTrayMenu() {
+function initTrayMenu() {
   tray = new _electron.Tray(getNewTrayIconPath((0, _settings.getSettings)().trayIconColor));
   tray.setContextMenu(createContextMenu());
   tray.setToolTip('LANLost');
@@ -1359,6 +1357,8 @@ function getNewTrayIconPath(trayIconColor) {
     label: 'Quit LANLost',
     click: _electron.app.quit
   }]);
+}function getNewTrayIconPath(trayIconColor) {
+  return _path2.default.join(trayIconsFolderPath, trayIconColor, `LANLost-${trayIconColor}-128x128.png`);
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`;
 }function changeTrayIcon(newTrayIconColor) {

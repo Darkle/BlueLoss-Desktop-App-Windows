@@ -7,16 +7,13 @@ import { updateSetting, getSettings } from '../db/settings.lsc'
 let tray = null // might need to be outside to avoid being garbage collected. https://electron.atom.io/docs/api/tray/
 trayIconsFolderPath = path.resolve(__dirname, '..', '..', 'resources', 'icons')
 
-getNewTrayIconPath(trayIconColor: string) ->
-  path.join(trayIconsFolderPath, trayIconColor, `LANLost-${ trayIconColor }-128x128.png`)
-
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
   tray.setContextMenu(createContextMenu())
   tray.setToolTip('LANLost')
   tray.on('double-click', toggleSettingsWindow)
 
-createContextMenu() ->
+createContextMenu():Object ->
   Menu.buildFromTemplate(
     [
       {
@@ -33,6 +30,9 @@ createContextMenu() ->
       }
     ]
   )
+
+getNewTrayIconPath(trayIconColor: string):string ->
+  path.join(trayIconsFolderPath, trayIconColor, `LANLost-${ trayIconColor }-128x128.png`)
 
 generateEnabledDisabledLabel():string ->
   `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`
