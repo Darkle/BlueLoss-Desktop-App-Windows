@@ -1,7 +1,6 @@
 
 /**
  * Settings Types
- *
  */
 type DeviceType = { vendorName: ?string, ipAddress: string, macAddress: string, lastSeen: ?number }
 type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
