@@ -100,7 +100,7 @@ var _utils = __webpack_require__(/*! ../../settingsWindow/renderer/utils.lsc */ 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const preElem = document.querySelector('#debugOutput');
-
+const { lanLostEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
 let loggingTextSansLineNumbers = '';
 
 _electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg = '', meta }) {
@@ -116,10 +116,10 @@ function createMetaObjForLogging(meta) {
   const metaObj = createMetaObjForLogging(meta);
   let logString = `${loggingTextSansLineNumbers}${msg + metaObj}\n`;
   if (isDebugWindowOpeningMessage(msg)) {
-    logString = `${logString}Please Wait...\n`;
+    logString = lanLostEnabled ? `${logString}Please Wait...\n` : void 0;
   }return logString;
 }function isDebugWindowOpeningMessage(msg) {
-  return msg === 'Settings Loaded At LANLost Startup:';
+  return msg === 'Current LANLost settings:';
 }function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
   _electron.ipcRenderer.send('debug-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
 }window.onerror = handleRendererWindowError;
@@ -152,13 +152,11 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function identity(param) {
-  return param;
-}function getInitialSettingsFromMainProcess() {
-  /**
-  * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
-  * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
-  */
+/**
+* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
+* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
+*/
+function getInitialSettingsFromMainProcess() {
   return _extends({
     activeTab: 'statusTab',
     devicesCanSee: [],
@@ -173,11 +171,14 @@ function identity(param) {
 function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
   _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) });
 }function omitInheritedProperties(obj) {
+  if (!isObject(obj)) return {};
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     if (isObject(obj[propName])) {
       return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
+}function identity(param) {
+  return param;
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
 }exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;

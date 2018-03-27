@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, remote } from 'electron'
 
 import stringifyObject from 'stringify-object'
 import addLineNumbers from 'add-line-numbers'
@@ -7,7 +7,7 @@ import _ from 'lodash'
 import { omitInheritedProperties } from '../../settingsWindow/renderer/utils.lsc'
 
 preElem = document.querySelector('#debugOutput')
-
+{ lanLostEnabled } = omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
 let loggingTextSansLineNumbers = ''
 
 ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void ->
@@ -24,11 +24,11 @@ createLoggingSansLineNumbers(msg, meta):string ->
   metaObj = createMetaObjForLogging(meta)
   let logString = `${ loggingTextSansLineNumbers }${ msg + metaObj }\n`
   if isDebugWindowOpeningMessage(msg):
-    now logString = `${ logString }Please Wait...\n`
+    now logString = if lanLostEnabled: `${ logString }Please Wait...\n`
   logString
 
 isDebugWindowOpeningMessage(msg):boolean ->
-  msg === 'Settings Loaded At LANLost Startup:'
+  msg === 'Current LANLost settings:'
 
 
 handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->

@@ -37,6 +37,7 @@ handleScanResults(devices: Array<DeviceType>):void ->
     return
 
   if shouldLock():
+    // lockSytem throws on error
     try:
       lockSystem()
     catch(err):

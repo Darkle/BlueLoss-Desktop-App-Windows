@@ -211,7 +211,7 @@ exports.default = function addNewDevice(newDevice) {
   return function (state) {
     var _ref;
 
-    if (_lodash2.default.find(state.devicesToSearchFor, { macAddress: newDevice.macAddress })) return;
+    if (_lodash2.default.find(state.devicesToSearchFor, { macAddress: newDevice.macAddress })) return {};
     _electron.ipcRenderer.send('renderer:device-added-in-ui', newDevice);
     return { devicesToSearchFor: [...(_ref = state.devicesToSearchFor, _ref === void 0 ? [] : _ref), ...[newDevice]] };
   };
@@ -321,11 +321,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 exports.default = function removeDevice(deviceToRemove) {
   return function (state) {
-    if (!_lodash2.default.find(state.devicesToSearchFor, { macAddress: deviceToRemove.macAddress })) return;
+    if (!_lodash2.default.find(state.devicesToSearchFor, { macAddress: deviceToRemove.macAddress })) return {};
     _electron.ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove);
-    return { devicesToSearchFor: [state.devicesToSearchFor.filter(function ({ macAddress }) {
+    return { devicesToSearchFor: state.devicesToSearchFor.filter(function ({ macAddress }) {
         return macAddress !== deviceToRemove.macAddress;
-      })] };
+      }) };
   };
 };
 
@@ -467,7 +467,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-exports.default = function deviceCard({ lookingForDevice, deviceName, macAddress, actions }) {
+exports.default = function deviceCard({ lookingForDevice, device, actions }) {
+  const { vendorName, macAddress, ipAddress } = device;
   return (0, _hyperapp.h)(
     "x-card",
     { "class": "deviceCard" },
@@ -484,8 +485,13 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, macAddress
         { vertical: true, "class": "deviceDetails" },
         (0, _hyperapp.h)(
           "strong",
-          { "class": "deviceName" },
-          deviceName
+          { "class": "vendorName" },
+          vendorName
+        ),
+        (0, _hyperapp.h)(
+          "p",
+          { "class": "deviceIPAddress" },
+          ipAddress
         ),
         (0, _hyperapp.h)(
           "p",
@@ -500,11 +506,9 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, macAddress
         // Lightscript if expressions FTW! http://bit.ly/2kNbt9R
         lookingForDevice ? (0, _hyperapp.h)(
           "x-button",
-          {
-            onclick: function () {
-              actions.removeDevice({ deviceName, macAddress });
-            }
-          },
+          { onclick: function () {
+              actions.removeDevice(device);
+            } },
           (0, _hyperapp.h)(
             "x-box",
             null,
@@ -516,11 +520,9 @@ exports.default = function deviceCard({ lookingForDevice, deviceName, macAddress
           )
         ) : (0, _hyperapp.h)(
           "x-button",
-          {
-            onclick: function () {
-              actions.addNewDevice({ deviceName, macAddress });
-            }
-          },
+          { onclick: function () {
+              actions.addNewDevice(device);
+            } },
           (0, _hyperapp.h)(
             "x-box",
             null,
@@ -570,9 +572,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const logInDev =  true ? _logger.withLogger : undefined; // eslint-disable-line no-unused-vars
 
-
 const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
-
 /**
  * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
  * for that.
@@ -614,13 +614,11 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function identity(param) {
-  return param;
-}function getInitialSettingsFromMainProcess() {
-  /**
-  * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
-  * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
-  */
+/**
+* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
+* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
+*/
+function getInitialSettingsFromMainProcess() {
   return _extends({
     activeTab: 'statusTab',
     devicesCanSee: [],
@@ -635,11 +633,14 @@ function identity(param) {
 function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
   _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) });
 }function omitInheritedProperties(obj) {
+  if (!isObject(obj)) return {};
   return Object.getOwnPropertyNames(obj).reduce(function (prev, propName) {
     if (isObject(obj[propName])) {
       return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName]) });
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
+}function identity(param) {
+  return param;
 }function isObject(obj) {
   return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
 }exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
@@ -930,6 +931,8 @@ var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 var _settingsDefaults = __webpack_require__(/*! ../../../db/settingsDefaults.lsc */ "./app/db/settingsDefaults.lsc");
 
 const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
+const minHostsScanRangeStart = _settingsDefaults.defaultSettings.hostsScanRangeStart;
+const minhostsScanRangeEnd = _settingsDefaults.defaultSettings.hostsScanRangeEnd;
 
 exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'settingsTab' ? 'flex' : 'none';
@@ -975,6 +978,117 @@ exports.default = function ({ actions, state }) {
             'x-label',
             null,
             'Once a device has been lost, LANLost will wait this many minutes before locking the computer.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      { id: 'hostScanTimeoutSetting' },
+      (0, _hyperapp.h)(
+        'x-numberinput',
+        {
+          id: 'hostScanTimeout',
+          value: state.hostScanTimeout / 1000,
+          suffix: ' seconds',
+          min: '0',
+          onchange: function ({ currentTarget: { value } }) {
+            const newhostScanTimeout = value < 0 ? 0 : value * 1000;
+            actions.updateSetting({ settingName: 'hostScanTimeout', settingValue: newhostScanTimeout });
+          }
+        },
+        (0, _hyperapp.h)('x-stepper', null)
+      ),
+      (0, _hyperapp.h)(
+        'x-label',
+        { 'for': 'hostScanTimeout', id: 'hostScanTimeoutLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            (0, _hyperapp.h)(
+              'strong',
+              null,
+              'Host Scan Timeout'
+            )
+          ),
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            'How many seconds to wait when trying to connect to a device during a scan before timing out.'
+          )
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'x-box',
+      { id: 'hostsScanRangeSetting' },
+      (0, _hyperapp.h)(
+        'x-box',
+        { vertical: true },
+        (0, _hyperapp.h)(
+          'x-numberinput',
+          {
+            id: 'hostsScanRangeStart',
+            value: state.hostsScanRangeStart,
+            min: '2',
+            prefix: 'start ',
+            onchange: function ({ currentTarget: { value } }) {
+              let newhostsScanRangeStart = value;
+              if (value < minHostsScanRangeStart) newhostsScanRangeStart = minHostsScanRangeStart;
+              if (value >= state.hostsScanRangeEnd) newhostsScanRangeStart = state.hostsScanRangeEnd - 1;
+              actions.updateSetting({ settingName: 'hostsScanRangeStart', settingValue: newhostsScanRangeStart });
+            }
+          },
+          (0, _hyperapp.h)('x-stepper', null)
+        ),
+        (0, _hyperapp.h)(
+          'x-numberinput',
+          {
+            id: 'hostsScanRangeEnd',
+            value: state.hostsScanRangeEnd,
+            min: '2',
+            prefix: 'end ',
+            onchange: function ({ currentTarget: { value } }) {
+              let newhostsScanRangeEnd = value;
+              if (value > minhostsScanRangeEnd) newhostsScanRangeEnd = minhostsScanRangeEnd;
+              if (value <= state.hostsScanRangeStart) newhostsScanRangeEnd = state.hostsScanRangeStart + 1;
+              actions.updateSetting({ settingName: 'hostsScanRangeEnd', settingValue: newhostsScanRangeEnd });
+            }
+          },
+          (0, _hyperapp.h)('x-stepper', null)
+        )
+      ),
+      (0, _hyperapp.h)(
+        'x-label',
+        { id: 'hostsScanRangeLabel' },
+        (0, _hyperapp.h)(
+          'x-box',
+          { vertical: true },
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            (0, _hyperapp.h)(
+              'strong',
+              null,
+              'Hosts Scan Range'
+            )
+          ),
+          (0, _hyperapp.h)(
+            'x-label',
+            null,
+            'The start and end range LANLost will scan to look for devices on your network.',
+            (0, _hyperapp.h)(
+              'span',
+              { 'class': 'extraInfo' },
+              (0, _hyperapp.h)(
+                'abbr',
+                { id: 'poo', title: 'e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254' },
+                (0, _hyperapp.h)('img', { src: `assets/icons/extraLabelinfo.svg` })
+              )
+            )
           )
         )
       )
@@ -1077,7 +1191,7 @@ exports.default = function ({ actions, state }) {
             (0, _hyperapp.h)(
               'strong',
               null,
-              'Run On Startup'
+              'Run On System Startup'
             )
           )
         )
@@ -1112,114 +1226,6 @@ exports.default = function ({ actions, state }) {
             'x-label',
             null,
             'LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.'
-          )
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'x-box',
-      null,
-      (0, _hyperapp.h)('x-switch', {
-        id: 'userDebugSwitch',
-        toggled: state.userDebug,
-        onchange: actions.toggleDebugWindow
-      }),
-      (0, _hyperapp.h)(
-        'x-label',
-        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
-        (0, _hyperapp.h)(
-          'x-box',
-          { vertical: true },
-          (0, _hyperapp.h)(
-            'strong',
-            null,
-            'User Debugger'
-          ),
-          (0, _hyperapp.h)(
-            'span',
-            null,
-            'Enabling this will show a debug window with information that may help you diagnose any issues.'
-          )
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'x-box',
-      null,
-      (0, _hyperapp.h)('x-switch', {
-        id: 'userDebugSwitch',
-        toggled: state.userDebug,
-        onchange: actions.toggleDebugWindow
-      }),
-      (0, _hyperapp.h)(
-        'x-label',
-        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
-        (0, _hyperapp.h)(
-          'x-box',
-          { vertical: true },
-          (0, _hyperapp.h)(
-            'strong',
-            null,
-            'User Debugger'
-          ),
-          (0, _hyperapp.h)(
-            'span',
-            null,
-            'Enabling this will show a debug window with information that may help you diagnose any issues.'
-          )
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'x-box',
-      null,
-      (0, _hyperapp.h)('x-switch', {
-        id: 'userDebugSwitch',
-        toggled: state.userDebug,
-        onchange: actions.toggleDebugWindow
-      }),
-      (0, _hyperapp.h)(
-        'x-label',
-        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
-        (0, _hyperapp.h)(
-          'x-box',
-          { vertical: true },
-          (0, _hyperapp.h)(
-            'strong',
-            null,
-            'User Debugger'
-          ),
-          (0, _hyperapp.h)(
-            'span',
-            null,
-            'Enabling this will show a debug window with information that may help you diagnose any issues.'
-          )
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'x-box',
-      null,
-      (0, _hyperapp.h)('x-switch', {
-        id: 'userDebugSwitch',
-        toggled: state.userDebug,
-        onchange: actions.toggleDebugWindow
-      }),
-      (0, _hyperapp.h)(
-        'x-label',
-        { 'for': 'userDebugSwitch', id: 'userDebugSwitchLabel' },
-        (0, _hyperapp.h)(
-          'x-box',
-          { vertical: true },
-          (0, _hyperapp.h)(
-            'strong',
-            null,
-            'User Debugger'
-          ),
-          (0, _hyperapp.h)(
-            'span',
-            null,
-            'Enabling this will show a debug window with information that may help you diagnose any issues.'
           )
         )
       )
@@ -1384,8 +1390,13 @@ exports.default = function ({ actions, state }) {
         { id: 'lookingForHeader', style: { display: lookingForHeaderDisplay } },
         'Currently Looking For:'
       ),
-      state.devicesToSearchFor.map(function ({ deviceName, macAddress }) {
-        return (0, _hyperapp.h)(_deviceCard2.default, { key: macAddress, actions: actions, lookingForDevice: true, deviceName: deviceName, macAddress: macAddress });
+      state.devicesToSearchFor.map(function (device) {
+        return (0, _hyperapp.h)(_deviceCard2.default, {
+          key: device.macAddress,
+          actions: actions,
+          lookingForDevice: true,
+          device: device
+        });
       }),
       (0, _hyperapp.h)(
         'div',
@@ -1396,8 +1407,13 @@ exports.default = function ({ actions, state }) {
       // Regular Array.includes compares by reference, not value, so using _.find.
       state.devicesCanSee.filter(function ({ macAddress }) {
         return !_lodash2.default.find(state.devicesToSearchFor, { macAddress });
-      }).map(function ({ deviceName, macAddress }) {
-        return (0, _hyperapp.h)(_deviceCard2.default, { key: macAddress, actions: actions, lookingForDevice: false, deviceName: deviceName, macAddress: macAddress });
+      }).map(function (device) {
+        return (0, _hyperapp.h)(_deviceCard2.default, {
+          key: device.macAddress,
+          actions: actions,
+          lookingForDevice: false,
+          device: device
+        });
       })
     ),
     (0, _hyperapp.h)('div', { id: 'devicesContainerBottomLip' })

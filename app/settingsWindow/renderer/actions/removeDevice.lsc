@@ -8,8 +8,8 @@ import { DeviceType } from '../../../types/types.lsc'
 * https://github.com/hyperapp/hyperapp#actions
 */
 export default removeDevice(deviceToRemove: DeviceType) -> state ->
-  if !_.find(state.devicesToSearchFor, {macAddress: deviceToRemove.macAddress}): return
+  if !_.find(state.devicesToSearchFor, {macAddress: deviceToRemove.macAddress}): return ({})
   ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove)
-  ({devicesToSearchFor: [state.devicesToSearchFor.filter(({macAddress}) -> (macAddress !== deviceToRemove.macAddress))]})
+  ({devicesToSearchFor: state.devicesToSearchFor.filter(({macAddress}) -> (macAddress !== deviceToRemove.macAddress))})
 
 

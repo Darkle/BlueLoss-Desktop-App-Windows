@@ -822,6 +822,7 @@ function handleScanResults(devices) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
   }if (shouldLock()) {
+    // lockSytem throws on error
     try {
       (0, _lockSystem2.default)();
     } catch (err) {
@@ -957,9 +958,7 @@ function connectToHostSocket(hostIP) {
   const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
   return _internalIp2.default.v4().then(function (internalIp) {
-    /**
-     * Lodash range doesn't include the last number.
-     */
+    // Lodash range doesn't include the last number.
     return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
       return `${networkOctects}.${lastOctet}`;
     }).filter(function (hostIP) {

@@ -7,14 +7,30 @@
   overflow: auto;
 }
 
-#settingsTabInfoWindow > *:first-child {
-  margin-top: 30px;
+#settingsTabInfoWindow > x-box:nth-child(1) {
+  margin-top: 10px;
+}
+#settingsTabInfoWindow > x-box:nth-child(2) {
+  margin-top: 10px;
+  min-height: 16%;
+}
+#settingsTabInfoWindow > x-box:nth-child(3) {
+  min-height: 28%;
+}
+#settingsTabInfoWindow > x-box:nth-child(4) {
+  min-height: 11%;
+}
+#settingsTabInfoWindow > x-box:nth-child(6) {
+  min-height: 11%;
+  margin-top: -10px;
+}
+#settingsTabInfoWindow > x-box:last-child {
+  margin-bottom: 20px;
 }
 
 #settingsTabInfoWindow > x-box {
-  margin-top: 30px;
   width: 514px;
-  min-height: 17%;
+  min-height: 18%;
 }
 
 #timeToLockSetting {
@@ -36,8 +52,65 @@
   margin-top: 5px;
 }
 
+#hostScanTimeoutSetting {
+  display: flex;
+  justify-content: space-around;
+}
+
+#hostScanTimeout {
+  margin-top: -9px;
+  margin-right: 10px;
+  width: 95px;
+}
+
+#hostScanTimeoutLabel {
+  width: 400px;
+}
+
+#hostScanTimeoutLabel > x-box > x-label:last-child {
+  margin-top: 5px;
+}
+
+#hostsScanRangeSetting {
+  display: flex;
+  justify-content: space-around;
+}
+
+#hostsScanRangeStart {
+  margin-top: -14px;
+  margin-right: 10px;
+  width: 95px;
+}
+
+#hostsScanRangeEnd {
+  margin-top: 10px;
+  margin-right: 10px;
+  width: 95px;
+}
+
+#hostsScanRangeLabel {
+  width: 400px;
+  margin-top: -30px;
+}
+
+#hostsScanRangeLabel .extraInfo > abbr {
+  text-decoration: none;
+}
+
+#hostsScanRangeLabel .extraInfo abbr img {
+  height 19px;
+  margin-bottom: -6px;
+  margin-left: 4px;
+}
+
+#hostsScanRangeLabel > x-box > x-label:last-child {
+  margin-top: 5px;
+}
+
+
 #iconColorDropdownContainer {
   align-items: flex-start;
+  margin-top: 0;
 }
 
 #iconColorDropdown {
@@ -70,6 +143,7 @@
   margin-left: 76px;
   margin-top: 11px;
   margin-right: 13px;
+  width: 25px;
 }
 
 #ouiUpdateCheckbox {
@@ -80,6 +154,11 @@
 
 #ouiUpdateCheckboxLabel {
   width: 398px;
+  margin-top: 5px;
+}
+
+#ouiUpdateCheckboxLabel > x-box > x-label:last-child {
+  margin-top: 5px;
 }
 
 #userDebugSwitch {

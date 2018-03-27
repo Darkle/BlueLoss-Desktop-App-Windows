@@ -36,8 +36,13 @@ export default ({ actions, state }) ->
         Currently Looking For:
       </div>
       {
-        state.devicesToSearchFor.map(({deviceName, macAddress}) ->
-          <DeviceCard key={macAddress} actions={actions} lookingForDevice={true} deviceName={deviceName} macAddress={macAddress} />
+        state.devicesToSearchFor.map(device ->
+          <DeviceCard
+            key={device.macAddress}
+            actions={actions}
+            lookingForDevice={true}
+            device={device}
+          />
         )
       }
       <div id="deviceAddHeader">
@@ -47,8 +52,13 @@ export default ({ actions, state }) ->
         // Regular Array.includes compares by reference, not value, so using _.find.
         state.devicesCanSee
           .filter(({macAddress}) -> !_.find(state.devicesToSearchFor, {macAddress}))
-          .map(({deviceName, macAddress}) ->
-            <DeviceCard key={macAddress} actions={actions} lookingForDevice={false} deviceName={deviceName} macAddress={macAddress} />
+          .map(device ->
+            <DeviceCard
+              key={device.macAddress}
+              actions={actions}
+              lookingForDevice={false}
+              device={device}
+            />
           )
       }
     </div>

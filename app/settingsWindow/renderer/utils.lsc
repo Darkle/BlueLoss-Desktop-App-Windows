@@ -25,6 +25,7 @@ handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, erro
   )
 
 omitInheritedProperties(obj) ->
+  if !isObject(obj): return {}
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
     if isObject(obj[propName]):
       return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
