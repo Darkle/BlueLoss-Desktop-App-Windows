@@ -1,11 +1,10 @@
 import _ from 'lodash'
-import ms from 'ms'
-import lockSystem from 'lock-system'
 
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { getSettings } from '../db/settings.lsc'
+import { locksSystemIfShouldLock } from '../common/lockSystem.lsc'
 
 let lastTimeSawADeviceWeAreLookingFor = Date.now()
 
@@ -24,23 +23,11 @@ handleScanResults(devices: Array<DeviceType>):void ->
     now lastTimeSawADeviceWeAreLookingFor = Date.now()
     return
 
-  locksSystemIfShouldLock()
-
+  locksSystemIfShouldLock(lastTimeSawADeviceWeAreLookingFor)
 
 foundADeviceWeAreLookingFor(devicesToSearchFor, devices):boolean ->
    _.intersectionBy(devicesToSearchFor, devices, 'macAddress').length
 
-shouldLock():boolean ->
-  getSettings().lanLostEnabled and
-    Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
-
-locksSystemIfShouldLock():void ->
-  if !shouldLock(): return
-  // lockSytem throws on error, so use try/catch
-  try:
-    lockSystem()
-  catch(err):
-    logger.error('Error occured trying locking the system : ', err)
 
 
 export {

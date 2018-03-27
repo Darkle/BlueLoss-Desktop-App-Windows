@@ -71,6 +71,49 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/common/lockSystem.lsc":
+/*!***********************************!*\
+  !*** ./app/common/lockSystem.lsc ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.locksSystemIfShouldLock = undefined;
+
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
+
+var _lockSystem2 = _interopRequireDefault(_lockSystem);
+
+var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function shouldLock(lastTimeSawADeviceWeAreLookingFor) {
+  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
+}function locksSystemIfShouldLock(lastTimeSawADeviceWeAreLookingFor) {
+  if (!shouldLock(lastTimeSawADeviceWeAreLookingFor)) return;
+  // lockSytem throws on error, so use try/catch
+  try {
+    (0, _lockSystem2.default)();
+  } catch (err) {
+    _logging.logger.error('Error occured trying locking the system : ', err);
+  }
+}exports.locksSystemIfShouldLock = locksSystemIfShouldLock;
+
+/***/ }),
+
 /***/ "./app/common/logging/customRollbarTransport.lsc":
 /*!*******************************************************!*\
   !*** ./app/common/logging/customRollbarTransport.lsc ***!
@@ -827,14 +870,6 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
-
-var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
-
-var _lockSystem2 = _interopRequireDefault(_lockSystem);
-
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
@@ -842,6 +877,8 @@ var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/c
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
 var _settings = __webpack_require__(/*! ../db/settings.lsc */ "./app/db/settings.lsc");
+
+var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -860,19 +897,9 @@ function handleScanResults(devices) {
   if (foundADeviceWeAreLookingFor(devicesToSearchFor, devices)) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
-  }locksSystemIfShouldLock();
+  }(0, _lockSystem.locksSystemIfShouldLock)(lastTimeSawADeviceWeAreLookingFor);
 }function foundADeviceWeAreLookingFor(devicesToSearchFor, devices) {
   return _lodash2.default.intersectionBy(devicesToSearchFor, devices, 'macAddress').length;
-}function shouldLock() {
-  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
-}function locksSystemIfShouldLock() {
-  if (!shouldLock()) return;
-  // lockSytem throws on error, so use try/catch
-  try {
-    (0, _lockSystem2.default)();
-  } catch (err) {
-    _logging.logger.error('Error occured trying locking the system : ', err);
-  }
 }exports.handleScanResults = handleScanResults;
 
 /***/ }),

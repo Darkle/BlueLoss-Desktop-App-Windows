@@ -1,0 +1,23 @@
+import ms from 'ms'
+import lockSystem from 'lock-system'
+
+import { getSettings } from '../db/settings.lsc'
+import { logger } from './logging/logging.lsc'
+
+
+shouldLock(lastTimeSawADeviceWeAreLookingFor: number):boolean ->
+  getSettings().lanLostEnabled and
+    Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
+
+locksSystemIfShouldLock(lastTimeSawADeviceWeAreLookingFor: number):void ->
+  if !shouldLock(lastTimeSawADeviceWeAreLookingFor): return
+  // lockSytem throws on error, so use try/catch
+  try:
+    lockSystem()
+  catch(err):
+    logger.error('Error occured trying locking the system : ', err)
+
+
+export {
+  locksSystemIfShouldLock
+}
