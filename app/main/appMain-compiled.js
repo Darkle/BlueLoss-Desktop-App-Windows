@@ -857,7 +857,6 @@ function handleScanResults(devices) {
   _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devices });
 
   if (!devicesToSearchFor.length) return;
-
   if (foundADeviceWeAreLookingFor(devicesToSearchFor, devices)) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
@@ -867,13 +866,12 @@ function handleScanResults(devices) {
 }function shouldLock() {
   return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }function locksSystemIfShouldLock() {
-  if (shouldLock()) {
-    // lockSytem throws on error
-    try {
-      (0, _lockSystem2.default)();
-    } catch (err) {
-      _logging.logger.error('Error occured trying locking the system : ', err);
-    }
+  if (!shouldLock()) return;
+  // lockSytem throws on error, so use try/catch
+  try {
+    (0, _lockSystem2.default)();
+  } catch (err) {
+    _logging.logger.error('Error occured trying locking the system : ', err);
   }
 }exports.handleScanResults = handleScanResults;
 

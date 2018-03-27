@@ -20,7 +20,6 @@ handleScanResults(devices: Array<DeviceType>):void ->
   )
 
   if !devicesToSearchFor.length: return
-
   if foundADeviceWeAreLookingFor(devicesToSearchFor, devices):
     now lastTimeSawADeviceWeAreLookingFor = Date.now()
     return
@@ -36,12 +35,12 @@ shouldLock():boolean ->
     Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
 
 locksSystemIfShouldLock():void ->
-  if shouldLock():
-    // lockSytem throws on error
-    try:
-      lockSystem()
-    catch(err):
-      logger.error('Error occured trying locking the system : ', err)
+  if !shouldLock(): return
+  // lockSytem throws on error, so use try/catch
+  try:
+    lockSystem()
+  catch(err):
+    logger.error('Error occured trying locking the system : ', err)
 
 
 export {
