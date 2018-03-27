@@ -823,8 +823,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleScanResults = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -852,29 +850,24 @@ let lastTimeSawADeviceWeAreLookingFor = Date.now();
 function handleScanResults(devices) {
   var _settingsWindow$webCo;
 
-  /**
-   * Dunno why, but you need an extra object at the end to make an array of objects
-   * print right in winston.
-   */
   _logging.logger.debug(`scan returned these active devices: \n`, devices);
 
-  /**
-   * We use the lastSeen time in the UI to show the user the last time we have
-   * seen the devices we are looking for.
-   */
-  const devicesWithTimeData = addCurrentTimeToDevices(devices);
   const { devicesToSearchFor } = (0, _settings.getSettings)();
 
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devicesWithTimeData });
+  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devices });
 
   if (!devicesToSearchFor.length) return;
 
-  const sawADeviceWeAreLookingFor = _lodash2.default.intersectionBy(devicesToSearchFor, devicesWithTimeData, 'macAddress');
-
-  if (sawADeviceWeAreLookingFor.length) {
+  if (foundADeviceWeAreLookingFor(devicesToSearchFor, devices)) {
     lastTimeSawADeviceWeAreLookingFor = Date.now();
     return;
-  }if (shouldLock()) {
+  }locksSystemIfShouldLock();
+}function foundADeviceWeAreLookingFor(devicesToSearchFor, devices) {
+  return _lodash2.default.intersectionBy(devicesToSearchFor, devices, 'macAddress').length;
+}function shouldLock() {
+  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
+}function locksSystemIfShouldLock() {
+  if (shouldLock()) {
     // lockSytem throws on error
     try {
       (0, _lockSystem2.default)();
@@ -882,12 +875,6 @@ function handleScanResults(devices) {
       _logging.logger.error('Error occured trying locking the system : ', err);
     }
   }
-}function addCurrentTimeToDevices(devices) {
-  return devices.map(function (device) {
-    return _extends({}, device, { lastSeen: Date.now() });
-  });
-}function shouldLock() {
-  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawADeviceWeAreLookingFor + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.handleScanResults = handleScanResults;
 
 /***/ }),

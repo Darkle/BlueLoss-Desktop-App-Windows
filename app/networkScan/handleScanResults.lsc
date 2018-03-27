@@ -10,32 +10,32 @@ import { getSettings } from '../db/settings.lsc'
 let lastTimeSawADeviceWeAreLookingFor = Date.now()
 
 handleScanResults(devices: Array<DeviceType>):void ->
-  /**
-   * Dunno why, but you need an extra object at the end to make an array of objects
-   * print right in winston.
-   */
   logger.debug(`scan returned these active devices: \n`, devices)
 
-  /**
-   * We use the lastSeen time in the UI to show the user the last time we have
-   * seen the devices we are looking for.
-   */
-  devicesWithTimeData = addCurrentTimeToDevices(devices)
   { devicesToSearchFor } = getSettings()
 
   settingsWindow?.webContents?.send(
     'mainprocess:update-of-network-devices-can-see',
-    { devicesCanSee: devicesWithTimeData }
+    { devicesCanSee: devices }
   )
 
   if !devicesToSearchFor.length: return
 
-  sawADeviceWeAreLookingFor = _.intersectionBy(devicesToSearchFor, devicesWithTimeData, 'macAddress')
-
-  if sawADeviceWeAreLookingFor.length:
+  if foundADeviceWeAreLookingFor(devicesToSearchFor, devices):
     now lastTimeSawADeviceWeAreLookingFor = Date.now()
     return
 
+  locksSystemIfShouldLock()
+
+
+foundADeviceWeAreLookingFor(devicesToSearchFor, devices):boolean ->
+   _.intersectionBy(devicesToSearchFor, devices, 'macAddress').length
+
+shouldLock():boolean ->
+  getSettings().lanLostEnabled and
+    Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
+
+locksSystemIfShouldLock():void ->
   if shouldLock():
     // lockSytem throws on error
     try:
@@ -43,13 +43,6 @@ handleScanResults(devices: Array<DeviceType>):void ->
     catch(err):
       logger.error('Error occured trying locking the system : ', err)
 
-
-addCurrentTimeToDevices(devices: Array<Object>):Array<Object> ->
-  devices.map(device -> {...device, ...{ lastSeen: Date.now() }})
-
-shouldLock():boolean ->
-  getSettings().lanLostEnabled and
-    Date.now() > (lastTimeSawADeviceWeAreLookingFor + ms(`${ getSettings().timeToLock } mins`))
 
 export {
   handleScanResults
