@@ -234,7 +234,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-// This is called from a lifecycle event, so the element is the thing thats passed in.
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
 exports.default = function animateDots(element) {
   function animateStatusDots(interval = 0) {
     setTimeout(function () {
@@ -317,7 +317,8 @@ var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/ty
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
-* If you need to use the state & actions and return data, you need to use (value) => (state, actions)
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
 * https://github.com/hyperapp/hyperapp#actions
 */
 exports.default = function removeDevice(deviceToRemove) {
@@ -374,7 +375,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-// This is called from a lifecycle event, so the element is the thing thats passed in.
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
 exports.default = function toggleTab(event) {
   return { activeTab: event.currentTarget.id };
 };

@@ -4,7 +4,8 @@ import _ from 'lodash'
 import { DeviceType } from '../../../types/types.lsc'
 
 /**
-* If you need to use the state & actions and return data, you need to use (value) => (state, actions)
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
 * https://github.com/hyperapp/hyperapp#actions
 */
 export default removeDevice(deviceToRemove: DeviceType) -> state ->

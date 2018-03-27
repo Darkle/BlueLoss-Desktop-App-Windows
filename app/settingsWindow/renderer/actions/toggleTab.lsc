@@ -1,5 +1,5 @@
 
-// This is called from a lifecycle event, so the element is the thing thats passed in.
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
 export default toggleTab(event) -> ({activeTab: event.currentTarget.id})
 
 
