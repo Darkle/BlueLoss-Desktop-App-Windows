@@ -56,14 +56,6 @@ const commonWebpackOptions = {
   /**
    * mode-and-optimization: http://bit.ly/2FCaZNN
    */
-  optimization: {
-  /**
-  * Minification could possibly increase parsing and compiling of the js a tiny bit, which might
-  * affect the app startup, so not going to bother minifying js since its a desktop app.
-  * http://bit.ly/2k0sI70
-  */
-    minimize: false
-  },
   performance: {
     hints: isDev ? false: 'error'
   },
