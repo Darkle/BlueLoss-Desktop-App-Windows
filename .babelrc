@@ -10,8 +10,7 @@
         },
         "stdlib": false,
         "noEnforcedSubscriptIndentation": true,
-        "existential": true,
-        "useRequire": true
+        "existential": true
       }
     ]
   ],

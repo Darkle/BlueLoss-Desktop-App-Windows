@@ -15,8 +15,7 @@ const isDev = process.env.NODE_ENV !== 'production'
 const debugging = isDev && process.env.nodeDebug === 'true'
 
 /*****
-* We dont want webpack to transpile the built in node modules so we use target: 'node/electron'.
-* We also need to tell it not include polyfills or mocks for various node stuff, which we set with
+* We dont want webpack to include polyfills or mocks for various node stuff, which we set with
 * the 'node' key https://webpack.js.org/configuration/node/
 * We also dont want webpack to transpile the stuff in node_modules folder, so we use the
 * webpack-node-externals plugin.
