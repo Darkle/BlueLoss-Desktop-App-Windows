@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 
-export default toggleDebugWindow(element) -> state ->
+export default toggleDebugWindow(element) ->
   toggled = element.currentTarget.toggled
   ipcRenderer.send('renderer:user-debug-toggled', toggled)
-  {...state, ...{ userDebug: toggled }}
+  { userDebug: toggled }

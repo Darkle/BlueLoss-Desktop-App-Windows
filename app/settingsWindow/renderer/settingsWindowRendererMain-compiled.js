@@ -345,16 +345,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 exports.default = function toggleDebugWindow(element) {
-  return function (state) {
-    const toggled = element.currentTarget.toggled;
-    _electron.ipcRenderer.send('renderer:user-debug-toggled', toggled);
-    return _extends({}, state, { userDebug: toggled });
-  };
+  const toggled = element.currentTarget.toggled;
+  _electron.ipcRenderer.send('renderer:user-debug-toggled', toggled);
+  return { userDebug: toggled };
 };
 
 /***/ }),
@@ -502,6 +498,8 @@ exports.default = function deviceCard({ lookingForDevice, device, actions }) {
       (0, _hyperapp.h)(
         "x-box",
         { "class": "addRemoveButton" },
+
+        // if expressions: http://bit.ly/2kNbt9R
         lookingForDevice ? (0, _hyperapp.h)(
           "x-button",
           { onclick: function () {
