@@ -1,16 +1,11 @@
 import lockSystem from 'lock-system'
-import ms from 'ms'
 
 import { logger } from './logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 
-shouldLock(lastTimeSawDevice: number):boolean ->
-  getSettings().lanLostEnabled and
-    Date.now() > (lastTimeSawDevice + ms(`${ getSettings().timeToLock } mins`))
-
-lockSystemIfShouldLock(lastTimeSawDevice: number):void ->
-  if !shouldLock(lastTimeSawDevice): return
-  // lockSytem throws on error, so use try/catch
+lockTheSystem():void ->
+  if !getSettings().lanLostEnabled: return
+  // lockComp throws on error, so use try/catch
   try:
     lockSystem()
   catch(err):
@@ -18,5 +13,5 @@ lockSystemIfShouldLock(lastTimeSawDevice: number):void ->
 
 
 export {
-  lockSystemIfShouldLock
+  lockTheSystem,
 }

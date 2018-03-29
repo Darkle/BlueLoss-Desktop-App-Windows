@@ -21,6 +21,9 @@ pGetMAC = util.promisify(arp.getMAC)
 scanInterval = ms('30 seconds')
 
 scanNetwork():void ->
+  if !getSettings().lanLostEnabled:
+    return scanNetworkIn30Seconds()
+
   logger.debug(`new scan started`)
 
   Promise.resolve(loadOUIfileIfNotLoaded())
@@ -34,7 +37,7 @@ scanNetwork():void ->
 
 scanHost(hostIP: string): Promise<any> ->
   connectToHostSocket(hostIP)
-    .then(addCurrentTimeToDevice)
+    .then(addMetaDataToDevice)
     .then(getMacAdressForHostIP)
     .then(getVendorInfoForMacAddress)
     .catch(handleHostScanError)
@@ -70,7 +73,7 @@ getDefaultGatewayIP():Promise<any> ->
       defaultGatewayIP
     )
 
-addCurrentTimeToDevice(ipAddress: string):DeviceType ->
+addMetaDataToDevice(ipAddress: string):DeviceType ->
   ({ ipAddress, lastSeen: Date.now() })
 
 getMacAdressForHostIP(device: DeviceType):Promise<any> ->

@@ -84,15 +84,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.lockSystemIfShouldLock = undefined;
+exports.lockTheSystem = undefined;
 
 var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
 
 var _lockSystem2 = _interopRequireDefault(_lockSystem);
-
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
 
 var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
@@ -100,17 +96,15 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/setti
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function shouldLock(lastTimeSawDevice) {
-  return (0, _settings.getSettings)().lanLostEnabled && Date.now() > lastTimeSawDevice + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
-}function lockSystemIfShouldLock(lastTimeSawDevice) {
-  if (!shouldLock(lastTimeSawDevice)) return;
-  // lockSytem throws on error, so use try/catch
+function lockTheSystem() {
+  if (!(0, _settings.getSettings)().lanLostEnabled) return;
+  // lockComp throws on error, so use try/catch
   try {
     (0, _lockSystem2.default)();
   } catch (err) {
     _logging.logger.error('Error occured trying locking the system : ', err);
   }
-}exports.lockSystemIfShouldLock = lockSystemIfShouldLock;
+}exports.lockTheSystem = lockTheSystem;
 
 /***/ }),
 
@@ -646,6 +640,10 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
@@ -668,15 +666,34 @@ function handleScanResults(devicesFound) {
   _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devicesFound });
 
   if (_lodash2.default.isEmpty(devicesToSearchFor)) return;
-
-  devicesFound.forEach(function (device) {
-    const { macAddress, lastSeen } = device;
-    if (!devicesToSearchFor[macAddress]) return;
-
-    (0, _lockSystem.lockSystemIfShouldLock)(lastSeen);
-
-    (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(macAddress, 'lastSeen', Date.now()));
-  });
+  /**
+   * If any devices we are looking for showed up in the latest scan,
+   * add the current time to the stored device in devicesToSearchFor.
+   */
+  for (let _i = 0, _len = devicesFound.length; _i < _len; _i++) {
+    const { macAddress } = devicesFound[_i];
+    if (devicesToSearchFor[macAddress]) {
+      (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(macAddress, 'lastSeen', Date.now()));
+    }
+  } /**
+     * If a device is lost we lock the computer, however, after that, if
+     * the computer is unlocked without the device coming back to the network,
+     * we don't want to keep locking the computer because the device is still
+     * lost. So we give the device that has just been lost a lastSeen value of
+     * 10 years from now (not using Infinity cause it doesn't JSON.stringify
+     * for storage).
+     */
+  for (let _i2 = 0, _keys = Object.keys(devicesToSearchFor), _len2 = _keys.length; _i2 < _len2; _i2++) {
+    const _k = _keys[_i2];const { lastSeen, macAddress } = devicesToSearchFor[_k];
+    if (deviceHasBeenLost(lastSeen)) {
+      (0, _lockSystem.lockTheSystem)();
+      (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(macAddress, 'lastSeen', tenYearsFromNow()));
+    }
+  }
+}function tenYearsFromNow() {
+  return Date.now() + (0, _ms2.default)('10 years');
+}function deviceHasBeenLost(lastTimeSawDevice) {
+  return Date.now() > lastTimeSawDevice + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.handleScanResults = handleScanResults;
 
 /***/ }),
@@ -754,11 +771,13 @@ const pGetMAC = _util2.default.promisify(_nodeArp2.default.getMAC);
 const scanInterval = (0, _ms2.default)('30 seconds');
 
 function scanNetwork() {
-  _logging.logger.debug(`new scan started`);
+  if (!(0, _settings.getSettings)().lanLostEnabled) {
+    return scanNetworkIn30Seconds();
+  }_logging.logger.debug(`new scan started`);
 
   _bluebird2.default.resolve((0, _getOUIfile.loadOUIfileIfNotLoaded)()).then(getDefaultGatewayIP).then(generatePossibleHostIPs).map(scanHost).filter(isDevice).then(_handleScanResults.handleScanResults).catch(_logging.logger.error).finally(scanNetworkIn30Seconds);
 }function scanHost(hostIP) {
-  return connectToHostSocket(hostIP).then(addCurrentTimeToDevice).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(handleHostScanError);
+  return connectToHostSocket(hostIP).then(addMetaDataToDevice).then(getMacAdressForHostIP).then(getVendorInfoForMacAddress).catch(handleHostScanError);
 } // http://bit.ly/2pzLeD3
 function connectToHostSocket(hostIP) {
   return new _bluebird2.default(function (resolve, reject) {
@@ -786,7 +805,7 @@ function connectToHostSocket(hostIP) {
     }_logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
     return defaultGatewayIP;
   });
-}function addCurrentTimeToDevice(ipAddress) {
+}function addMetaDataToDevice(ipAddress) {
   return { ipAddress, lastSeen: Date.now() };
 }
 

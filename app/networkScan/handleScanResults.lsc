@@ -1,10 +1,11 @@
 import _ from 'lodash'
+import ms from 'ms'
 
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { getSettings, updateSetting, modifyADeviceInDevicesToSearchFor } from '../settings/settings.lsc'
-import { lockSystemIfShouldLock } from '../common/lockSystem.lsc'
+import { lockTheSystem } from '../common/lockSystem.lsc'
 
 handleScanResults(devicesFound: Array<DeviceType>):void ->
   logger.debug(`scan returned these active devices: \n`, devicesFound)
@@ -17,20 +18,35 @@ handleScanResults(devicesFound: Array<DeviceType>):void ->
   )
 
   if _.isEmpty(devicesToSearchFor): return
+  /**
+   * If any devices we are looking for showed up in the latest scan,
+   * add the current time to the stored device in devicesToSearchFor.
+   */
+  for elem { macAddress } in devicesFound:
+    if devicesToSearchFor[macAddress]:
+      updateSetting('devicesToSearchFor',
+        modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', Date.now())
+      )
 
-  devicesFound.forEach((device):void ->
-    { macAddress , lastSeen } = device
-    if !devicesToSearchFor[macAddress]: return
+  /**
+   * If a device is lost we lock the computer, however, after that, if
+   * the computer is unlocked without the device coming back to the network,
+   * we don't want to keep locking the computer because the device is still
+   * lost. So we give the device that has just been lost a lastSeen value of
+   * 10 years from now (not using Infinity cause it doesn't JSON.stringify
+   * for storage).
+   */
+  for val { lastSeen, macAddress } in devicesToSearchFor:
+    if deviceHasBeenLost(lastSeen):
+      lockTheSystem()
+      updateSetting('devicesToSearchFor',
+        modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', tenYearsFromNow())
+      )
 
-    lockSystemIfShouldLock(lastSeen)
+tenYearsFromNow():number -> Date.now() + ms('10 years')
 
-    updateSetting('devicesToSearchFor',
-      modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', Date.now())
-    )
-
-  )
-
-
+deviceHasBeenLost(lastTimeSawDevice: number):boolean ->
+  Date.now() > (lastTimeSawDevice + ms(`${ getSettings().timeToLock } mins`))
 
 export {
   handleScanResults
