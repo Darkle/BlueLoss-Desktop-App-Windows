@@ -20,6 +20,7 @@ defaultSettings: {
   canSearchForMacVendorInfo: boolean,
   dateLastCheckedForOUIupdate: number,
   settingsWindowPosition: SettingsWindowPositionType,
+  dateLastCheckedForAppUpdate: number,
 } = {
   lanLostEnabled: true,
   runOnStartup: true,
@@ -35,6 +36,7 @@ defaultSettings: {
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
+  dateLastCheckedForAppUpdate: Date.now(),
 }
 
 export {

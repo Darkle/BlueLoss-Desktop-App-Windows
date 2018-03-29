@@ -1,0 +1,50 @@
+import { app as electronApp, autoUpdater, dialog } from 'electron'
+
+import ms from 'ms'
+
+import { getSettings, updateSetting } from '../settings/settings.lsc'
+import { logger } from '../common/logging/logging.lsc'
+
+oneDaysTime = ms('1 day')
+twoWeeksTime = ms('2 weeks')
+server = 'https://your-deployment-url.com'
+feed = `${ server }/update/${ process.platform }/${ electronApp.getVersion() }`
+dialogOpts = {
+  type: 'info',
+  buttons: ['Restart', 'Later'],
+  title: 'Application Update',
+  detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+}
+
+autoUpdater.setFeedURL(feed)
+
+checkForUpdate():void ->
+  if shouldCheckForUpdate(): return
+
+  updateSetting('dateLastCheckedForAppUpdate', Date.now())
+  autoUpdater.checkForUpdates()
+  checkForUpdateTomorrow()
+
+shouldCheckForUpdate():boolean ->
+  Date.now() > (getSettings().dateLastCheckedForAppUpdate + twoWeeksTime)
+
+checkForUpdateTomorrow():void ->
+  setTimeout(checkForUpdate, oneDaysTime)
+
+createDialogMessage(releaseNotes, releaseName):Object ->
+  { message: if process.platform === 'win32': releaseNotes else: releaseName }
+
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName):void ->
+  dialogMessage = createDialogMessage(releaseNotes, releaseName)
+  dialog.showMessageBox({...dialogOpts, ...dialogMessage}, (response):void ->
+    if response === 0: autoUpdater.quitAndInstall()
+  )
+)
+
+autoUpdater.on('error', (msg):void ->
+  logger('There was a problem updating the application', msg)
+)
+
+export {
+  checkForUpdate
+}

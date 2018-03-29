@@ -10,12 +10,13 @@ import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { scanNetwork } from '../networkScan/networkScanner.lsc'
 import { scheduleOUIfileUpdate } from '../oui/updateOUIfilePeriodically.lsc'
 import { enableRunOnStartup } from '../common/runOnStartup.lsc'
+import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
 if electronApp.makeSingleInstance(noop): electronApp.quit()
 
 electronApp.once('ready', ():void ->
   { firstRun } = getSettings()
-  if !firstRun: electronApp.dock?.hide()
+
   if ISDEV: setUpDev()
 
   initTrayMenu()
@@ -26,6 +27,9 @@ electronApp.once('ready', ():void ->
     updateSetting('firstRun', !firstRun)
     showSettingsWindow()
     enableRunOnStartup(firstRun)
+  else:
+    electronApp.dock?.hide()
+    checkForAppUpdate()
 )
 
 electronApp.on('window-all-closed', noop)

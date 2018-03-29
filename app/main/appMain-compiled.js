@@ -71,6 +71,75 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/appUpdates/appUpdates.lsc":
+/*!***************************************!*\
+  !*** ./app/appUpdates/appUpdates.lsc ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.checkForUpdate = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _ms = __webpack_require__(/*! ms */ "ms");
+
+var _ms2 = _interopRequireDefault(_ms);
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const oneDaysTime = (0, _ms2.default)('1 day');
+const twoWeeksTime = (0, _ms2.default)('2 weeks');
+const server = 'https://your-deployment-url.com';
+const feed = `${server}/update/${process.platform}/${_electron.app.getVersion()}`;
+const dialogOpts = {
+  type: 'info',
+  buttons: ['Restart', 'Later'],
+  title: 'Application Update',
+  detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+};
+
+_electron.autoUpdater.setFeedURL(feed);
+
+function checkForUpdate() {
+  if (shouldCheckForUpdate()) return;
+
+  (0, _settings.updateSetting)('dateLastCheckedForAppUpdate', Date.now());
+  _electron.autoUpdater.checkForUpdates();
+  checkForUpdateTomorrow();
+}function shouldCheckForUpdate() {
+  return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
+}function checkForUpdateTomorrow() {
+  setTimeout(checkForUpdate, oneDaysTime);
+}function createDialogMessage(releaseNotes, releaseName) {
+  return { message: process.platform === 'win32' ? releaseNotes : releaseName };
+}_electron.autoUpdater.on('update-downloaded', function (event, releaseNotes, releaseName) {
+  const dialogMessage = createDialogMessage(releaseNotes, releaseName);
+  _electron.dialog.showMessageBox(_extends({}, dialogOpts, dialogMessage), function (response) {
+    if (response === 0) _electron.autoUpdater.quitAndInstall();
+  });
+});
+
+_electron.autoUpdater.on('error', function (msg) {
+  (0, _logging.logger)('There was a problem updating the application', msg);
+});
+
+exports.checkForUpdate = checkForUpdate;
+
+/***/ }),
+
 /***/ "./app/common/lockSystem.lsc":
 /*!***********************************!*\
   !*** ./app/common/lockSystem.lsc ***!
@@ -595,13 +664,13 @@ var _updateOUIfilePeriodically = __webpack_require__(/*! ../oui/updateOUIfilePer
 
 var _runOnStartup = __webpack_require__(/*! ../common/runOnStartup.lsc */ "./app/common/runOnStartup.lsc");
 
+var _appUpdates = __webpack_require__(/*! ../appUpdates/appUpdates.lsc */ "./app/appUpdates/appUpdates.lsc");
+
 if (_electron.app.makeSingleInstance(_utils.noop)) _electron.app.quit();
 
 _electron.app.once('ready', function () {
-  var _electronApp$dock;
-
   const { firstRun } = (0, _settings.getSettings)();
-  if (!firstRun) (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
+
   if (true) (0, _setUpDev.setUpDev)();
 
   (0, _tray.initTrayMenu)();
@@ -612,6 +681,11 @@ _electron.app.once('ready', function () {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
     (0, _runOnStartup.enableRunOnStartup)(firstRun);
+  } else {
+    var _electronApp$dock;
+
+    (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
+    (0, _appUpdates.checkForUpdate)();
   }
 });
 
@@ -1168,7 +1242,8 @@ const defaultSettings = {
   firstRun: true,
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
-  settingsWindowPosition: null
+  settingsWindowPosition: null,
+  dateLastCheckedForAppUpdate: Date.now()
 };
 
 exports.defaultSettings = defaultSettings;
