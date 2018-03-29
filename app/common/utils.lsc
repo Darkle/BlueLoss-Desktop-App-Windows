@@ -22,7 +22,7 @@ isFunction(value) -> typeof value === 'function'
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
-range(start, end) -> Array.from({length: (end - start)}, (v, k) -> k + start)
+range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start)
 tenYearsFromNow():number -> Date.now() + ms('10 years')
 
 

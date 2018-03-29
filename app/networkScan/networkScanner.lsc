@@ -93,8 +93,7 @@ generatePossibleHostIPs(gateway: string):Promise<Array<string>> ->
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   getInternalIP.v4()
     .then(internalIp ->
-      // range doesn't include the last number.
-      range(hostsScanRangeStart, hostsScanRangeEnd + 1)
+      range(hostsScanRangeStart, hostsScanRangeEnd)
         .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
         .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
     )

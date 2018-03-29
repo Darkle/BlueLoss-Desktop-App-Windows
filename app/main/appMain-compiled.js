@@ -446,7 +446,7 @@ function omitGawkFromSettings(settings) {
     };
   };
 }function range(start, end) {
-  return Array.from({ length: end - start }, function (v, k) {
+  return Array.from({ length: end - start + 1 }, function (v, k) {
     return k + start;
   });
 }function tenYearsFromNow() {
@@ -819,8 +819,7 @@ function getMacAdressForHostIP(device) {
   const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
   return _internalIp2.default.v4().then(function (internalIp) {
-    // range doesn't include the last number.
-    return (0, _utils.range)(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
+    return (0, _utils.range)(hostsScanRangeStart, hostsScanRangeEnd).map(function (lastOctet) {
       return `${networkOctects}.${lastOctet}`;
     }).filter(function (hostIP) {
       return hostIP !== gateway && hostIP !== internalIp;
