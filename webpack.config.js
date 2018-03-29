@@ -52,9 +52,6 @@ const commonWebpackOptions = {
     extensions: ['.lsc', '.js']
   },
   externals: [nodeExternals()],
-  /**
-   * mode-and-optimization: http://bit.ly/2FCaZNN
-   */
   performance: {
     hints: isDev ? false: 'error'
   },
