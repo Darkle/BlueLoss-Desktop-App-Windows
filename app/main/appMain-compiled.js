@@ -618,7 +618,11 @@ _electron.app.once('ready', function () {
 _electron.app.on('window-all-closed', _utils.noop);
 
 process.on('unhandledRejection', _logging.logger.error);
-process.on('uncaughtException', _logging.logger.error);
+process.on('uncaughtException', function (err) {
+  _logging.logger.error(err);
+  process.exit(1);
+} // eslint-disable-line no-process-exit
+);
 
 /***/ }),
 
