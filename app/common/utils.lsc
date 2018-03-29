@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import { SettingsTypes } from '../types/types.lsc'
 import { logger } from './logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
@@ -24,10 +22,13 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
   , {})
 
 noop() -> return
-isObject(obj) -> _.isObject(obj) and !_.isArray(obj) and !_.isFunction(obj)
+isObject(obj) ->
+  obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
+isFunction(value) -> typeof value === 'function'
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
+range(start, end) -> Array.from({length: (end - start)}, (v, k) -> k + start)
 
 export {
   logSettingsUpdate,
@@ -39,4 +40,5 @@ export {
   pipe,
   curry,
   curryRight,
+  range,
 }

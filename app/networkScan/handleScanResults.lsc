@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import isEmpty from 'is-empty'
 import ms from 'ms'
 
 import { DeviceType } from '../types/types.lsc'
@@ -17,7 +17,7 @@ handleScanResults(devicesFound: Array<DeviceType>):void ->
     { devicesCanSee: devicesFound }
   )
 
-  if _.isEmpty(devicesToSearchFor): return
+  if isEmpty(devicesToSearchFor): return
   /**
    * If any devices we are looking for showed up in the latest scan,
    * add the current time to the stored device in devicesToSearchFor.

@@ -2,7 +2,7 @@ import { ipcRenderer, remote } from 'electron'
 
 import stringifyObject from 'stringify-object'
 import addLineNumbers from 'add-line-numbers'
-import _ from 'lodash'
+import isEmpty from 'is-empty'
 
 import { omitInheritedProperties } from '../../settingsWindow/renderer/utils.lsc'
 
@@ -16,7 +16,7 @@ ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void -
 )
 
 createMetaObjForLogging(meta):string ->
-  if _.isEmpty(meta): return ''
+  if isEmpty(meta): return ''
   if meta.stack: meta.stack = meta.stack.split(/\r\n?|\n/)
   stringifyObject(meta).replace(/'/g, '')
 

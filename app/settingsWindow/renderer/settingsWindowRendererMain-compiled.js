@@ -608,12 +608,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
@@ -642,7 +636,9 @@ function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNum
 }function identity(param) {
   return param;
 }function isObject(obj) {
-  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
+}function isFunction(value) {
+  return typeof value === 'function';
 }exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
 exports.handleRendererWindowError = handleRendererWindowError;
 exports.identity = identity;
@@ -1605,17 +1601,6 @@ module.exports = require("electron");
 /***/ (function(module, exports) {
 
 module.exports = require("hyperapp");
-
-/***/ }),
-
-/***/ "lodash":
-/*!*************************!*\
-  !*** external "lodash" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash");
 
 /***/ })
 

@@ -2,7 +2,6 @@ import { Socket } from 'net'
 import util from 'util'
 
 import getDefaultGateway from 'default-gateway'
-import _ from 'lodash'
 import ms from 'ms'
 import arp from 'node-arp'
 import getInternalIP from 'internal-ip'
@@ -14,7 +13,7 @@ import { getSettings } from '../settings/settings.lsc'
 import { loadOUIfileIfNotLoaded, getOUIfileData } from '../oui/getOUIfile.lsc'
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { isObject } from '../common/utils.lsc'
+import { isObject, range } from '../common/utils.lsc'
 import { DeviceType } from '../types/types.lsc'
 
 pGetMAC = util.promisify(arp.getMAC)
@@ -94,8 +93,8 @@ generatePossibleHostIPs(gateway: string):Promise<Array<string>> ->
   networkOctects = gateway.slice(0, gateway.lastIndexOf('.'))
   getInternalIP.v4()
     .then(internalIp ->
-      // Lodash range doesn't include the last number.
-      _.range(hostsScanRangeStart, hostsScanRangeEnd + 1)
+      // range doesn't include the last number.
+      range(hostsScanRangeStart, hostsScanRangeEnd + 1)
         .map((lastOctet:string) -> `${ networkOctects }.${ lastOctet }`)
         .filter((hostIP:string) -> hostIP !== gateway and hostIP !== internalIp)
     )

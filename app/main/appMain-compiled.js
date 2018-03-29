@@ -398,21 +398,15 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = exports.logSettingsUpdate = undefined;
+exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = exports.logSettingsUpdate = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
 
 var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function logSettingsUpdate(newSettingKey, newSettingValue) {
   _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
@@ -433,7 +427,9 @@ function logSettingsUpdate(newSettingKey, newSettingValue) {
 }function noop() {
   return;
 }function isObject(obj) {
-  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj);
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
+}function isFunction(value) {
+  return typeof value === 'function';
 }function pipe(...fns) {
   return function (param) {
     return fns.reduce(function (result, fn) {
@@ -452,6 +448,10 @@ function logSettingsUpdate(newSettingKey, newSettingValue) {
       return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
     };
   };
+}function range(start, end) {
+  return Array.from({ length: end - start }, function (v, k) {
+    return k + start;
+  });
 }exports.logSettingsUpdate = logSettingsUpdate;
 exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.recursiveOmitFilterAndInheritedPropertiesFromObj = recursiveOmitFilterAndInheritedPropertiesFromObj;
@@ -461,6 +461,7 @@ exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
+exports.range = range;
 
 /***/ }),
 
@@ -636,9 +637,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleScanResults = undefined;
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
+var _isEmpty = __webpack_require__(/*! is-empty */ "./node_modules/is-empty/lib/index.js");
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _ms = __webpack_require__(/*! ms */ "ms");
 
@@ -665,7 +666,7 @@ function handleScanResults(devicesFound) {
 
   _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-network-devices-can-see', { devicesCanSee: devicesFound });
 
-  if (_lodash2.default.isEmpty(devicesToSearchFor)) return;
+  if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
   /**
    * If any devices we are looking for showed up in the latest scan,
    * add the current time to the stored device in devicesToSearchFor.
@@ -724,10 +725,6 @@ var _util2 = _interopRequireDefault(_util);
 var _defaultGateway = __webpack_require__(/*! default-gateway */ "default-gateway");
 
 var _defaultGateway2 = _interopRequireDefault(_defaultGateway);
-
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
 
 var _ms = __webpack_require__(/*! ms */ "ms");
 
@@ -823,8 +820,8 @@ function getMacAdressForHostIP(device) {
   const { hostsScanRangeStart, hostsScanRangeEnd } = (0, _settings.getSettings)();
   const networkOctects = gateway.slice(0, gateway.lastIndexOf('.'));
   return _internalIp2.default.v4().then(function (internalIp) {
-    // Lodash range doesn't include the last number.
-    return _lodash2.default.range(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
+    // range doesn't include the last number.
+    return (0, _utils.range)(hostsScanRangeStart, hostsScanRangeEnd + 1).map(function (lastOctet) {
       return `${networkOctects}.${lastOctet}`;
     }).filter(function (hostIP) {
       return hostIP !== gateway && hostIP !== internalIp;
@@ -1450,6 +1447,96 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
+/***/ "./node_modules/is-empty/lib/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/is-empty/lib/index.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+/**
+ * Has own property.
+ *
+ * @type {Function}
+ */
+
+var has = Object.prototype.hasOwnProperty
+
+/**
+ * To string.
+ *
+ * @type {Function}
+ */
+
+var toString = Object.prototype.toString
+
+/**
+ * Test whether a value is "empty".
+ *
+ * @param {Mixed} val
+ * @return {Boolean}
+ */
+
+function isEmpty(val) {
+  // Null and Undefined...
+  if (val == null) return true
+
+  // Booleans...
+  if ('boolean' == typeof val) return false
+
+  // Numbers...
+  if ('number' == typeof val) return val === 0
+
+  // Strings...
+  if ('string' == typeof val) return val.length === 0
+
+  // Functions...
+  if ('function' == typeof val) return val.length === 0
+
+  // Arrays...
+  if (Array.isArray(val)) return val.length === 0
+
+  // Errors...
+  if (val instanceof Error) return val.message === ''
+
+  // Objects...
+  if (val.toString == toString) {
+    switch (val.toString()) {
+
+      // Maps, Sets, Files and Errors...
+      case '[object File]':
+      case '[object Map]':
+      case '[object Set]': {
+        return val.size === 0
+      }
+
+      // Plain objects...
+      case '[object Object]': {
+        for (var key in val) {
+          if (has.call(val, key)) return false
+        }
+
+        return true
+      }
+    }
+  }
+
+  // Anything else...
+  return false
+}
+
+/**
+ * Export `isEmpty`.
+ *
+ * @type {Function}
+ */
+
+module.exports = isEmpty
+
+
+/***/ }),
+
 /***/ "auto-launch":
 /*!******************************!*\
   !*** external "auto-launch" ***!
@@ -1579,17 +1666,6 @@ module.exports = require("is-ip");
 /***/ (function(module, exports) {
 
 module.exports = require("lock-system");
-
-/***/ }),
-
-/***/ "lodash":
-/*!*************************!*\
-  !*** external "lodash" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash");
 
 /***/ }),
 

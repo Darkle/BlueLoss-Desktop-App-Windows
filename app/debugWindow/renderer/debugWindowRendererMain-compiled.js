@@ -91,9 +91,9 @@ var _addLineNumbers = __webpack_require__(/*! add-line-numbers */ "add-line-numb
 
 var _addLineNumbers2 = _interopRequireDefault(_addLineNumbers);
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
+var _isEmpty = __webpack_require__(/*! is-empty */ "./node_modules/is-empty/lib/index.js");
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _utils = __webpack_require__(/*! ../../settingsWindow/renderer/utils.lsc */ "./app/settingsWindow/renderer/utils.lsc");
 
@@ -109,7 +109,7 @@ _electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg =
 });
 
 function createMetaObjForLogging(meta) {
-  if (_lodash2.default.isEmpty(meta)) return '';
+  if ((0, _isEmpty2.default)(meta)) return '';
   if (meta.stack) meta.stack = meta.stack.split(/\r\n?|\n/);
   return (0, _stringifyObject2.default)(meta).replace(/'/g, '');
 }function createLoggingSansLineNumbers(msg, meta) {
@@ -146,12 +146,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
@@ -180,11 +174,103 @@ function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNum
 }function identity(param) {
   return param;
 }function isObject(obj) {
-  return _lodash2.default.isObject(obj) && !_lodash2.default.isArray(obj) && !_lodash2.default.isFunction(obj) && !_lodash2.default.isRegExp(obj) && !_lodash2.default.isString(obj);
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
+}function isFunction(value) {
+  return typeof value === 'function';
 }exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
 exports.handleRendererWindowError = handleRendererWindowError;
 exports.identity = identity;
 exports.omitInheritedProperties = omitInheritedProperties;
+
+/***/ }),
+
+/***/ "./node_modules/is-empty/lib/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/is-empty/lib/index.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+/**
+ * Has own property.
+ *
+ * @type {Function}
+ */
+
+var has = Object.prototype.hasOwnProperty
+
+/**
+ * To string.
+ *
+ * @type {Function}
+ */
+
+var toString = Object.prototype.toString
+
+/**
+ * Test whether a value is "empty".
+ *
+ * @param {Mixed} val
+ * @return {Boolean}
+ */
+
+function isEmpty(val) {
+  // Null and Undefined...
+  if (val == null) return true
+
+  // Booleans...
+  if ('boolean' == typeof val) return false
+
+  // Numbers...
+  if ('number' == typeof val) return val === 0
+
+  // Strings...
+  if ('string' == typeof val) return val.length === 0
+
+  // Functions...
+  if ('function' == typeof val) return val.length === 0
+
+  // Arrays...
+  if (Array.isArray(val)) return val.length === 0
+
+  // Errors...
+  if (val instanceof Error) return val.message === ''
+
+  // Objects...
+  if (val.toString == toString) {
+    switch (val.toString()) {
+
+      // Maps, Sets, Files and Errors...
+      case '[object File]':
+      case '[object Map]':
+      case '[object Set]': {
+        return val.size === 0
+      }
+
+      // Plain objects...
+      case '[object Object]': {
+        for (var key in val) {
+          if (has.call(val, key)) return false
+        }
+
+        return true
+      }
+    }
+  }
+
+  // Anything else...
+  return false
+}
+
+/**
+ * Export `isEmpty`.
+ *
+ * @type {Function}
+ */
+
+module.exports = isEmpty
+
 
 /***/ }),
 
@@ -207,17 +293,6 @@ module.exports = require("add-line-numbers");
 /***/ (function(module, exports) {
 
 module.exports = require("electron");
-
-/***/ }),
-
-/***/ "lodash":
-/*!*************************!*\
-  !*** external "lodash" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash");
 
 /***/ }),
 
