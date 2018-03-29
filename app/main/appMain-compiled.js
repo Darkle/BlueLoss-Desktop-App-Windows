@@ -658,7 +658,7 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function handleScanResults(devicesFound) {
+function handleScanResults(devicesFound = []) {
   var _settingsWindow$webCo;
 
   _logging.logger.debug(`scan returned these active devices: \n`, devicesFound);

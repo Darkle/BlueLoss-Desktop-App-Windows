@@ -8,7 +8,7 @@ import { getSettings, updateSetting, modifyADeviceInDevicesToSearchFor } from '.
 import { lockTheSystem } from '../common/lockSystem.lsc'
 import { tenYearsFromNow } from '../common/utils.lsc'
 
-handleScanResults(devicesFound: Array<DeviceType>):void ->
+handleScanResults(devicesFound: Array<?DeviceType> = []):void ->
   logger.debug(`scan returned these active devices: \n`, devicesFound)
 
   { devicesToSearchFor } = getSettings()
