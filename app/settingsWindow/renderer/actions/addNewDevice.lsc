@@ -1,5 +1,4 @@
 import { ipcRenderer } from 'electron'
-import _ from 'lodash'
 
 import { DeviceType } from '../../../types/types.lsc'
 
@@ -9,6 +8,13 @@ import { DeviceType } from '../../../types/types.lsc'
 * https://github.com/hyperapp/hyperapp#actions
 */
 export default addNewDevice(newDevice: DeviceType) -> state ->
-  if _.find(state.devicesToSearchFor, {macAddress: newDevice.macAddress}): return ({})
+  if state.devicesToSearchFor[newDevice.macAddress]: return {}
   ipcRenderer.send('renderer:device-added-in-ui', newDevice)
-  ({devicesToSearchFor: [...state.devicesToSearchFor, ...[newDevice]]})
+  ({
+    devicesToSearchFor: {
+      ...state.devicesToSearchFor,
+      ...{
+        [ newDevice.macAddress ]: newDevice
+      }
+    }
+  })

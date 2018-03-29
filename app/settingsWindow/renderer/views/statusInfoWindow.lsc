@@ -1,5 +1,4 @@
 import { h } from 'hyperapp'
-import _ from 'lodash'
 
 import DeviceCard from '../components/deviceCard.lsc'
 
@@ -7,7 +6,7 @@ export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'statusTab': 'flex' else: 'none'
   statusAnimationVisibility = if state.lanLostEnabled: 'visible' else: 'hidden'
   lanLostStatusText = if state.lanLostEnabled: 'Enabled' else: 'Disabled'
-  lookingForHeaderDisplay = if state.devicesToSearchFor.length > 0: 'block' else: 'none'
+  lookingForHeaderDisplay = if Object.keys(state.devicesToSearchFor).length: 'block' else: 'none'
 
   <div id="statusTabInfoWindow" style={ { display: infoWindowDisplay } } >
     <div id="topStatus">
@@ -36,7 +35,7 @@ export default ({ actions, state }) ->
         Currently Looking For:
       </div>
       {
-        state.devicesToSearchFor.map(device ->
+        Object.values(state.devicesToSearchFor).map(device ->
           <DeviceCard
             key={device.macAddress}
             actions={actions}
@@ -49,9 +48,8 @@ export default ({ actions, state }) ->
         Devices To Add:
       </div>
       {
-        // Regular Array.includes compares by reference, not value, so using _.find.
         state.devicesCanSee
-          .filter(({macAddress}) -> !_.find(state.devicesToSearchFor, {macAddress}))
+          .filter(({macAddress}) -> !state.devicesToSearchFor[macAddress])
           .map(device ->
             <DeviceCard
               key={device.macAddress}

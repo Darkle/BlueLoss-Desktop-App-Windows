@@ -16,7 +16,7 @@ rollbarConfig = {
       platform: process.platform,
       processVersions: process.versions,
       arch: process.arch,
-      lanLostVersion: electronApp.getVersion()
+      LANLostVersion: electronApp.getVersion()
     },
     // Ignore the server stuff cause that includes info about the host pc name.
     transform(payload){

@@ -1,14 +1,14 @@
-import { SettingsWindowPositionType, DeviceType } from '../types/types.lsc'
+import { SettingsWindowPositionType } from '../types/types.lsc'
 
 defaultSettings: {
   lanLostEnabled: boolean,
   runOnStartup: boolean,
   trayIconColor: string,
-  devicesToSearchFor: Array<DeviceType>,
+  devicesToSearchFor: Object,
   timeToLock: number,
   reportErrors: boolean,
-  hostsScanRangeStart: boolean,
-  hostsScanRangeEnd: boolean,
+  hostsScanRangeStart: number,
+  hostsScanRangeEnd: number,
   hostScanTimeout: number,
   enableOUIfileUpdate: boolean,
   /**
@@ -24,7 +24,7 @@ defaultSettings: {
   lanLostEnabled: true,
   runOnStartup: true,
   trayIconColor: 'white',
-  devicesToSearchFor: [],
+  devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
   hostsScanRangeStart: 2,

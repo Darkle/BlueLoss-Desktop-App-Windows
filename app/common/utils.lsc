@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import { SettingsTypes } from '../types/types.lsc'
 import { logger } from './logging/logging.lsc'
-import { getSettings } from '../db/settings.lsc'
+import { getSettings } from '../settings/settings.lsc'
 
 logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)

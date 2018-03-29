@@ -4,7 +4,7 @@ import winston from 'winston'
 
 import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
 import { UserDebugLoggerTransport } from './userDebugLogger.lsc'
-import { getSettings } from '../../db/settings.lsc'
+import { getSettings } from '../../settings/settings.lsc'
 
 rollbarTransportOptions = {
   level: 'error'

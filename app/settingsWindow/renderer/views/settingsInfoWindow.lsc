@@ -1,6 +1,6 @@
 import { h } from 'hyperapp'
 
-import { defaultSettings } from '../../../db/settingsDefaults.lsc'
+import { defaultSettings } from '../../../settings/settingsDefaults.lsc'
 
 minTimeToLock = defaultSettings.timeToLock
 minHostsScanRangeStart = defaultSettings.hostsScanRangeStart

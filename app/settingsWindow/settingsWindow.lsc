@@ -2,7 +2,7 @@ import path from 'path'
 import url from 'url'
 import { app as electronApp, BrowserWindow, Menu } from 'electron'
 
-import { getSettings, updateSetting } from '../db/settings.lsc'
+import { getSettings, updateSetting } from '../settings/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { recursiveOmitFilterAndInheritedPropertiesFromObj } from '../common/utils.lsc'
 

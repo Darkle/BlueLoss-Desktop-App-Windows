@@ -3,30 +3,33 @@ import _ from 'lodash'
 import { DeviceType } from '../types/types.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { getSettings } from '../db/settings.lsc'
-import { locksSystemIfShouldLock } from '../common/lockSystem.lsc'
+import { getSettings, updateSetting, modifyADeviceInDevicesToSearchFor } from '../settings/settings.lsc'
+import { lockSystemIfShouldLock } from '../common/lockSystem.lsc'
 
-let lastTimeSawADeviceWeAreLookingFor = Date.now()
-
-handleScanResults(devices: Array<DeviceType>):void ->
-  logger.debug(`scan returned these active devices: \n`, devices)
+handleScanResults(devicesFound: Array<DeviceType>):void ->
+  logger.debug(`scan returned these active devices: \n`, devicesFound)
 
   { devicesToSearchFor } = getSettings()
 
   settingsWindow?.webContents?.send(
     'mainprocess:update-of-network-devices-can-see',
-    { devicesCanSee: devices }
+    { devicesCanSee: devicesFound }
   )
 
-  if !devicesToSearchFor.length: return
-  if foundADeviceWeAreLookingFor(devicesToSearchFor, devices):
-    now lastTimeSawADeviceWeAreLookingFor = Date.now()
-    return
+  if _.isEmpty(devicesToSearchFor): return
 
-  locksSystemIfShouldLock(lastTimeSawADeviceWeAreLookingFor)
+  devicesFound.forEach((device):void ->
+    { macAddress , lastSeen } = device
+    if !devicesToSearchFor[macAddress]: return
 
-foundADeviceWeAreLookingFor(devicesToSearchFor:Array<any>, devices:Array<any>):boolean ->
-   _.intersectionBy(devicesToSearchFor, devices, 'macAddress').length
+    lockSystemIfShouldLock(lastSeen)
+
+    updateSetting('devicesToSearchFor',
+      modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', Date.now())
+    )
+
+  )
+
 
 
 export {

@@ -1,5 +1,4 @@
 import { ipcRenderer } from 'electron'
-import _ from 'lodash'
 
 import { DeviceType } from '../../../types/types.lsc'
 
@@ -9,8 +8,13 @@ import { DeviceType } from '../../../types/types.lsc'
 * https://github.com/hyperapp/hyperapp#actions
 */
 export default removeDevice(deviceToRemove: DeviceType) -> state ->
-  if !_.find(state.devicesToSearchFor, {macAddress: deviceToRemove.macAddress}): return ({})
+  if !state.devicesToSearchFor[deviceToRemove.macAddress]: return {}
   ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove)
-  ({devicesToSearchFor: state.devicesToSearchFor.filter(({macAddress}) -> (macAddress !== deviceToRemove.macAddress))})
+  ({
+    devicesToSearchFor: {
+    ...for key macAddress, val device in state.devicesToSearchFor:
+      if macAddress != deviceToRemove.macAddress: { [ macAddress ]: device }
+  }
+  })
 
 

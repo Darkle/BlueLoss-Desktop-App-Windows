@@ -2,7 +2,7 @@ import path from 'path'
 import { Tray, Menu, app as electronApp } from 'electron'
 
 import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { updateSetting, getSettings } from '../db/settings.lsc'
+import { updateSetting, getSettings } from '../settings/settings.lsc'
 
 let tray = null // might need to be outside to avoid being garbage collected. https://electron.atom.io/docs/api/tray/
 trayIconsFolderPath = path.resolve(__dirname, '..', '..', 'resources', 'icons')

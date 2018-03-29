@@ -1,7 +1,6 @@
 import path from 'path'
 import { app as electronApp } from 'electron'
 
-import _ from 'lodash'
 import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
@@ -38,23 +37,41 @@ updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   logSettingsUpdate(newSettingKey, newSettingValue)
 
 addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
-  if findDeviceInDevicesToSearchFor(deviceToAdd.macAddress): return
-  updateSetting('devicesToSearchFor', [...settings.devicesToSearchFor, ...[deviceToAdd]])
+  { macAddress } = deviceToAdd
+  if deviceIsInDevicesToSearchFor(macAddress): return
 
-removeNewDeviceToSearchFor({macAddress: macAddressOfDeviceToRemove}):void ->
-  if !findDeviceInDevicesToSearchFor(macAddressOfDeviceToRemove): return
   updateSetting('devicesToSearchFor',
-    settings.devicesToSearchFor.filter(({ macAddress }) -> macAddress !== macAddressOfDeviceToRemove)
+    {...settings.devicesToSearchFor, ...{ [ macAddress ]: deviceToAdd }}
   )
-/*****
-* Regular Array.includes compares by reference, not value, so using _.find.
-*/
-findDeviceInDevicesToSearchFor(macAddress) ->
-  _.find(settings.devicesToSearchFor, { macAddress })
+
+removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
+  { macAddress } = deviceToRemove
+  if !deviceIsInDevicesToSearchFor(macAddress): return
+
+  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(macAddress))
+
+filterDevicesToSearchFor(macAddressToRemove: string):Object ->
+  {
+    ...for key macAddress, val device in settings.devicesToSearchFor:
+      if macAddress != macAddressToRemove: { [ macAddress ]: device }
+  }
+
+deviceIsInDevicesToSearchFor(macAddress: string):boolean ->
+  settings.devicesToSearchFor[macAddress]
+
+modifyADeviceInDevicesToSearchFor(macAddress: string, propName: string, propValue: any):Object ->
+  {
+    ...settings.devicesToSearchFor,
+    ...{
+      [ macAddress ]: {
+        ...settings.devicesToSearchFor[macAddress],
+        ...{ [ propName ]: propValue }
+      }
+    }
+  }
 
 logStartupSettings() ->
   logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
-
 
 export {
   updateSetting,
@@ -62,4 +79,5 @@ export {
   addNewDeviceToSearchFor,
   removeNewDeviceToSearchFor,
   logStartupSettings,
+  modifyADeviceInDevicesToSearchFor,
 }

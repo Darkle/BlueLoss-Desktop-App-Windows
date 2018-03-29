@@ -71,10 +71,10 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/db/settingsDefaults.lsc":
-/*!*************************************!*\
-  !*** ./app/db/settingsDefaults.lsc ***!
-  \*************************************/
+/***/ "./app/settings/settingsDefaults.lsc":
+/*!*******************************************!*\
+  !*** ./app/settings/settingsDefaults.lsc ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -92,7 +92,7 @@ const defaultSettings = {
   lanLostEnabled: true,
   runOnStartup: true,
   trayIconColor: 'white',
-  devicesToSearchFor: [],
+  devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
   hostsScanRangeStart: 2,
@@ -193,15 +193,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -210,11 +206,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 exports.default = function addNewDevice(newDevice) {
   return function (state) {
-    var _ref;
-
-    if (_lodash2.default.find(state.devicesToSearchFor, { macAddress: newDevice.macAddress })) return {};
+    if (state.devicesToSearchFor[newDevice.macAddress]) return {};
     _electron.ipcRenderer.send('renderer:device-added-in-ui', newDevice);
-    return { devicesToSearchFor: [...(_ref = state.devicesToSearchFor, _ref === void 0 ? [] : _ref), ...[newDevice]] };
+    return {
+      devicesToSearchFor: _extends({}, state.devicesToSearchFor, {
+        [newDevice.macAddress]: newDevice
+      })
+    };
   };
 };
 
@@ -308,13 +306,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -323,11 +315,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 exports.default = function removeDevice(deviceToRemove) {
   return function (state) {
-    if (!_lodash2.default.find(state.devicesToSearchFor, { macAddress: deviceToRemove.macAddress })) return {};
+    if (!state.devicesToSearchFor[deviceToRemove.macAddress]) return {};
     _electron.ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove);
-    return { devicesToSearchFor: state.devicesToSearchFor.filter(function ({ macAddress }) {
-        return macAddress !== deviceToRemove.macAddress;
-      }) };
+    return {
+      devicesToSearchFor: (() => {
+        const _obj = {};
+        for (let _obj2 = state.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+          const macAddress = _keys[_i];const device = _obj2[macAddress];
+          if (macAddress !== deviceToRemove.macAddress) _obj[macAddress] = device;
+        }return _obj;
+      })()
+    };
   };
 };
 
@@ -930,7 +928,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _settingsDefaults = __webpack_require__(/*! ../../../db/settingsDefaults.lsc */ "./app/db/settingsDefaults.lsc");
+var _settingsDefaults = __webpack_require__(/*! ../../../settings/settingsDefaults.lsc */ "./app/settings/settingsDefaults.lsc");
 
 const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
 const minHostsScanRangeStart = _settingsDefaults.defaultSettings.hostsScanRangeStart;
@@ -1331,10 +1329,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _deviceCard = __webpack_require__(/*! ../components/deviceCard.lsc */ "./app/settingsWindow/renderer/components/deviceCard.lsc");
 
 var _deviceCard2 = _interopRequireDefault(_deviceCard);
@@ -1345,7 +1339,7 @@ exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'statusTab' ? 'flex' : 'none';
   const statusAnimationVisibility = state.lanLostEnabled ? 'visible' : 'hidden';
   const lanLostStatusText = state.lanLostEnabled ? 'Enabled' : 'Disabled';
-  const lookingForHeaderDisplay = state.devicesToSearchFor.length > 0 ? 'block' : 'none';
+  const lookingForHeaderDisplay = Object.keys(state.devicesToSearchFor).length ? 'block' : 'none';
 
   return (0, _hyperapp.h)(
     'div',
@@ -1392,7 +1386,7 @@ exports.default = function ({ actions, state }) {
         { id: 'lookingForHeader', style: { display: lookingForHeaderDisplay } },
         'Currently Looking For:'
       ),
-      state.devicesToSearchFor.map(function (device) {
+      Object.values(state.devicesToSearchFor).map(function (device) {
         return (0, _hyperapp.h)(_deviceCard2.default, {
           key: device.macAddress,
           actions: actions,
@@ -1405,10 +1399,8 @@ exports.default = function ({ actions, state }) {
         { id: 'deviceAddHeader' },
         'Devices To Add:'
       ),
-
-      // Regular Array.includes compares by reference, not value, so using _.find.
       state.devicesCanSee.filter(function ({ macAddress }) {
-        return !_lodash2.default.find(state.devicesToSearchFor, { macAddress });
+        return !state.devicesToSearchFor[macAddress];
       }).map(function (device) {
         return (0, _hyperapp.h)(_deviceCard2.default, {
           key: device.macAddress,
