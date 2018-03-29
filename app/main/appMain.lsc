@@ -31,3 +31,4 @@ electronApp.once('ready', ():void ->
 electronApp.on('window-all-closed', noop)
 
 process.on('unhandledRejection', logger.error)
+process.on('uncaughtException', logger.error)

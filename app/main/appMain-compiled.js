@@ -618,6 +618,7 @@ _electron.app.once('ready', function () {
 _electron.app.on('window-all-closed', _utils.noop);
 
 process.on('unhandledRejection', _logging.logger.error);
+process.on('uncaughtException', _logging.logger.error);
 
 /***/ }),
 
