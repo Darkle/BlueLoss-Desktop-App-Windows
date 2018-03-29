@@ -502,8 +502,6 @@ exports.default = function deviceCard({ lookingForDevice, device, actions }) {
       (0, _hyperapp.h)(
         "x-box",
         { "class": "addRemoveButton" },
-
-        // Lightscript if expressions FTW! http://bit.ly/2kNbt9R
         lookingForDevice ? (0, _hyperapp.h)(
           "x-button",
           { onclick: function () {
@@ -575,7 +573,7 @@ const logInDev =  true ? _logger.withLogger : undefined; // eslint-disable-line 
 const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
 /**
  * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
- * for that.
+ * for them.
  */
 _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
