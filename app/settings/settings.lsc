@@ -5,7 +5,7 @@ import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 
-import { logSettingsUpdate, omitGawkFromSettings } from '../common/utils.lsc'
+import { omitGawkFromSettings, tenYearsFromNow } from '../common/utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
@@ -28,6 +28,7 @@ settingsLoadedOnStartup = {...omitGawkFromSettings(settings)}
 
 initSettingsObservers(settings)
 initSettingsIPClisteners()
+updateLastSeenForDevicesLookingForOnStartup()
 
 getSettings() -> settings
 
@@ -70,8 +71,37 @@ modifyADeviceInDevicesToSearchFor(macAddress: string, propName: string, propValu
     }
   }
 
+/**
+ * When a user starts up LANLost after previously exiting, the
+ * lastSeen value will be out of date for the devices in
+ * devicesToSearchFor. This would cause LANLost to lock the
+ * system straight away because the lastSeen value + timeToLock
+ *  will be less than Date.now(). So to prevent this, we give all
+ * devices in devicesToSearchFor a lastSeen of 10 years from now.
+ * (when a device is seen again during a scan, lastSeen is updated.)
+ */
+updateLastSeenForDevicesLookingForOnStartup():void ->
+  for val { macAddress } in settings.devicesToSearchFor:
+    updateSetting('devicesToSearchFor',
+      modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', tenYearsFromNow())
+    )
+
+logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
+  /**
+   * There's a circular dependancy issue with logging stuff on app startup,
+   * so using nextTick hack.
+   * (updateLastSeenForDevicesLookingForOnStartup is called on startup,
+   * which changes the devicesToSearchFor setting value, which in turn
+   * causes logSettingsUpdate to be called).
+   */
+  process.nextTick(() ->
+    logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
+    logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
+  )
+
 logStartupSettings() ->
   logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
+
 
 export {
   updateSetting,

@@ -398,20 +398,17 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = exports.logSettingsUpdate = undefined;
+exports.tenYearsFromNow = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+var _ms = __webpack_require__(/*! ms */ "ms");
 
-var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/common/logging/logging.lsc");
+var _ms2 = _interopRequireDefault(_ms);
 
-var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function logSettingsUpdate(newSettingKey, newSettingValue) {
-  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
-  _logging.logger.debug(`Settings Are Now: `, omitGawkFromSettings((0, _settings.getSettings)()));
-}function omitGawkFromSettings(settings) {
+function omitGawkFromSettings(settings) {
   return recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__']);
 }function recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties) {
   return omitInheritedProperties(settings, properties);
@@ -452,8 +449,9 @@ function logSettingsUpdate(newSettingKey, newSettingValue) {
   return Array.from({ length: end - start }, function (v, k) {
     return k + start;
   });
-}exports.logSettingsUpdate = logSettingsUpdate;
-exports.omitGawkFromSettings = omitGawkFromSettings;
+}function tenYearsFromNow() {
+  return Date.now() + (0, _ms2.default)('10 years');
+}exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.recursiveOmitFilterAndInheritedPropertiesFromObj = recursiveOmitFilterAndInheritedPropertiesFromObj;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.noop = noop;
@@ -462,6 +460,7 @@ exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
 exports.range = range;
+exports.tenYearsFromNow = tenYearsFromNow;
 
 /***/ }),
 
@@ -637,7 +636,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleScanResults = undefined;
 
-var _isEmpty = __webpack_require__(/*! is-empty */ "./node_modules/is-empty/lib/index.js");
+var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
 
 var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
@@ -654,6 +653,8 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
 
 var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
+
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -688,11 +689,9 @@ function handleScanResults(devicesFound) {
     const _k = _keys[_i2];const { lastSeen, macAddress } = devicesToSearchFor[_k];
     if (deviceHasBeenLost(lastSeen)) {
       (0, _lockSystem.lockTheSystem)();
-      (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(macAddress, 'lastSeen', tenYearsFromNow()));
+      (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(macAddress, 'lastSeen', (0, _utils.tenYearsFromNow)()));
     }
   }
-}function tenYearsFromNow() {
-  return Date.now() + (0, _ms2.default)('10 years');
 }function deviceHasBeenLost(lastTimeSawDevice) {
   return Date.now() > lastTimeSawDevice + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
 }exports.handleScanResults = handleScanResults;
@@ -1064,13 +1063,14 @@ const settingsLoadedOnStartup = _extends({}, (0, _utils.omitGawkFromSettings)(se
 
 (0, _settingsObservers.initSettingsObservers)(settings);
 (0, _settingsIPClisteners.initSettingsIPClisteners)();
+updateLastSeenForDevicesLookingForOnStartup();
 
 function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
   settings[newSettingKey] = newSettingValue;
   db.set(newSettingKey, newSettingValue).write();
-  (0, _utils.logSettingsUpdate)(newSettingKey, newSettingValue);
+  logSettingsUpdate(newSettingKey, newSettingValue);
 }function addNewDeviceToSearchFor(deviceToAdd) {
   const { macAddress } = deviceToAdd;
   if (deviceIsInDevicesToSearchFor(macAddress)) return;
@@ -1095,6 +1095,32 @@ function deviceIsInDevicesToSearchFor(macAddress) {
 }function modifyADeviceInDevicesToSearchFor(macAddress, propName, propValue) {
   return _extends({}, settings.devicesToSearchFor, {
     [macAddress]: _extends({}, settings.devicesToSearchFor[macAddress], { [propName]: propValue })
+  });
+} /**
+   * When a user starts up LANLost after previously exiting, the
+   * lastSeen value will be out of date for the devices in
+   * devicesToSearchFor. This would cause LANLost to lock the
+   * system straight away because the lastSeen value + timeToLock
+   *  will be less than Date.now(). So to prevent this, we give all
+   * devices in devicesToSearchFor a lastSeen of 10 years from now.
+   * (when a device is seen again during a scan, lastSeen is updated.)
+   */
+function updateLastSeenForDevicesLookingForOnStartup() {
+  for (let _obj3 = settings.devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
+    const _k = _keys2[_i2];const { macAddress } = _obj3[_k];
+    updateSetting('devicesToSearchFor', modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', (0, _utils.tenYearsFromNow)()));
+  }
+}function logSettingsUpdate(newSettingKey, newSettingValue) {
+  /**
+   * There's a circular dependancy issue with logging stuff on app startup,
+   * so using nextTick hack.
+   * (updateLastSeenForDevicesLookingForOnStartup is called on startup,
+   * which changes the devicesToSearchFor setting value, which in turn
+   * causes logSettingsUpdate to be called).
+   */
+  process.nextTick(function () {
+    _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
+    return _logging.logger.debug(`Settings Are Now: `, (0, _utils.omitGawkFromSettings)(getSettings()));
   });
 }function logStartupSettings() {
   return _logging.logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup);
@@ -1447,96 +1473,6 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/is-empty/lib/index.js":
-/*!********************************************!*\
-  !*** ./node_modules/is-empty/lib/index.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-
-/**
- * Has own property.
- *
- * @type {Function}
- */
-
-var has = Object.prototype.hasOwnProperty
-
-/**
- * To string.
- *
- * @type {Function}
- */
-
-var toString = Object.prototype.toString
-
-/**
- * Test whether a value is "empty".
- *
- * @param {Mixed} val
- * @return {Boolean}
- */
-
-function isEmpty(val) {
-  // Null and Undefined...
-  if (val == null) return true
-
-  // Booleans...
-  if ('boolean' == typeof val) return false
-
-  // Numbers...
-  if ('number' == typeof val) return val === 0
-
-  // Strings...
-  if ('string' == typeof val) return val.length === 0
-
-  // Functions...
-  if ('function' == typeof val) return val.length === 0
-
-  // Arrays...
-  if (Array.isArray(val)) return val.length === 0
-
-  // Errors...
-  if (val instanceof Error) return val.message === ''
-
-  // Objects...
-  if (val.toString == toString) {
-    switch (val.toString()) {
-
-      // Maps, Sets, Files and Errors...
-      case '[object File]':
-      case '[object Map]':
-      case '[object Set]': {
-        return val.size === 0
-      }
-
-      // Plain objects...
-      case '[object Object]': {
-        for (var key in val) {
-          if (has.call(val, key)) return false
-        }
-
-        return true
-      }
-    }
-  }
-
-  // Anything else...
-  return false
-}
-
-/**
- * Export `isEmpty`.
- *
- * @type {Function}
- */
-
-module.exports = isEmpty
-
-
-/***/ }),
-
 /***/ "auto-launch":
 /*!******************************!*\
   !*** external "auto-launch" ***!
@@ -1644,6 +1580,17 @@ module.exports = require("got");
 /***/ (function(module, exports) {
 
 module.exports = require("internal-ip");
+
+/***/ }),
+
+/***/ "is-empty":
+/*!***************************!*\
+  !*** external "is-empty" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("is-empty");
 
 /***/ }),
 

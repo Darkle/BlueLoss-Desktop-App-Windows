@@ -6,6 +6,7 @@ import { logger } from '../common/logging/logging.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { getSettings, updateSetting, modifyADeviceInDevicesToSearchFor } from '../settings/settings.lsc'
 import { lockTheSystem } from '../common/lockSystem.lsc'
+import { tenYearsFromNow } from '../common/utils.lsc'
 
 handleScanResults(devicesFound: Array<DeviceType>):void ->
   logger.debug(`scan returned these active devices: \n`, devicesFound)
@@ -42,8 +43,6 @@ handleScanResults(devicesFound: Array<DeviceType>):void ->
       updateSetting('devicesToSearchFor',
         modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', tenYearsFromNow())
       )
-
-tenYearsFromNow():number -> Date.now() + ms('10 years')
 
 deviceHasBeenLost(lastTimeSawDevice: number):boolean ->
   Date.now() > (lastTimeSawDevice + ms(`${ getSettings().timeToLock } mins`))

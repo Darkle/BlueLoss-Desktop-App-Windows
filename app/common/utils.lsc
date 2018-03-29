@@ -1,10 +1,4 @@
-import { SettingsTypes } from '../types/types.lsc'
-import { logger } from './logging/logging.lsc'
-import { getSettings } from '../settings/settings.lsc'
-
-logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
-  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
+import ms from 'ms'
 
 omitGawkFromSettings(settings) ->
   recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__'])
@@ -29,9 +23,10 @@ pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 range(start, end) -> Array.from({length: (end - start)}, (v, k) -> k + start)
+tenYearsFromNow():number -> Date.now() + ms('10 years')
+
 
 export {
-  logSettingsUpdate,
   omitGawkFromSettings,
   recursiveOmitFilterAndInheritedPropertiesFromObj,
   omitInheritedProperties,
@@ -41,4 +36,5 @@ export {
   curry,
   curryRight,
   range,
+  tenYearsFromNow,
 }
