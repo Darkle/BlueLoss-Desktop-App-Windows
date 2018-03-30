@@ -108,8 +108,8 @@ findVendorInfoInOUIfile(device: DeviceType): ?string ->
   getOUIfileData(device)[ouiSansDelimeters(device)]
 
 gatewayIsIPV4address({gateway: defaultGatewayIP}):Promise<string | Error> ->
+  logger.debug(`defaultGatewayIP ip: ${ defaultGatewayIP }`)
   new Promise((resolve, reject) ->
-    logger.debug(`defaultGatewayIP ip: ${ defaultGatewayIP }`)
     if !isIp.v4(defaultGatewayIP):
       return reject(new Error(`Didn't get valid gateway IP address: ${ defaultGatewayIP }`))
     resolve(defaultGatewayIP)

@@ -1031,8 +1031,8 @@ function getMacAdressForHostIP(device) {
 }function findVendorInfoInOUIfile(device) {
   return (0, _getOUIfile.getOUIfileData)(device)[ouiSansDelimeters(device)];
 }function gatewayIsIPV4address({ gateway: defaultGatewayIP }) {
+  _logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
   return new _bluebird2.default(function (resolve, reject) {
-    _logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
     if (!_isIp2.default.v4(defaultGatewayIP)) {
       return reject(new Error(`Didn't get valid gateway IP address: ${defaultGatewayIP}`));
     }return resolve(defaultGatewayIP);
