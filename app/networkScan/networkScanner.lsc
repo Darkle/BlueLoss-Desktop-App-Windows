@@ -63,13 +63,7 @@ connectToHostSocket(hostIP: string): Promise<any> ->
   )
 
 getDefaultGatewayIP():Promise<any> ->
-  getDefaultGateway.v4()
-    .then(({gateway: defaultGatewayIP}): ?string ->
-      if !isIp.v4(defaultGatewayIP):
-        throw new Error(`Didn't get valid gateway IP address`, { defaultGatewayIP })
-      logger.debug(`defaultGatewayIP ip: ${ defaultGatewayIP }`)
-      defaultGatewayIP
-    )
+  getDefaultGateway.v4().then(gatewayIsIPV4address)
 
 addMetaDataToDevice(ipAddress: string):DeviceType ->
   ({ ipAddress, lastSeen: Date.now() })
@@ -112,6 +106,14 @@ ouiSansDelimeters(device: DeviceType): string ->
 
 findVendorInfoInOUIfile(device: DeviceType): ?string ->
   getOUIfileData(device)[ouiSansDelimeters(device)]
+
+gatewayIsIPV4address({gateway: defaultGatewayIP}):Promise<string | Error> ->
+  new Promise((resolve, reject) ->
+    logger.debug(`defaultGatewayIP ip: ${ defaultGatewayIP }`)
+    if !isIp.v4(defaultGatewayIP):
+      return reject(new Error(`Didn't get valid gateway IP address: ${ defaultGatewayIP }`))
+    resolve(defaultGatewayIP)
+  )
 
 export {
   scanNetwork,

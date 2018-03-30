@@ -994,12 +994,7 @@ function connectToHostSocket(hostIP) {
     });
   });
 }function getDefaultGatewayIP() {
-  return _defaultGateway2.default.v4().then(function ({ gateway: defaultGatewayIP }) {
-    if (!_isIp2.default.v4(defaultGatewayIP)) {
-      throw new Error(`Didn't get valid gateway IP address`, { defaultGatewayIP });
-    }_logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
-    return defaultGatewayIP;
-  });
+  return _defaultGateway2.default.v4().then(gatewayIsIPV4address);
 }function addMetaDataToDevice(ipAddress) {
   return { ipAddress, lastSeen: Date.now() };
 }
@@ -1035,6 +1030,13 @@ function getMacAdressForHostIP(device) {
   return device.macAddress.replace(/[.:-]/g, "").substring(0, 6).toUpperCase();
 }function findVendorInfoInOUIfile(device) {
   return (0, _getOUIfile.getOUIfileData)(device)[ouiSansDelimeters(device)];
+}function gatewayIsIPV4address({ gateway: defaultGatewayIP }) {
+  return new _bluebird2.default(function (resolve, reject) {
+    _logging.logger.debug(`defaultGatewayIP ip: ${defaultGatewayIP}`);
+    if (!_isIp2.default.v4(defaultGatewayIP)) {
+      return reject(new Error(`Didn't get valid gateway IP address: ${defaultGatewayIP}`));
+    }return resolve(defaultGatewayIP);
+  });
 }exports.scanNetwork = scanNetwork;
 
 /***/ }),
