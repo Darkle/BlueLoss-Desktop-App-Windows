@@ -1079,7 +1079,7 @@ exports.default = function ({ actions, state }) {
               { 'class': 'extraInfo' },
               (0, _hyperapp.h)(
                 'abbr',
-                { id: 'poo', title: 'e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254' },
+                { title: 'e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254' },
                 (0, _hyperapp.h)('img', { src: `assets/icons/extraLabelinfo.svg` })
               )
             )

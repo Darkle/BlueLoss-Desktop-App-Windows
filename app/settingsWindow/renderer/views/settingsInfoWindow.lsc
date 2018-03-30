@@ -94,7 +94,7 @@ export default ({ actions, state }) ->
           </x-label>
           <x-label>The start and end range LANLost will scan to look for devices on your network.
             <span class="extraInfo">
-              <abbr id="poo" title="e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254">
+              <abbr title="e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254">
                 <img src={ `assets/icons/extraLabelinfo.svg` } />
               </abbr>
             </span>
