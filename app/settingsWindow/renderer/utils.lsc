@@ -32,9 +32,9 @@ omitInheritedProperties(obj) ->
   , {})
 
 identity(param) -> param
-isObject(obj) ->
+isObject(obj):boolean ->
   obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
-isFunction(value) -> typeof value === 'function'
+isFunction(value):boolean -> typeof value === 'function'
 
 
 export {

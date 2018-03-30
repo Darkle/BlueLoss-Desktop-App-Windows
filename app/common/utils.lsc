@@ -24,9 +24,9 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
  */
 getProperAppVersion():string -> appVersion
 noop() -> return
-isObject(obj) ->
+isObject(obj):boolean ->
   obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
-isFunction(value) -> typeof value === 'function'
+isFunction(value):boolean -> typeof value === 'function'
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
