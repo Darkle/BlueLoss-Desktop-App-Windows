@@ -36,6 +36,7 @@ isObject(obj) ->
   obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
 isFunction(value) -> typeof value === 'function'
 
+
 export {
   getInitialSettingsFromMainProcess,
   handleRendererWindowError,

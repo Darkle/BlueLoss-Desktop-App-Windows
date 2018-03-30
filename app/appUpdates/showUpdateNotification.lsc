@@ -1,6 +1,6 @@
 import path from 'path'
 import url from 'url'
-import { ipcMain, BrowserWindow, Menu } from 'electron'
+import { ipcMain, BrowserWindow, Menu, shell } from 'electron'
 
 import Positioner from 'electron-positioner'
 
@@ -8,13 +8,13 @@ import { logger } from '../common/logging/logging.lsc'
 import { updateSetting } from '../settings/settings.lsc'
 
 let notificationWindow = null
-// notificationWindowIcon = path.join(__dirname, '..', 'icons', 'blue', 'asd.png')
 notificationWindowMenu = if ISDEV: Menu.buildFromTemplate([{role: 'reload'}]) else: null
 updateHTMLfilePath = url.format({
   protocol: 'file',
   slashes: true,
   pathname: path.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
 })
+iconFileName = path.join(__dirname, '..', 'appUpdates', `LANLost-Blue-512x512.png`)
 
 showUpdateNotification(latestUpdateVersion: string):void ->
   now notificationWindow = new BrowserWindow(
@@ -28,6 +28,7 @@ showUpdateNotification(latestUpdateVersion: string):void ->
       acceptFirstMouse: true,
       titleBarStyle: 'hidden',
       autoHideMenuBar: true,
+      icon: iconFileName,
       title: 'An Update Is Available For LANLost'
     }
   )
@@ -57,6 +58,11 @@ showUpdateNotification(latestUpdateVersion: string):void ->
   )
 
 
+ipcMain.on('renderer:open-update-web-page', ():void ->
+  notificationWindow?.close?()
+  shell.openExternal('https://github.com/Darkle/LANLost/releases')
+)
+
 ipcMain.on('renderer:skip-update-version', (event, versionToSkip: string): void ->
   notificationWindow?.close?()
   updateSetting('skipUpdateVersion', versionToSkip)
@@ -81,7 +87,6 @@ getPlatformNotificationWindowHeight():number ->
     case 'win32':
       return 160
   }
-
 
 export{
   showUpdateNotification

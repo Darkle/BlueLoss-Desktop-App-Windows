@@ -1,8 +1,9 @@
 import util from 'util'
-import { app as electronApp } from 'electron'
 
 import winston from 'winston'
 import Rollbar from 'rollbar'
+
+import { getProperAppVersion } from '../utils.lsc'
 
 rollbarConfig = {
   accessToken: process.env.rollbarAccessToken,
@@ -16,7 +17,7 @@ rollbarConfig = {
       platform: process.platform,
       processVersions: process.versions,
       arch: process.arch,
-      LANLostVersion: electronApp.getVersion()
+      LANLostVersion: getProperAppVersion()
     },
     // Ignore the server stuff cause that includes info about the host pc name.
     transform(payload){

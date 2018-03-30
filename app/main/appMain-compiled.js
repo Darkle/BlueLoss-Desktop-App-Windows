@@ -128,7 +128,7 @@ function checkForUpdate() {
 }function shouldCheckForUpdate() {
   return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
 }function shouldShowUpdateNotification(latestVersion) {
-  return appVersion !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
+  return _electron.app.getVersion() !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
 }function checkForUpdateTomorrow() {
   setTimeout(checkForUpdate, oneDaysTime);
 }exports.checkForUpdate = checkForUpdate;
@@ -171,13 +171,13 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/setti
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let notificationWindow = null;
-// notificationWindowIcon = path.join(__dirname, '..', 'icons', 'blue', 'asd.png')
 const notificationWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
 const updateHTMLfilePath = _url2.default.format({
   protocol: 'file',
   slashes: true,
   pathname: _path2.default.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
 });
+const iconFileName = _path2.default.join(__dirname, '..', 'appUpdates', `LANLost-Blue-512x512.png`);
 
 function showUpdateNotification(latestUpdateVersion) {
   notificationWindow = new _electron.BrowserWindow({
@@ -190,6 +190,7 @@ function showUpdateNotification(latestUpdateVersion) {
     acceptFirstMouse: true,
     titleBarStyle: 'hidden',
     autoHideMenuBar: true,
+    icon: iconFileName,
     title: 'An Update Is Available For LANLost'
   });
 
@@ -216,7 +217,12 @@ function showUpdateNotification(latestUpdateVersion) {
   notificationWindow.once('unresponsive', function (event) {
     _logging.logger.error('notificationWindow unresponsive', event);
   });
-}_electron.ipcMain.on('renderer:skip-update-version', function (event, versionToSkip) {
+}_electron.ipcMain.on('renderer:open-update-web-page', function () {
+  notificationWindow == null ? void 0 : typeof notificationWindow.close !== 'function' ? void 0 : notificationWindow.close();
+  _electron.shell.openExternal('https://github.com/Darkle/LANLost/releases');
+});
+
+_electron.ipcMain.on('renderer:skip-update-version', function (event, versionToSkip) {
   notificationWindow == null ? void 0 : typeof notificationWindow.close !== 'function' ? void 0 : notificationWindow.close();
   (0, _settings.updateSetting)('skipUpdateVersion', versionToSkip);
 });
@@ -299,8 +305,6 @@ var _util = __webpack_require__(/*! util */ "util");
 
 var _util2 = _interopRequireDefault(_util);
 
-var _electron = __webpack_require__(/*! electron */ "electron");
-
 var _winston = __webpack_require__(/*! winston */ "winston");
 
 var _winston2 = _interopRequireDefault(_winston);
@@ -308,6 +312,8 @@ var _winston2 = _interopRequireDefault(_winston);
 var _rollbar = __webpack_require__(/*! rollbar */ "rollbar");
 
 var _rollbar2 = _interopRequireDefault(_rollbar);
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/common/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -323,7 +329,7 @@ const rollbarConfig = {
     platform: process.platform,
     processVersions: process.versions,
     arch: process.arch,
-    LANLostVersion: _electron.app.getVersion()
+    LANLostVersion: (0, _utils.getProperAppVersion)()
   },
   // Ignore the server stuff cause that includes info about the host pc name.
   transform(payload) {
@@ -571,7 +577,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.tenYearsFromNow = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = undefined;
+exports.getProperAppVersion = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.recursiveOmitFilterAndInheritedPropertiesFromObj = exports.omitGawkFromSettings = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -580,6 +586,8 @@ var _ms = __webpack_require__(/*! ms */ "ms");
 var _ms2 = _interopRequireDefault(_ms);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json").version;
 
 function omitGawkFromSettings(settings) {
   return recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__']);
@@ -594,6 +602,11 @@ function omitGawkFromSettings(settings) {
       return _extends({}, prev, { [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) });
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
+} /**
+   * When not packaged, Electron reports its own version rather than the app version.
+   */
+function getProperAppVersion() {
+  return appVersion;
 }function noop() {
   return;
 }function isObject(obj) {
@@ -624,6 +637,8 @@ function omitGawkFromSettings(settings) {
   });
 }function tenYearsFromNow() {
   return Date.now() + (0, _ms2.default)('10 years');
+}function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.recursiveOmitFilterAndInheritedPropertiesFromObj = recursiveOmitFilterAndInheritedPropertiesFromObj;
 exports.omitInheritedProperties = omitInheritedProperties;
@@ -634,6 +649,8 @@ exports.curry = curry;
 exports.curryRight = curryRight;
 exports.range = range;
 exports.tenYearsFromNow = tenYearsFromNow;
+exports.capitalizeFirstLetter = capitalizeFirstLetter;
+exports.getProperAppVersion = getProperAppVersion;
 
 /***/ }),
 
@@ -1472,10 +1489,12 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const settingsWindowRendererDirPath = _path2.default.join(__dirname, '..', 'settingsWindow', 'renderer');
+const iconsDir = _path2.default.join(settingsWindowRendererDirPath, 'assets', 'icons');
 const settingsHTMLpath = _url2.default.format({
   protocol: 'file',
   slashes: true,
-  pathname: _path2.default.resolve(__dirname, '..', 'settingsWindow', 'renderer', 'settingsWindow.html')
+  pathname: _path2.default.resolve(settingsWindowRendererDirPath, 'settingsWindow.html')
 });
 const settingsWindowProperties = _extends({
   width: 786,
@@ -1487,6 +1506,7 @@ const settingsWindowProperties = _extends({
   fullscreen: false,
   frame: false,
   show: false,
+  icon: getIconPath(),
   webPreferences: {
     textAreasAreResizable: false,
     devTools: true
@@ -1517,7 +1537,7 @@ function showSettingsWindow() {
   */
   global.settingsWindowRendererInitialSettings = (0, _utils.recursiveOmitFilterAndInheritedPropertiesFromObj)((0, _settings.getSettings)(), ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate', 'firstRun']);
 
-  exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition()));
+  exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition(), { icon: getIconPath() }));
   settingsWindow.loadURL(settingsHTMLpath);
   settingsWindow.setMenu(settingsWindowMenu);
   (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.show();
@@ -1545,6 +1565,11 @@ function showSettingsWindow() {
   const settingsWindowPosition = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().settingsWindowPosition;
   if (!settingsWindowPosition) return {};
   return { x: settingsWindowPosition.x, y: settingsWindowPosition.y };
+}function getIconPath() {
+  let trayIconColor = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().trayIconColor;
+  if (!trayIconColor) trayIconColor = 'blue';
+  const iconFileName = `LANLost-${(0, _utils.capitalizeFirstLetter)(trayIconColor)}-512x512.png`;
+  return _path2.default.join(iconsDir, iconFileName);
 }function toggleSettingsWindow() {
   if (!settingsWindow) {
     showSettingsWindow();
@@ -1654,6 +1679,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // http://bit.ly/2xEDMxk
 _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'config', '.env') });
+
+/***/ }),
+
+/***/ "./package.json":
+/*!**********************!*\
+  !*** ./package.json ***!
+  \**********************/
+/*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
+/***/ (function(module) {
+
+module.exports = {"name":"lanloss","productName":"LANLoss","version":"2018.3.30","description":"A desktop app that locks your computer when a device is lost on your local network","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config ./nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true sleepms 3000 && electron --inspect-brk ./app/main/appMain-compiled.js","build":"cross-env NODE_ENV=production,webpackBuild=true","start":"cross-env NODE_ENV=production electron ./app/main/appMain-compiled.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/LANLost.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","bluebird":"^3.5.1","default-gateway":"^2.7.0","dotenv":"^5.0.1","electron":"^1.8.4","electron-positioner":"^3.0.0","formbase":"^6.0.3","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.0","internal-ip":"^3.0.1","is-empty":"^1.2.0","is-ip":"^2.0.0","lock-system":"^1.3.0","lowdb":"^1.0.0","ms":"^2.1.1","node-arp":"^1.0.6","ono":"^4.0.3","rollbar":"^2.3.9","stringify-object":"^3.2.2","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.2","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","cross-env":"^5.1.4","devtron":"^1.4.0","electron-reload":"^1.2.2","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.3","gulp":"github:gulpjs/gulp#4.0","nodemon":"^1.17.2","parallel-webpack":"^2.3.0","sleep-ms":"^2.0.1","snyk":"^1.70.2","stylus":"^0.54.5","webpack":"^4.3.0","webpack-node-externals":"^1.6.0"},"snyk":true};
 
 /***/ }),
 

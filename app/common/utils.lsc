@@ -1,5 +1,7 @@
 import ms from 'ms'
 
+appVersion = require('../../package.json').version
+
 omitGawkFromSettings(settings) ->
   recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__'])
 
@@ -15,6 +17,10 @@ omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
     {...prev, ...{ [propName]: obj[propName] }}
   , {})
 
+/**
+ * When not packaged, Electron reports its own version rather than the app version.
+ */
+getProperAppVersion():string -> appVersion
 noop() -> return
 isObject(obj) ->
   obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
@@ -24,7 +30,7 @@ curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start)
 tenYearsFromNow():number -> Date.now() + ms('10 years')
-
+capitalizeFirstLetter(string: string):string -> string.charAt(0).toUpperCase() + string.slice(1)
 
 export {
   omitGawkFromSettings,
@@ -37,4 +43,6 @@ export {
   curryRight,
   range,
   tenYearsFromNow,
+  capitalizeFirstLetter,
+  getProperAppVersion,
 }
