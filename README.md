@@ -68,6 +68,6 @@ The following settings are configurable in the LANLost settings window:
 
 ## Screenshots
 
-![resources\readmeMedia\LANLost-Settings-Status](resources\readmeMedia\LANLost-Settings-Status.png)
+![LANLost Status WIndow](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings-Status.png)
 
-![resources\readmeMedia\LANLost-Settings](resources\readmeMedia\LANLost-Settings.png)
+![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings.png)
