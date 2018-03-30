@@ -86,8 +86,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.checkForUpdate = undefined;
 
-var _electron = __webpack_require__(/*! electron */ "electron");
-
 var _ms = __webpack_require__(/*! ms */ "ms");
 
 var _ms2 = _interopRequireDefault(_ms);
@@ -102,6 +100,8 @@ var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/c
 
 var _showUpdateNotification = __webpack_require__(/*! ./showUpdateNotification.lsc */ "./app/appUpdates/showUpdateNotification.lsc");
 
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const oneDaysTime = (0, _ms2.default)('1 day');
@@ -109,7 +109,6 @@ const twoWeeksTime = (0, _ms2.default)('2 weeks');
 const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
 const gotRequestOptions = { headers: { 'user-agent': userAgentString }, json: true };
 const updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json';
-const appVersion = _electron.app.getVersion();
 
 function checkForUpdate() {
   if (shouldCheckForUpdate()) return;
@@ -128,7 +127,7 @@ function checkForUpdate() {
 }function shouldCheckForUpdate() {
   return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
 }function shouldShowUpdateNotification(latestVersion) {
-  return _electron.app.getVersion() !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
+  return (0, _utils.getProperAppVersion)() !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
 }function checkForUpdateTomorrow() {
   setTimeout(checkForUpdate, oneDaysTime);
 }exports.checkForUpdate = checkForUpdate;
@@ -603,7 +602,9 @@ function omitGawkFromSettings(settings) {
     }return _extends({}, prev, { [propName]: obj[propName] });
   }, {});
 } /**
-   * When not packaged, Electron reports its own version rather than the app version.
+   * If you run Electron by pointing it to a js file that's not in the base parent directory with the
+   * package.json it will report the Electron binary version rather than what's in your package.json.
+   * https://github.com/electron/electron/issues/7085
    */
 function getProperAppVersion() {
   return appVersion;
