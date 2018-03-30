@@ -5,7 +5,7 @@ import { getSettings } from '../settings/settings.lsc'
 
 lockTheSystem():void ->
   if !getSettings().lanLostEnabled: return
-  // lockComp throws on error, so use try/catch
+  // lockSystem throws on error, so use try/catch
   try:
     lockSystem()
   catch(err):

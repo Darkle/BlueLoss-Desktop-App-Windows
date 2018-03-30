@@ -11,16 +11,7 @@
         font-weight: normal;
         font-style: normal;
       }
-    /*
-    Color scheme:
 
-    #FFFFFF - white
-    #F9F9F9 - off white
-    #757575 - grey
-      http: //paletton.com/#uid=2000u0k00eG09ql01ki0288280u - complimentary colors
-    #1B5299 - blue
-      http: //paletton.com/#uid=23D0u0ksMtghHAbmEuBunn2-bi5 - complimentary colors
-    */
     body {
       -webkit-app-region: drag;
       -webkit-user-select: none;
@@ -107,12 +98,10 @@
     const { ipcRenderer } = require('electron')
 
     ipcRenderer.on('main-process:sent-latest-update-version', (_, latestUpdateVersion) => {
-
       document.querySelector('#updatePage').addEventListener('mouseup', event => {
         event.preventDefault()
         ipcRenderer.send('renderer:open-update-web-page', '')
       }, false)
-
       document.querySelector('#skipUpdate').addEventListener('mouseup', event => {
         event.preventDefault()
         ipcRenderer.send('renderer:skip-update-version', latestUpdateVersion)

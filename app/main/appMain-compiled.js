@@ -275,7 +275,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function lockTheSystem() {
   if (!(0, _settings.getSettings)().lanLostEnabled) return;
-  // lockComp throws on error, so use try/catch
+  // lockSystem throws on error, so use try/catch
   try {
     (0, _lockSystem2.default)();
   } catch (err) {
