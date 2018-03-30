@@ -48,7 +48,6 @@ connectToHostSocket(hostIP: string): Promise<any> ->
     socket.setTimeout(getSettings().hostScanTimeout)
     socket.connect({ host: hostIP, port: 1 })
     socket.unref()
-
     socket.on('error', (error):void ->
       if error.code === 'ECONNREFUSED': resolve(hostIP)
       else: reject(error)

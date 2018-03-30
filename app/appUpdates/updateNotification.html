@@ -105,18 +105,15 @@
   </div>
   <script>
     const { ipcRenderer } = require('electron')
-    const updatePage = 'https://github.com/Darkle/LANLost/releases'
 
-    ipcRenderer.on('main-process:sent-latest-update-version', function (event, latestUpdateVersion) {
+    ipcRenderer.on('main-process:sent-latest-update-version', (_, latestUpdateVersion) => {
 
-      var downloadPageButton = document.body.querySelector('#updatePage')
-      downloadPageButton.addEventListener('mouseup', function (event) {
+      document.querySelector('#updatePage').addEventListener('mouseup', event => {
         event.preventDefault()
         ipcRenderer.send('renderer:open-update-web-page', '')
       }, false)
 
-      var skipUpdateButton = document.body.querySelector('#skipUpdate')
-      skipUpdateButton.addEventListener('mouseup', function (event) {
+      document.querySelector('#skipUpdate').addEventListener('mouseup', event => {
         event.preventDefault()
         ipcRenderer.send('renderer:skip-update-version', latestUpdateVersion)
       }, false)
