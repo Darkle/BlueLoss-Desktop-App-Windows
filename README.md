@@ -6,7 +6,7 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 ## Installation
 
-Download here and install.
+Download [here](https://github.com/Darkle/LANLost/releases) and install for your OS.
 
 For users that don't want to run the precompiled binaries, you can clone this repo, then
 
@@ -28,41 +28,41 @@ LANLost scans the network once every 30 seconds. If the device you have added to
 
 The following settings are configurable in the LANLost settings window:
 
-- Enable/Disable LANLost (default: enabled)
+- **Enable/Disable LANLost** (default: enabled)
 
   - You can enable/disable LANLost from either the system tray or the status window (see screenshot below)
 
-- Run On System Startup (default: true)
+- **Run On System Startup** (default: true)
 
-- Tray Icon Color (default: white)
+- **Tray Icon Color** (default: white)
 
   - You can change the system tray (or menu bar) icon color to either white or blue
 
-- Time To Lock (default: 2 minutes)
+- **Time To Lock** (default: 2 minutes)
 
   - This determins how long LANLost should wait before locking the computer after the device it's looking for on the network has been lost
 
-- Report Errors (default: true)
+- **Report Errors** (default: true)
 
   - This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.
 
 - Scan Range:
 
-  - Hosts Scan Range Start (default: 2)
+  - **Hosts Scan Range Start** (default: 2)
 
-  - Hosts Scan Range End (default: 254)
+  - **Hosts Scan Range End** (default: 254)
 
   - This is the start and end range LANLost will scan to look for devices on your network. e.g. if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254
 
-- Host Scan Timeout (default: 3000 milliseconds)
+- **Host Scan Timeout** (default: 3000 milliseconds)
 
   - How many seconds to wait when trying to connect to a device during a scan before timing out. This is not the same as the Time To Lock - when LANLost scans all the IP addresses specified in the scan range, it may take some time for a device to respond. If it doesn't respond within the Host Scan Timeout time, it is ignored.
 
-- Download OUI File Updates (default: true)
+- **Download OUI File Updates** (default: true)
 
   - LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.
 
-- User Debugger (default: disabled)
+- **User Debugger** (default: disabled)
 
   - Enabling this will show a debug window with information that may help you diagnose any issues.
 
