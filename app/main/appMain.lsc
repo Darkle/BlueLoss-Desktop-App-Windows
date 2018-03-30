@@ -29,7 +29,7 @@ electronApp.once('ready', ():void ->
     enableRunOnStartup(firstRun)
   else:
     electronApp.dock?.hide()
-    checkForAppUpdate()
+    checkForAppUpdate() // don't check on firsRun http://bit.ly/2GoiEf1
 )
 
 electronApp.on('window-all-closed', noop)

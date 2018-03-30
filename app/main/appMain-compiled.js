@@ -86,13 +86,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.checkForUpdate = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
 var _ms = __webpack_require__(/*! ms */ "ms");
 
 var _ms2 = _interopRequireDefault(_ms);
+
+var _got = __webpack_require__(/*! got */ "got");
+
+var _got2 = _interopRequireDefault(_got);
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
 
@@ -102,41 +102,33 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const oneDaysTime = (0, _ms2.default)('1 day');
 const twoWeeksTime = (0, _ms2.default)('2 weeks');
-const server = 'https://your-deployment-url.com';
-const feed = `${server}/update/${process.platform}/${_electron.app.getVersion()}`;
-const dialogOpts = {
-  type: 'info',
-  buttons: ['Restart', 'Later'],
-  title: 'Application Update',
-  detail: 'A new version has been downloaded. Restart the application to apply the updates.'
-};
-
-_electron.autoUpdater.setFeedURL(feed);
+const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
+const gotRequestOptions = { headers: { 'user-agent': userAgentString }, json: true };
+const updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json';
 
 function checkForUpdate() {
   if (shouldCheckForUpdate()) return;
 
   (0, _settings.updateSetting)('dateLastCheckedForAppUpdate', Date.now());
-  _electron.autoUpdater.checkForUpdates();
-  checkForUpdateTomorrow();
+
+  (0, _got2.default)(updateInfoUrl, gotRequestOptions).then(function (response) {
+    debugger;
+  } // var updateData = JSON.parse(response.body)
+  // if(_.get(updateData, 'latestVersion.length') &&
+  //     appVersion !== updateData.latestUpdateVersion &&
+  //     updateData.latestVersion !== appSettings.settings.skipUpdateVersion){
+  //   showUpdateNotification(updateData.latestVersion)
+  // }
+  ).catch(function (err) {
+    _logging.logger.error('error downloading update info', err);
+  });
+
+  tryCheckForUpdateTomorrow();
 }function shouldCheckForUpdate() {
   return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
-}function checkForUpdateTomorrow() {
+}function tryCheckForUpdateTomorrow() {
   setTimeout(checkForUpdate, oneDaysTime);
-}function createDialogMessage(releaseNotes, releaseName) {
-  return { message: process.platform === 'win32' ? releaseNotes : releaseName };
-}_electron.autoUpdater.on('update-downloaded', function (event, releaseNotes, releaseName) {
-  const dialogMessage = createDialogMessage(releaseNotes, releaseName);
-  _electron.dialog.showMessageBox(_extends({}, dialogOpts, dialogMessage), function (response) {
-    if (response === 0) _electron.autoUpdater.quitAndInstall();
-  });
-});
-
-_electron.autoUpdater.on('error', function (msg) {
-  (0, _logging.logger)('There was a problem updating the application', msg);
-});
-
-exports.checkForUpdate = checkForUpdate;
+}exports.checkForUpdate = checkForUpdate;
 
 /***/ }),
 
@@ -687,7 +679,8 @@ _electron.app.once('ready', function () {
     (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
     (0, _appUpdates.checkForUpdate)();
   }
-});
+} // don't check on firsRun http://bit.ly/2GoiEf1
+);
 
 _electron.app.on('window-all-closed', _utils.noop);
 
@@ -1032,7 +1025,8 @@ const twoDaysTime = (0, _ms2.default)('2 days');
 const threeMinutesTime = (0, _ms2.default)('3 minutes');
 const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
 const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
-const gotRequestOptions = { headers: { 'user-agent': 'Mozilla/5.0 LANLost' } };
+const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
+const gotRequestOptions = { headers: { 'user-agent': userAgentString } };
 const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
 const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
 
