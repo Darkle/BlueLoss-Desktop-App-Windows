@@ -103,7 +103,8 @@ const defaultSettings = {
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
-  dateLastCheckedForAppUpdate: Date.now()
+  dateLastCheckedForAppUpdate: Date.now(),
+  skipUpdateVersion: ''
 };
 
 exports.defaultSettings = defaultSettings;

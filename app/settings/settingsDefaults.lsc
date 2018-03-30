@@ -21,6 +21,7 @@ defaultSettings: {
   dateLastCheckedForOUIupdate: number,
   settingsWindowPosition: SettingsWindowPositionType,
   dateLastCheckedForAppUpdate: number,
+  skipUpdateVersion: string,
 } = {
   lanLostEnabled: true,
   runOnStartup: true,
@@ -37,6 +38,7 @@ defaultSettings: {
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
+  skipUpdateVersion: '',
 }
 
 export {

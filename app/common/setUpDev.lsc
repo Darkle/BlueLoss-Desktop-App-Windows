@@ -4,6 +4,7 @@ import { BrowserWindow } from 'electron'
 
 import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
+devtronPath = path.resolve(__dirname, '..', '..', 'node_modules', 'devtron')
 settingsWindowDirPath = path.resolve(__dirname, '..', 'settingsWindow', 'renderer')
 settingsWindowHTMLfilePath = path.join(settingsWindowDirPath, 'settingsWindow.html')
 settingsWindowCSSfilePath = path.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
@@ -12,7 +13,7 @@ settingsWindowIconFiles = path.join(settingsWindowDirPath, 'assets', 'icons', '*
 debugWindowDirPath = path.resolve(__dirname, '..', 'debugWindow', 'renderer')
 debugWindowHTMLfilePath = path.join(debugWindowDirPath, 'debugWindow.html')
 debugWindowJSfilePath = path.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js')
-devtronPath = path.resolve(__dirname, '..', '..', 'node_modules', 'devtron')
+notificationWindowHTMLfilePath = path.join(__dirname, '..', 'appUpdates', 'updateNotification.html')
 
 setUpDev():void ->
   if !ISDEV: return
@@ -23,6 +24,7 @@ setUpDev():void ->
     settingsWindowIconFiles,
     debugWindowHTMLfilePath,
     debugWindowJSfilePath,
+    notificationWindowHTMLfilePath,
   ])
   BrowserWindow.addDevToolsExtension(devtronPath)
   // auto open the settings window in dev so dont have to manually open it each time electron restarts

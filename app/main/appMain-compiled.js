@@ -86,6 +86,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.checkForUpdate = undefined;
 
+var _electron = __webpack_require__(/*! electron */ "electron");
+
 var _ms = __webpack_require__(/*! ms */ "ms");
 
 var _ms2 = _interopRequireDefault(_ms);
@@ -98,6 +100,8 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/setti
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
+var _showUpdateNotification = __webpack_require__(/*! ./showUpdateNotification.lsc */ "./app/appUpdates/showUpdateNotification.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const oneDaysTime = (0, _ms2.default)('1 day');
@@ -105,30 +109,137 @@ const twoWeeksTime = (0, _ms2.default)('2 weeks');
 const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
 const gotRequestOptions = { headers: { 'user-agent': userAgentString }, json: true };
 const updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json';
+const appVersion = _electron.app.getVersion();
 
 function checkForUpdate() {
   if (shouldCheckForUpdate()) return;
 
   (0, _settings.updateSetting)('dateLastCheckedForAppUpdate', Date.now());
 
-  (0, _got2.default)(updateInfoUrl, gotRequestOptions).then(function (response) {
-    debugger;
-  } // var updateData = JSON.parse(response.body)
-  // if(_.get(updateData, 'latestVersion.length') &&
-  //     appVersion !== updateData.latestUpdateVersion &&
-  //     updateData.latestVersion !== appSettings.settings.skipUpdateVersion){
-  //   showUpdateNotification(updateData.latestVersion)
-  // }
-  ).catch(function (err) {
+  (0, _got2.default)(updateInfoUrl, gotRequestOptions).then(function ({ body: { latestVersion } }) {
+    if (shouldShowUpdateNotification(latestVersion)) {
+      (0, _showUpdateNotification.showUpdateNotification)(latestVersion);
+    }
+  }).catch(function (err) {
     _logging.logger.error('error downloading update info', err);
   });
 
-  tryCheckForUpdateTomorrow();
+  checkForUpdateTomorrow();
 }function shouldCheckForUpdate() {
   return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
-}function tryCheckForUpdateTomorrow() {
+}function shouldShowUpdateNotification(latestVersion) {
+  return appVersion !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
+}function checkForUpdateTomorrow() {
   setTimeout(checkForUpdate, oneDaysTime);
 }exports.checkForUpdate = checkForUpdate;
+
+/***/ }),
+
+/***/ "./app/appUpdates/showUpdateNotification.lsc":
+/*!***************************************************!*\
+  !*** ./app/appUpdates/showUpdateNotification.lsc ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.showUpdateNotification = undefined;
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _url = __webpack_require__(/*! url */ "url");
+
+var _url2 = _interopRequireDefault(_url);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _electronPositioner = __webpack_require__(/*! electron-positioner */ "electron-positioner");
+
+var _electronPositioner2 = _interopRequireDefault(_electronPositioner);
+
+var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let notificationWindow = null;
+// notificationWindowIcon = path.join(__dirname, '..', 'icons', 'blue', 'asd.png')
+const notificationWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
+const updateHTMLfilePath = _url2.default.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: _path2.default.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
+});
+
+function showUpdateNotification(latestUpdateVersion) {
+  notificationWindow = new _electron.BrowserWindow({
+    width: getPlatformNotificationWindowWidth(),
+    height: getPlatformNotificationWindowHeight(),
+    resizable: false,
+    alwaysOnTop: true,
+    maximizable: false,
+    fullscreenable: false,
+    acceptFirstMouse: true,
+    titleBarStyle: 'hidden',
+    autoHideMenuBar: true,
+    title: 'An Update Is Available For LANLost'
+  });
+
+  notificationWindow.setMenu(notificationWindowMenu);
+
+  var positioner = new _electronPositioner2.default(notificationWindow);
+  positioner.move('bottomRight');
+
+  notificationWindow.loadURL(updateHTMLfilePath);
+  if (true) notificationWindow.webContents.openDevTools({ mode: 'undocked' });
+
+  notificationWindow.once('ready-to-show', function () {
+    notificationWindow.show();
+  });
+  notificationWindow.webContents.on('dom-ready', function () {
+    notificationWindow.webContents.send('main-process:sent-latest-update-version', latestUpdateVersion);
+  });
+  notificationWindow.on('closed', function () {
+    notificationWindow = null;
+  });
+  notificationWindow.webContents.once('crashed', function (event) {
+    _logging.logger.error('notificationWindow.webContents crashed', event);
+  });
+  notificationWindow.once('unresponsive', function (event) {
+    _logging.logger.error('notificationWindow unresponsive', event);
+  });
+}_electron.ipcMain.on('renderer:skip-update-version', function (event, versionToSkip) {
+  notificationWindow == null ? void 0 : typeof notificationWindow.close !== 'function' ? void 0 : notificationWindow.close();
+  (0, _settings.updateSetting)('skipUpdateVersion', versionToSkip);
+});
+
+function getPlatformNotificationWindowWidth() {
+  switch (process.platform) {
+    case 'darwin':
+      return 420;
+    case 'linux':
+      return 415;
+    case 'win32':
+      return 435;
+  }
+}function getPlatformNotificationWindowHeight() {
+  switch (process.platform) {
+    case 'darwin':
+      return 140;
+    case 'linux':
+      return 120;
+    case 'win32':
+      return 160;
+  }
+}exports.showUpdateNotification = showUpdateNotification;
 
 /***/ }),
 
@@ -426,6 +537,7 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const devtronPath = _path2.default.resolve(__dirname, '..', '..', 'node_modules', 'devtron');
 const settingsWindowDirPath = _path2.default.resolve(__dirname, '..', 'settingsWindow', 'renderer');
 const settingsWindowHTMLfilePath = _path2.default.join(settingsWindowDirPath, 'settingsWindow.html');
 const settingsWindowCSSfilePath = _path2.default.join(settingsWindowDirPath, 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css');
@@ -434,11 +546,11 @@ const settingsWindowIconFiles = _path2.default.join(settingsWindowDirPath, 'asse
 const debugWindowDirPath = _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer');
 const debugWindowHTMLfilePath = _path2.default.join(debugWindowDirPath, 'debugWindow.html');
 const debugWindowJSfilePath = _path2.default.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js');
-const devtronPath = _path2.default.resolve(__dirname, '..', '..', 'node_modules', 'devtron');
+const notificationWindowHTMLfilePath = _path2.default.join(__dirname, '..', 'appUpdates', 'updateNotification.html');
 
 function setUpDev() {
   if (false) {}
-  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath]);
+  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath, notificationWindowHTMLfilePath]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
   (0, _settingsWindow.showSettingsWindow)();
@@ -661,26 +773,24 @@ var _appUpdates = __webpack_require__(/*! ../appUpdates/appUpdates.lsc */ "./app
 if (_electron.app.makeSingleInstance(_utils.noop)) _electron.app.quit();
 
 _electron.app.once('ready', function () {
+  var _electronApp$dock;
+
   const { firstRun } = (0, _settings.getSettings)();
 
   if (true) (0, _setUpDev.setUpDev)();
+  if (!firstRun) (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
 
   (0, _tray.initTrayMenu)();
   (0, _networkScanner.scanNetwork)();
   (0, _updateOUIfilePeriodically.scheduleOUIfileUpdate)();
+  (0, _appUpdates.checkForUpdate)();
 
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
     (0, _runOnStartup.enableRunOnStartup)(firstRun);
-  } else {
-    var _electronApp$dock;
-
-    (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
-    (0, _appUpdates.checkForUpdate)();
   }
-} // don't check on firsRun http://bit.ly/2GoiEf1
-);
+});
 
 _electron.app.on('window-all-closed', _utils.noop);
 
@@ -1237,7 +1347,8 @@ const defaultSettings = {
   canSearchForMacVendorInfo: true,
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
-  dateLastCheckedForAppUpdate: Date.now()
+  dateLastCheckedForAppUpdate: Date.now(),
+  skipUpdateVersion: ''
 };
 
 exports.defaultSettings = defaultSettings;
@@ -1598,6 +1709,17 @@ module.exports = require("dotenv");
 /***/ (function(module, exports) {
 
 module.exports = require("electron");
+
+/***/ }),
+
+/***/ "electron-positioner":
+/*!**************************************!*\
+  !*** external "electron-positioner" ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("electron-positioner");
 
 /***/ }),
 
