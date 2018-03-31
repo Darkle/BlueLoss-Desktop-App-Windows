@@ -28,6 +28,7 @@ showUpdateNotification(latestUpdateVersion: string):void ->
       acceptFirstMouse: true,
       titleBarStyle: 'hidden',
       autoHideMenuBar: true,
+      show: false,
       icon: iconFileName,
       title: 'An Update Is Available For LANLost'
     }

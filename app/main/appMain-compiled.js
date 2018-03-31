@@ -189,6 +189,7 @@ function showUpdateNotification(latestUpdateVersion) {
     acceptFirstMouse: true,
     titleBarStyle: 'hidden',
     autoHideMenuBar: true,
+    show: false,
     icon: iconFileName,
     title: 'An Update Is Available For LANLost'
   });
@@ -1354,7 +1355,7 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.ls
 const defaultSettings = {
   lanLostEnabled: true,
   runOnStartup: true,
-  trayIconColor: 'white',
+  trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
@@ -1367,7 +1368,7 @@ const defaultSettings = {
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '2018.3.39'
+  skipUpdateVersion: '0.2.3'
 };
 
 exports.defaultSettings = defaultSettings;
@@ -1691,7 +1692,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"lanlost","productName":"LANLost","version":"2018.3.39","description":"A desktop app that locks your computer when a device is lost on your local network","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config ./nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true sleepms 3000 && electron --inspect-brk ./app/main/appMain-compiled.js","build":"cross-env NODE_ENV=production,webpackBuild=true parallel-webpack","start":"cross-env NODE_ENV=production electron ./app/main/appMain-compiled.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/LANLost.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","bluebird":"^3.5.1","default-gateway":"^2.7.0","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.3","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.0","internal-ip":"^3.0.1","is-empty":"^1.2.0","is-ip":"^2.0.0","lock-system":"^1.3.0","lowdb":"^1.0.0","ms":"^2.1.1","node-arp":"^1.0.6","ono":"^4.0.3","rollbar":"^2.3.9","stringify-object":"^3.2.2","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.2","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","cross-env":"^5.1.4","devtron":"^1.4.0","electron":"^1.8.4","electron-packager":"^11.2.0","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.3","exeq":"^3.0.0","gulp":"github:gulpjs/gulp#4.0","moment":"^2.22.0","nodemon":"^1.17.2","parallel-webpack":"^2.3.0","sleep-ms":"^2.0.1","snyk":"^1.70.2","stylus":"^0.54.5","webpack":"^4.3.0","webpack-node-externals":"^1.6.0"},"snyk":true};
+module.exports = {"name":"lanlost","productName":"LANLost","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost on your local network","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","build":"cross-env NODE_ENV=production,webpackBuild=true parallel-webpack","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","task":"cross-env NODE_ENV=development node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/LANLost.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","bluebird":"^3.5.1","default-gateway":"^2.7.0","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.3","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.0","internal-ip":"^3.0.1","is-empty":"^1.2.0","is-ip":"^2.0.0","lock-system":"^1.3.0","lowdb":"^1.0.0","ms":"^2.1.1","node-arp":"^1.0.6","ono":"^4.0.3","rollbar":"^2.3.9","stringify-object":"^3.2.2","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.2","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","cross-env":"^5.1.4","devtron":"^1.4.0","electron":"^1.8.4","electron-packager":"^11.2.0","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.3","exeq":"^3.0.0","inquirer":"^5.2.0","nodemon":"^1.17.2","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.70.2","stylus":"^0.54.5","webpack":"^4.3.0","webpack-node-externals":"^1.6.0"},"snyk":true};
 
 /***/ }),
 

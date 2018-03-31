@@ -91,7 +91,7 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.ls
 const defaultSettings = {
   lanLostEnabled: true,
   runOnStartup: true,
-  trayIconColor: 'white',
+  trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
@@ -104,7 +104,7 @@ const defaultSettings = {
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '2018.3.39'
+  skipUpdateVersion: '0.2.3'
 };
 
 exports.defaultSettings = defaultSettings;
