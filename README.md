@@ -1,4 +1,4 @@
-# LANLost
+# LANLost - lock your computer when a device is lost
 
 ## Synopsis
 
