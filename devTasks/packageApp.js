@@ -29,7 +29,6 @@ const linuxPackageOptions = {
   ...commonPackageProperties,
   ...{
     platform: 'win32',
-    icon: path.join(iconsFolderPath, 'LANLost-Blue.ico'),
     out: path.join(basePath, 'build', 'Linux'),
   }
 }
@@ -39,9 +38,8 @@ const macOSPackageOptions = {
     platform: 'darwin',
     icon: path.join(iconsFolderPath, 'LANLost-Blue.icns'),
     out: path.join(basePath, 'build', 'MacOS'),
-    'app-version': appVersion,
-    'app-bundle-id': 'com.darkle.LANLost',
-    'app-category-type': 'public.app-category.utilities'
+    appBundleId: 'com.darkle.LANLost',
+    appCategoryType: 'public.app-category.utilities'
   }
 }
 const msiCreator = new MSICreator({

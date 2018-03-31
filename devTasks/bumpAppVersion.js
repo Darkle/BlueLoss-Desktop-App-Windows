@@ -5,21 +5,32 @@ const gulp = require('gulp')
 const jetpack = require('fs-jetpack')
 const exeq = require('exeq')
 const semver = require('semver')
+const inquirer = require('inquirer')
 
 const basePath = path.join(__dirname, '..')
 const currentAppVersion = require(path.join(basePath, 'package.json')).version
 const updateInfoJsonFilePath = path.join(basePath, 'updateInfo.json')
 const settingsDefaultsFilePath = path.join(basePath, 'app', 'settings', 'settingsDefaults.lsc')
 
-const newAppVersion = semver.inc(currentAppVersion, 'minor')
-
+const promptOptions = {
+  type: 'list',
+  name: 'bumpType',
+  message: 'Choose What Type Of Version Bump',
+  default: 'patch',
+  choices: ['major', 'minor', 'patch']
+}
+let newAppVersion = null
 /**
  * We bump the package.json with npm (which also adds a git tag with the version),
  * also updateInfo.json and in settingsDefaults.lsc.
  */
-gulp.task('bumpVersion', () => {
-  console.log(`running 'npm version ${ newAppVersion }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
-  return exeq(`npm version ${ newAppVersion }`)
+gulp.task('bumpVersion', () =>
+  inquirer.prompt([promptOptions])
+    .then(({ bumpType }) => {
+      newAppVersion = semver.inc(currentAppVersion, bumpType)
+      console.log(`running 'npm version ${ newAppVersion }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
+    })
+    .then(() => exeq(`npm version ${ newAppVersion }`))
     .then(() => jetpack.writeAsync(updateInfoJsonFilePath, { latestVersion: newAppVersion }))
     .then(() => jetpack.readAsync(settingsDefaultsFilePath))
     .then(result =>
@@ -39,5 +50,4 @@ gulp.task('bumpVersion', () => {
     .catch(err => {
       console.error('There was an error running bumpVersion', err)
     })
-})
-
+)
