@@ -60,6 +60,10 @@ The following settings are configurable in the LANLost settings window:
 
 ## Support
 
+Please open an issue for support here: https://github.com/Darkle/LANLost/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
+
+## Donate
+
 ###### Buy Me A Coffee
 
 <a href="https://www.buymeacoffee.com/2yhzJxd4B" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png?" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
