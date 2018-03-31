@@ -1,6 +1,6 @@
 {
-  "name": "lanloss",
-  "productName": "LANLoss",
+  "name": "lanlost",
+  "productName": "LANLost",
   "version": "2018.3.39",
   "description": "A desktop app that locks your computer when a device is lost on your local network",
   "main": "app/main/appMain-compiled.js",
