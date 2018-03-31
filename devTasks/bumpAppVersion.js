@@ -1,7 +1,6 @@
 // @ts-nocheck
 const path = require('path')
 
-const gulp = require('gulp')
 const jetpack = require('fs-jetpack')
 const exeq = require('exeq')
 const semver = require('semver')
@@ -24,8 +23,8 @@ let newAppVersion = null
  * We bump the package.json with npm (which also adds a git tag with the version),
  * also updateInfo.json and in settingsDefaults.lsc.
  */
-gulp.task('bumpVersion', () =>
-  inquirer.prompt([promptOptions])
+function bumpVersion(){
+  return inquirer.prompt([promptOptions])
     .then(({ bumpType }) => {
       newAppVersion = semver.inc(currentAppVersion, bumpType)
       console.log(`running 'npm version ${ newAppVersion }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
@@ -50,4 +49,6 @@ gulp.task('bumpVersion', () =>
     .catch(err => {
       console.error('There was an error running bumpVersion', err)
     })
-)
+}
+
+module.exports = bumpVersion

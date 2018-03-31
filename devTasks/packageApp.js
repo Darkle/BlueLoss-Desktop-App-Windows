@@ -1,7 +1,6 @@
 // @ts-nocheck
 const path = require('path')
 
-const gulp = require('gulp')
 const packager = require('electron-packager')
 const { MSICreator } = require('electron-wix-msi')
 
@@ -38,7 +37,7 @@ const msiCreator = new MSICreator({
 })
 
 
-gulp.task('packageWin64', () => {
+function packageWin64(){
   console.log('Packaging for Windows 64')
   return packager(packageProperties)
     .then(() => msiCreator.create())
@@ -46,22 +45,27 @@ gulp.task('packageWin64', () => {
     .catch(err => {
       console.error('There was an error creating the Windows Package', err)
     })
-})
+}
 
-gulp.task('packageLinux64', () => {
+function packageLinux64() {
   console.log('Packaging for Linux 64')
   return packager(packageProperties)
     .catch(err => {
       console.error('There was an error creating the Linux Package', err)
     })
-})
+}
 
-gulp.task('packageMacOS', () => {
+function packageMacOS() {
   console.log('Packaging for MacOS')
   return packager(packageProperties)
     .catch(err => {
       console.error('There was an error creating the MacOS Package', err)
     })
-})
+}
 
 
+module.exports = {
+  packageWin64,
+  packageLinux64,
+  packageMacOS,
+}
