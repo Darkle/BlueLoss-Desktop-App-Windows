@@ -57,3 +57,16 @@ The following settings are configurable in the LANLost settings window:
 ![LANLost Status WIndow](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings-Status.png)
 
 ![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings.png)
+
+## Support
+
+- Buy Me A Coffee:
+
+- <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/2yhzJxd4B"><img src="https://www.buymeacoffee.com/assets/img/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+
+
+- Bitcoin - Click the image below if you have a bitcoin app installed, or use it as a QR code. Or copy the address manually below.
+
+  - [![Bitcoin Address QR Code](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOQAAADkAQAAAACgLLUgAAADH0lEQVR4nO2Y3Y0kMQiEzSYAGZB/WM4AIvB95Xnve5jmpJO2V5rpNZIZ/qrK/jkPT/2sp+fX+l9YzSy6V8fqtSL45kuLw379HD5sbVvWWrOwz+JwNhRZe6wTZ+0VVV2fxfkquK+z4liuVa2P13Z+thoRrzKKvDN2+Xs7P1hPkeIOMu0UtWrxpsVhv222cCm3KzwjM1ZocdivALH523XrWor4Lo738zKPE4lzDRIDvDvijZ0frbjU3OxKxnZtvIYzS2saN9p2klyQqs52XApB+g7xLF65796u+prjLJP2pru+3/kv1gYpvJPH1clgVhN1jef5rPIAKmjpz2IGtbbxPAsxFJ1bKs2t/7aP48aml8N29wYpu+o4nrNiOs+5VVSIwS9eQkRUd0eN4wZ5PR6ABnSPawYomeDxeOsUM9PpnviHf8n1NvPvd362Bu3E/FLgggw1UC06Gs/zPhBvLsVsaUwVEBnh/f3Oz1baF33TfOaN9zbY6nG8itvD5Y6o1AxvUW/nP5hfp52JE6A+7XxV8zLez5IZLRmJo3DYYUfysqb7CnckGUQWYKHfIaXWy/c7P1tLMmOrnfAp3CLvbW/s/Gx1cILm2lKyoBWFNnjw7On6WkaUH7AxklIDVAc6ivH6SkMCjhT37E2kjJHmdxwnmZyABUg0Yyy0OMrAGtfP8uT3lAAz6GdYFTUf15OBWgYljuaJbF8K7OMv7PxslZS8JQa56CjYV/z/xs7P1jTSCw8unQkP1F8QobT7eD9z+IQHmyPoJaTmHBp7f7/zs7XhgAuLWWUAJipH//k4L9jRMaWyLCWzOCBR4BznfbCReUVAmsjIQhcqOpzNn0Nd8X7ukYRUO6Wgx3kfqtWJ8KCzwkLnfiih58+/93oDIoiW3tAoMVXHx/H5Xs2lvOqeo/QrmKMb8SwvnLMkXtVJ98KMwQIxx+O9V3NQQeoWZyVN1noZP+/rCcllVCRx3sOgbizf2fkvVth3nd0SeH3Vpc/zLw290XTEm1LTEgL1D/TGvZqDDyrvjV0UP8IuXg7P7znIOmHW56JO1MDn/H3dr3Xe+gdaueWsaAiRewAAAABJRU5ErkJggg==)](bitcoin:1D8rwE8rmAzASPaJadcaMFxdjXtyJZpGQP)
+
+  - `1D8rwE8rmAzASPaJadcaMFxdjXtyJZpGQP`
