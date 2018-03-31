@@ -21,7 +21,7 @@ const windowsPackageOptions = {
   ...commonPackageProperties,
   ...{
     platform: 'win32',
-    icon: path.join(iconsFolderPath, 'platform', 'LANLost-Blue.ico'),
+    icon: path.join(iconsFolderPath, 'LANLost-Blue.ico'),
     out: path.join(basePath, 'build', 'Windows'),
   }
 }
@@ -29,7 +29,7 @@ const linuxPackageOptions = {
   ...commonPackageProperties,
   ...{
     platform: 'win32',
-    icon: path.join(iconsFolderPath, 'platform', 'LANLost-Blue.ico'),
+    icon: path.join(iconsFolderPath, 'LANLost-Blue.ico'),
     out: path.join(basePath, 'build', 'Linux'),
   }
 }
@@ -37,7 +37,7 @@ const macOSPackageOptions = {
   ...commonPackageProperties,
   ...{
     platform: 'darwin',
-    icon: path.join(basePath, 'appmodules', 'electron', 'icons', 'platform', 'ms.icns'),
+    icon: path.join(iconsFolderPath, 'LANLost-Blue.icns'),
     out: path.join(basePath, 'build', 'MacOS'),
     'app-version': appVersion,
     'app-bundle-id': 'com.darkle.LANLost',
@@ -50,7 +50,11 @@ const msiCreator = new MSICreator({
   exe: 'LANLost',
   name: 'LANLost',
   version: appVersion,
-  outputDirectory: path.join(basePath, 'build', 'Windows', 'installer')
+  outputDirectory: path.join(basePath, 'build', 'Windows', 'installer'),
+  shortcutFolderName: 'LANLost',
+  ui : {
+    chooseDirectory: true
+  }
 })
 
 
