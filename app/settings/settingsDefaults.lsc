@@ -38,7 +38,7 @@ defaultSettings: {
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
-skipUpdateVersion: '0.2.2',
+  skipUpdateVersion: '0.2.3',
 }
 
 export {
