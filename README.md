@@ -16,7 +16,7 @@ When you run LANLost, it sits in your system tray (or menu bar on MacOS) and sea
 
 #### System Tray (Menu Bar) Options:
 
-To open the LANLost settings/status window Double clicking on the system tray icon. Alternatively, you can right-click the icon in the system tray - this will also give you the option to show the settings/status window, as well as enable/disable LANLost, or quit the app.
+To open the LANLost settings/status window Double clicking on the system tray icon. Alternatively, you can right-click the icon in the system tray - this will also give you the option to show the settings/status window as well as enable/disable LANLost, or quit the app.
 
 #### Adding A Device:
 
