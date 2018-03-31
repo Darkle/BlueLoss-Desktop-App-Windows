@@ -16,7 +16,7 @@ const tasks = [
 const promptOptions = {
   type: 'list',
   name: 'taskName',
-  message: 'Choose Which Gulp Task To Run',
+  message: 'Choose Which Task To Run',
   choices: Object.keys(tasks)
 }
 
