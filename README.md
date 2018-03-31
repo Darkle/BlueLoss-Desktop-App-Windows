@@ -8,7 +8,13 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 Download [here](https://github.com/Darkle/LANLost/releases) and install for your OS.
 
-For users that don't want to run the precompiled binaries, you can clone this repo, then
+For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
+
+- `npm run createEnvFile`
+
+- `npm install`
+
+- `npm start`
 
 ## Screenshots
 
@@ -57,7 +63,6 @@ The following settings are configurable in the LANLost settings window:
 - **Download OUI File Updates** (default: true): LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
-
 
 ## Support
 

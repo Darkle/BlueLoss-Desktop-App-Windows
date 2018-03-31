@@ -879,7 +879,7 @@ var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 exports.default = function ({ actions }) {
   return (0, _hyperapp.h)(
     "div",
-    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://github.com/Darkle/LANLost" },
+    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://github.com/Darkle/LANLost#readme" },
     (0, _hyperapp.h)(
       "div",
       { "class": "tabIcon" },

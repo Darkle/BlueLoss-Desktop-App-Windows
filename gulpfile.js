@@ -1,1 +1,1 @@
-require('./devTasks/startDev.js')
+require('./devTasks/createEnvFile.js')
