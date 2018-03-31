@@ -44,7 +44,7 @@ The following settings are configurable in the LANLost settings window:
 
   - **Hosts Scan Range End** (default: 254)
 
-  This is the start and end range LANLost will scan to look for devices on your network. For example, if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254
+  This is the start and end range LANLost will scan to look for devices on your network. For example, if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254 The default range should work fine in most scenarios.
 
 - **Host Scan Timeout** (default: 3000 milliseconds): How many seconds to wait when trying to connect to a device during a scan before timing out. This is not the same as the Time To Lock - when LANLost scans all the IP addresses specified in the scan range, it may take some time for a device to respond. If it doesn't respond within the Host Scan Timeout time, it is ignored.
 
