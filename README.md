@@ -10,6 +10,12 @@ Download [here](https://github.com/Darkle/LANLost/releases) and install for your
 
 For users that don't want to run the precompiled binaries, you can clone this repo, then
 
+## Screenshots
+
+![LANLost Status WIndow](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings-Status.png)
+
+![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings.png)
+
 ## How To Use
 
 When you run LANLost, it sits in your system tray (or menu bar on MacOS) and searches for devices on your network. 
@@ -52,11 +58,6 @@ The following settings are configurable in the LANLost settings window:
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
 
-## Screenshots
-
-![LANLost Status WIndow](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings-Status.png)
-
-![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/LANLost-Settings.png)
 
 ## Support
 
