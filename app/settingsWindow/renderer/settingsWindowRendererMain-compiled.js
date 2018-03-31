@@ -104,7 +104,7 @@ const defaultSettings = {
   dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '2018.3.30'
+  skipUpdateVersion: '2018.3.39'
 };
 
 exports.defaultSettings = defaultSettings;
