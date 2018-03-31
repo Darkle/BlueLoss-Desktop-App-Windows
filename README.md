@@ -6,15 +6,19 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 ## Installation
 
-Download [here](https://github.com/Darkle/LANLost/releases) and install for your OS.
+- Basic: 
 
-For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
+  - Download [here](https://github.com/Darkle/LANLost/releases) and install for your OS.
 
-- `npm run createEnvFile`
+- Advanced:
 
-- `npm install`
+  - For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
 
-- `npm start`
+    - `npm run createEnvFile`
+
+    - `npm install`
+
+    - `npm start`
 
 ## Screenshots
 
