@@ -111,8 +111,8 @@ The following settings are configurable in the LANLost settings window:
 
 
 
-- Bitcoin - Click the image below if you have a bitcoin app installed, or use it as a QR code. Or copy the address manually below.
+- Bitcoin: Click the image below if you have a bitcoin app installed, or use it as a QR code. Or copy the address manually below.
 
-  - ![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/Bitcoin-QR-Code.png)
+  - [![LANLost Settings Window](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/Bitcoin-QR-Code.png)](bitcoin:1D8rwE8rmAzASPaJadcaMFxdjXtyJZpGQP)
 
   - `1D8rwE8rmAzASPaJadcaMFxdjXtyJZpGQP`
