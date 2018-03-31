@@ -60,16 +60,9 @@ The following settings are configurable in the LANLost settings window:
 
 ## Support
 
-- <style>
-.bmc-button img {
-    width: 27px !important;
-    margin-bottom: 1px !important;
-    box-shadow: none !important;
-    border: none !important;
-    vertical-align: middle !important;
-}
-
-.bmc-button {
+- <link href="https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext" rel="stylesheet">
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/2yhzJxd4B"
+style="
     line-height: 36px !important;
     height: 37px !important;
     text-decoration: none !important;
@@ -93,20 +86,16 @@ The following settings are configurable in the LANLost settings window:
     -moz-transition: 0.3s all linear !important;
     -ms-transition: 0.3s all linear !important;
     transition: 0.3s all linear !important;
-}
-
-.bmc-button:hover,
-.bmc-button:active,
-.bmc-button:focus {
-    -webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;
-    text-decoration: none !important;
-    box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;
-    opacity: 0.85 !important;
-    color: #FFFFFF !important;
-}
-</style>
-<link href="https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext" rel="stylesheet">
-<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/2yhzJxd4B"><img src="https://www.buymeacoffee.com/assets/img/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span>
+"
+><img src="https://www.buymeacoffee.com/assets/img/BMC-btn-logo.svg" 
+style="
+    width: 27px !important;
+    margin-bottom: 1px !important;
+    box-shadow: none !important;
+    border: none !important;
+    vertical-align: middle !important;
+"
+alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span>
 </a>
 
 
@@ -114,5 +103,4 @@ The following settings are configurable in the LANLost settings window:
 - Bitcoin: Click the image below if you have a bitcoin app installed, or use it as a QR code. Or copy the address manually below.
 
 	- [![Bitcoin Address QR Code](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/Bitcoin-QR-Code.png)](bitcoin:1M6FmSZUJJzj4n3qLkSh2s19dqmXeYXrFT)
-
-  - `1M6FmSZUJJzj4n3qLkSh2s19dqmXeYXrFT`
+	- `1M6FmSZUJJzj4n3qLkSh2s19dqmXeYXrFT`
