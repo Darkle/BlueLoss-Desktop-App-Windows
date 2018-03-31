@@ -76,7 +76,7 @@ Click the image below if you have a bitcoin app installed, or use it as a QR cod
 
 ## Built With
 
-- [LightScript](http://www.lightscript.org/docs/)
+- [LightScript](http://www.lightscript.org/)
 - [Electron](https://electronjs.org/)
 - [Hyperapp](https://github.com/hyperapp/hyperapp)
 - [Xel Toolkit](https://xel-toolkit.org/)
