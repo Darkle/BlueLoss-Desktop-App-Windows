@@ -48,7 +48,7 @@ The following settings are configurable in the LANLost settings window:
 
 - **Run On System Startup** (default: true)
 
-- **Tray Icon Color** (default: white): You can change the system tray (or menu bar) icon color to either white or blue
+- **Tray Icon Color** (default: blue): You can change the system tray (or menu bar) icon color to either white or blue
 
 - **Time To Lock** (default: 2 minutes): This determins how long LANLost should wait before locking the computer after the device it's looking for on the network has been lost
 

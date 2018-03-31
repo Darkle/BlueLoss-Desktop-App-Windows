@@ -38,7 +38,7 @@ gulp.task('bumpVersion', () =>
         if(!line.includes('skipUpdateVersion') || line.includes('string')) {
           return line
         }
-        return `skipUpdateVersion: '${ newAppVersion }',`
+        return `  skipUpdateVersion: '${ newAppVersion }',`
       }).join('\n')
     )
     .then(newFileData =>

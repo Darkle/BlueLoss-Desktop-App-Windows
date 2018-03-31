@@ -25,7 +25,7 @@ defaultSettings: {
 } = {
   lanLostEnabled: true,
   runOnStartup: true,
-  trayIconColor: 'white',
+  trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
