@@ -4,35 +4,37 @@ const path = require('path')
 const gulp = require('gulp')
 const jetpack = require('fs-jetpack')
 const exeq = require('exeq')
-const moment = require('moment')
+const semver = require('semver')
 
-const updateInfoJsonFilePath = path.join(__dirname, '..', 'updateInfo.json')
-const settingsDefaultsFilePath = path.join(__dirname, '..', 'app', 'settings', 'settingsDefaults.lsc')
+const basePath = path.join(__dirname, '..')
+const currentAppVersion = require(path.join(basePath, 'package.json')).version
+const updateInfoJsonFilePath = path.join(basePath, 'updateInfo.json')
+const settingsDefaultsFilePath = path.join(basePath, 'app', 'settings', 'settingsDefaults.lsc')
 
-const newVersionString = `${ moment().year() }.${ moment().month() + 1 }.${ moment().date() }`
+const newAppVersion = semver.inc(currentAppVersion, 'minor')
 
 /**
  * We bump the package.json with npm (which also adds a git tag with the version),
  * also updateInfo.json and in settingsDefaults.lsc.
  */
 gulp.task('bumpVersion', () => {
-  console.log(`running 'npm version ${ newVersionString }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
-  return exeq(`npm version ${ newVersionString }`)
-    .then(() => jetpack.writeAsync(updateInfoJsonFilePath, { latestVersion: newVersionString }))
+  console.log(`running 'npm version ${ newAppVersion }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
+  return exeq(`npm version ${ newAppVersion }`)
+    .then(() => jetpack.writeAsync(updateInfoJsonFilePath, { latestVersion: newAppVersion }))
     .then(() => jetpack.readAsync(settingsDefaultsFilePath))
     .then(result =>
       result.split(/\r\n?|\n/).map(line => {
         if(!line.includes('skipUpdateVersion') || line.includes('string')) {
           return line
         }
-        return `skipUpdateVersion: '${ newVersionString }',`
+        return `skipUpdateVersion: '${ newAppVersion }',`
       }).join('\n')
     )
     .then(newFileData =>
       jetpack.writeAsync(settingsDefaultsFilePath, newFileData)
     )
     .then(() => {
-      console.log('Successfully bumped LANLost version!')
+      console.log(`Successfully bumped LANLost version to ${ newAppVersion }`)
     })
     .catch(err => {
       console.error('There was an error running bumpVersion', err)

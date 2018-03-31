@@ -52,7 +52,7 @@ const msiCreator = new MSICreator({
   version: appVersion,
   outputDirectory: path.join(basePath, 'build', 'Windows', 'installer'),
   shortcutFolderName: 'LANLost',
-  ui : {
+  ui: {
     chooseDirectory: true
   }
 })
