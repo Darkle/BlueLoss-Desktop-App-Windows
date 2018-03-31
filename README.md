@@ -60,7 +60,7 @@ The following settings are configurable in the LANLost settings window:
 
 ## Support
 
-Please open an issue for support here: https://github.com/Darkle/LANLost/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
+Please open an issue for support here: https://github.com/Darkle/LANLost/issues
 
 ## Donate
 
@@ -75,12 +75,13 @@ Click the image below if you have a bitcoin app installed, or use it as a QR cod
 [![Bitcoin Address QR Code](https://github.com/Darkle/LANLost/raw/master/resources/readmeMedia/Bitcoin-QR-Code.png)](bitcoin:1M6FmSZUJJzj4n3qLkSh2s19dqmXeYXrFT)
 
 `1M6FmSZUJJzj4n3qLkSh2s19dqmXeYXrFT`
-    
-
 
 ## Built With
 
 - [LightScript](http://www.lightscript.org/)
+
 - [Electron](https://electronjs.org/)
+
 - [Hyperapp](https://github.com/hyperapp/hyperapp)
+
 - [Xel Toolkit](https://xel-toolkit.org/)
