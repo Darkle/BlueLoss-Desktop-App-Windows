@@ -51,4 +51,6 @@ function bumpVersion(){
     })
 }
 
-module.exports = bumpVersion
+module.exports = {
+  bumpVersion
+}

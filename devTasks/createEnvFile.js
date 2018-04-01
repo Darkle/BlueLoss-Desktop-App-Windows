@@ -12,4 +12,6 @@ function createEnvFile(){
     })
 }
 
-module.exports = createEnvFile
+module.exports = {
+  createEnvFile
+}

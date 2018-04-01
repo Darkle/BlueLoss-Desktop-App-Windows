@@ -1,18 +1,11 @@
 // @ts-nocheck
 const inquirer = require('inquirer')
 
-const { packageApp, createWindowsInstaller, stylusBuild, webpackBuild } = require('./packageApp.js')
-
-const tasks = [
-  require('./createEnvFile.js'),
-  require('./bumpAppVersion.js'),
-  packageApp,
-  createWindowsInstaller,
-  stylusBuild,
-  webpackBuild,
-].reduce((obj, func) =>
-  ({ ...obj, ...{ [func.name]: func } })
-, {})
+const tasks = {
+  ...require('./createEnvFile.js'),
+  ...require('./bumpAppVersion.js'),
+  ...require('./packageApp.js'),
+}
 
 const promptOptions = {
   type: 'list',

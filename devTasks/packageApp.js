@@ -64,18 +64,14 @@ function createWindowsInstaller(){
     .then(() => msiCreator.compile())
 }
 
-function packageApp(){
+function packageWin64(){
   return stylusBuild()
     .then(webpackBuild)
     .then(() => {
       console.log(chalk.blue('Packaging Electron App. Please Wait...'))
       return packager(packageProperties)
     })
-    .then(() => {
-      if(process.platform === 'win32'){
-        return createWindowsInstaller()
-      }
-    })
+    .then(createWindowsInstaller)
     .then(() => {
       console.log(chalk.green('Successfully Packaged Electron App!'))
     })
@@ -84,9 +80,41 @@ function packageApp(){
     })
 }
 
+function packageLinux(){
+  return stylusBuild()
+    .then(webpackBuild)
+    .then(() => {
+      console.log(chalk.blue('Packaging Electron App. Please Wait...'))
+      return packager(packageProperties)
+    })
+    .then(() => {
+      console.log(chalk.green('Successfully Packaged Electron App!'))
+    })
+    .catch(err => {
+      console.error(chalk.red('There was an error creating the Linux Package'), err)
+    })
+}
+
+function packagemacOS(){
+  return stylusBuild()
+    .then(webpackBuild)
+    .then(() => {
+      console.log(chalk.blue('Packaging Electron App. Please Wait...'))
+      return packager(packageProperties)
+    })
+    .then(() => {
+      console.log(chalk.green('Successfully Packaged Electron App!'))
+    })
+    .catch(err => {
+      console.error(chalk.red('There was an error creating the MacOS Package'), err)
+    })
+}
+
 
 module.exports = {
-  packageApp,
+  packageWin64,
+  packageLinux,
+  packagemacOS,
   createWindowsInstaller,
   stylusBuild,
   webpackBuild,
