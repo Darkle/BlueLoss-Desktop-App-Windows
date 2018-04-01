@@ -1,15 +1,15 @@
 // @ts-nocheck
 const inquirer = require('inquirer')
 
-const { packageWin64, packageLinux64, packageMacOS, createWindowsInstaller } = require('./packageApp.js')
+const { packageApp, createWindowsInstaller, stylusBuild, webpackBuild } = require('./packageApp.js')
 
 const tasks = [
   require('./createEnvFile.js'),
   require('./bumpAppVersion.js'),
-  packageWin64,
+  packageApp,
   createWindowsInstaller,
-  packageLinux64,
-  packageMacOS,
+  stylusBuild,
+  webpackBuild,
 ].reduce((obj, func) =>
   ({ ...obj, ...{ [func.name]: func } })
 , {})
