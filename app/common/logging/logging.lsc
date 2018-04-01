@@ -7,14 +7,16 @@ import { UserDebugLoggerTransport } from './userDebugLogger.lsc'
 import { getSettings } from '../../settings/settings.lsc'
 
 rollbarTransportOptions = {
-  level: 'error'
+  name: 'rollbarTransport',
+  level: 'error',
   handleExceptions: true,
-  humanReadableUnhandledException: true
+  humanReadableUnhandledException: true,
 }
 userDebugTransportOptions = {
-  level: 'debug'
+  name: 'userDebugTransport',
+  level: 'debug',
   handleExceptions: true,
-  humanReadableUnhandledException: true
+  humanReadableUnhandledException: true,
 }
 
 // https://github.com/winstonjs/winston/tree/2.4.0
@@ -45,7 +47,7 @@ addRollbarLogging():void ->
 
 removeRollbarLogging():void ->
   rollbarLogger.configure({enabled: false})
-  logger.remove(CustomRollbarTransport)
+  logger.remove('rollbarTransport')
 
 ipcMain.on('settings-renderer:error-sent', (event, error):void ->
   logger.error('settings-renderer:error-sent', error)
