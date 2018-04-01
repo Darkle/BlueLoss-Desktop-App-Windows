@@ -29,11 +29,12 @@ const packageProperties = {
   appCategoryType: 'public.app-category.utilities'
 }
 const msiCreator = new MSICreator({
-  appDirectory: path.join(basePath, 'build', 'windows'),
+  appDirectory: path.join(platformBuildFolder, 'LANLost-win32-x64'),
   description: 'LANLost - A desktop app that locks your computer when a device is lost on your local network',
   exe: 'LANLost',
   name: 'LANLost',
   version: appVersion,
+  manufacturer: 'CoopCoding',
   outputDirectory: path.join(platformBuildFolder, 'installer'),
   shortcutFolderName: 'LANLost',
   ui: {

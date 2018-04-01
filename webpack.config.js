@@ -52,6 +52,14 @@ const commonWebpackOptions = {
     extensions: ['.lsc', '.js']
   },
   externals: [nodeExternals()],
+  optimization: {
+    /**
+    * Not minimizing for better error messages. Also the js is pretty small. Also,
+    * minification could slightly increase the app startup as parsing minified source
+    * is a tiny bit slower.
+    */
+    minimize: false
+  },
   performance: {
     hints: isDev ? false: 'error'
   },
