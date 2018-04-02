@@ -48,7 +48,7 @@ const msiCreator = new MSICreator({
 
 function stylusBuild(){
   console.log(chalk.blue('Running Stylus Build'))
-  return exeq(`stylus ${stylusInput} -o ${ stylusOutput }`)
+  return exeq(`stylus ${ stylusInput } -o ${ stylusOutput }`)
     .catch(err => {console.error(err)})
 }
 
