@@ -5,7 +5,7 @@ import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/sett
 import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { capitalizeFirstLetter } from '../common/utils.lsc'
 
-let tray = null // might need to be outside to avoid being garbage collected. https://electron.atom.io/docs/api/tray/
+let tray = null
 trayIconsFolder = path.resolve(__dirname, '..', 'tray', 'icons')
 
 initTrayMenu():void ->
