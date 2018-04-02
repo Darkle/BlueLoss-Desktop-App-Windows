@@ -66,17 +66,72 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./app/debugWindow/renderer/debugWindowRendererMain.lsc");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports) {
+/******/ ({
 
-module.exports = require("electron");
+/***/ "./app/debugWindow/renderer/debugWindowRendererMain.lsc":
+/*!**************************************************************!*\
+  !*** ./app/debugWindow/renderer/debugWindowRendererMain.lsc ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _stringifyObject = __webpack_require__(/*! stringify-object */ "stringify-object");
+
+var _stringifyObject2 = _interopRequireDefault(_stringifyObject);
+
+var _addLineNumbers = __webpack_require__(/*! add-line-numbers */ "add-line-numbers");
+
+var _addLineNumbers2 = _interopRequireDefault(_addLineNumbers);
+
+var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
+
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
+
+var _utils = __webpack_require__(/*! ../../settingsWindow/renderer/utils.lsc */ "./app/settingsWindow/renderer/utils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const preElem = document.querySelector('#debugOutput');
+const { lanLostEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
+let loggingTextSansLineNumbers = '';
+
+_electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg = '', meta }) {
+  loggingTextSansLineNumbers = createLoggingSansLineNumbers(msg, meta);
+  preElem.textContent = (0, _addLineNumbers2.default)(loggingTextSansLineNumbers);
+});
+
+function createMetaObjForLogging(meta) {
+  if ((0, _isEmpty2.default)(meta)) return '';
+  if (meta.stack) meta.stack = meta.stack.split(/\r\n?|\n/);
+  return (0, _stringifyObject2.default)(meta).replace(/'/g, '');
+}function createLoggingSansLineNumbers(msg, meta) {
+  const metaObj = createMetaObjForLogging(meta);
+  let logString = `${loggingTextSansLineNumbers}${msg + metaObj}\n`;
+  if (isDebugWindowOpeningMessage(msg)) {
+    logString = lanLostEnabled ? `${logString}Please Wait...\n` : void 0;
+  }return logString;
+}function isDebugWindowOpeningMessage(msg) {
+  return msg === 'Current LANLost settings:';
+}function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('debug-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
 
 /***/ }),
-/* 1 */
+
+/***/ "./app/settingsWindow/renderer/utils.lsc":
+/*!***********************************************!*\
+  !*** ./app/settingsWindow/renderer/utils.lsc ***!
+  \***********************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -89,7 +144,7 @@ exports.omitInheritedProperties = exports.identity = exports.handleRendererWindo
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _electron = __webpack_require__(0);
+var _electron = __webpack_require__(/*! electron */ "electron");
 
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
@@ -128,73 +183,49 @@ exports.identity = identity;
 exports.omitInheritedProperties = omitInheritedProperties;
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
 
-module.exports = require("is-empty");
-
-/***/ }),
-/* 3 */
+/***/ "add-line-numbers":
+/*!***********************************!*\
+  !*** external "add-line-numbers" ***!
+  \***********************************/
+/*! no static exports found */
 /***/ (function(module, exports) {
 
 module.exports = require("add-line-numbers");
 
 /***/ }),
-/* 4 */
+
+/***/ "electron":
+/*!***************************!*\
+  !*** external "electron" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("electron");
+
+/***/ }),
+
+/***/ "is-empty":
+/*!***************************!*\
+  !*** external "is-empty" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("is-empty");
+
+/***/ }),
+
+/***/ "stringify-object":
+/*!***********************************!*\
+  !*** external "stringify-object" ***!
+  \***********************************/
+/*! no static exports found */
 /***/ (function(module, exports) {
 
 module.exports = require("stringify-object");
 
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _electron = __webpack_require__(0);
-
-var _stringifyObject = __webpack_require__(4);
-
-var _stringifyObject2 = _interopRequireDefault(_stringifyObject);
-
-var _addLineNumbers = __webpack_require__(3);
-
-var _addLineNumbers2 = _interopRequireDefault(_addLineNumbers);
-
-var _isEmpty = __webpack_require__(2);
-
-var _isEmpty2 = _interopRequireDefault(_isEmpty);
-
-var _utils = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const preElem = document.querySelector('#debugOutput');
-const { lanLostEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
-let loggingTextSansLineNumbers = '';
-
-_electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg = '', meta }) {
-  loggingTextSansLineNumbers = createLoggingSansLineNumbers(msg, meta);
-  preElem.textContent = (0, _addLineNumbers2.default)(loggingTextSansLineNumbers);
-});
-
-function createMetaObjForLogging(meta) {
-  if ((0, _isEmpty2.default)(meta)) return '';
-  if (meta.stack) meta.stack = meta.stack.split(/\r\n?|\n/);
-  return (0, _stringifyObject2.default)(meta).replace(/'/g, '');
-}function createLoggingSansLineNumbers(msg, meta) {
-  const metaObj = createMetaObjForLogging(meta);
-  let logString = `${loggingTextSansLineNumbers}${msg + metaObj}\n`;
-  if (isDebugWindowOpeningMessage(msg)) {
-    logString = lanLostEnabled ? `${logString}Please Wait...\n` : void 0;
-  }return logString;
-}function isDebugWindowOpeningMessage(msg) {
-  return msg === 'Current LANLost settings:';
-}function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
-  _electron.ipcRenderer.send('debug-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
-}window.onerror = handleRendererWindowError;
-window.onunhandledrejection = handleRendererWindowError;
-
 /***/ })
-/******/ ]);
+
+/******/ });
