@@ -70,6 +70,7 @@
     "sleep-ms": "^2.0.1",
     "snyk": "^1.70.2",
     "stylus": "^0.54.5",
+    "trash": "^4.3.0",
     "webpack": "^4.3.0",
     "webpack-node-externals": "^1.6.0"
   },

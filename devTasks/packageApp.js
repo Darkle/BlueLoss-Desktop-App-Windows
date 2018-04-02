@@ -5,6 +5,8 @@ const packager = require('electron-packager')
 const { MSICreator } = require('electron-wix-msi')
 const exeq = require('exeq')
 const chalk = require('chalk')
+const trash = require('trash')
+const stringifyObject = require('stringify-object')
 
 const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')
@@ -14,6 +16,7 @@ const stylusOutput = path.join(basePath, 'app', 'settingsWindow', 'renderer', 'a
 const appVersion = require(path.join(basePath, 'package.json')).version
 const iconName = process.platform === 'darwin' ? 'LANLost-Blue.icns' : 'LANLost-Blue.ico'
 const platformBuildFolder = path.join(basePath, 'build', process.platform === 'win32' ? 'windows' : process.platform)
+const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
 const packageProperties = {
   dir: basePath,
   asar: true,
@@ -58,56 +61,56 @@ function webpackBuild(){
     .catch(err => {console.error(err)})
 }
 
+function prepareForPackaging(){
+  return stylusBuild()
+    .then(webpackBuild)
+    .then(() => {
+      console.log(chalk.blue(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
+      return trash(globsForCleanPlatformFolder, { glob: true })
+    })
+}
+
 function createWindowsInstaller(){
   console.log(chalk.blue('Creating Windows Installer. Please Wait...'))
   return msiCreator.create()
-    .then(() => msiCreator.compile())
+  .then(() => msiCreator.compile())
 }
 
 function packageWin64(){
-  return stylusBuild()
-    .then(webpackBuild)
+  return prepareForPackaging()
     .then(() => {
       console.log(chalk.blue('Packaging Electron App. Please Wait...'))
       return packager(packageProperties)
     })
     .then(createWindowsInstaller)
-    .then(() => {
-      console.log(chalk.green('Successfully Packaged Electron App!'))
-    })
-    .catch(err => {
-      console.error(chalk.red('There was an error creating the Windows Package'), err)
-    })
+    .then(packagingSuccess, packagingError)
 }
 
 function packageLinux(){
-  return stylusBuild()
-    .then(webpackBuild)
+  return prepareForPackaging()
     .then(() => {
       console.log(chalk.blue('Packaging Electron App. Please Wait...'))
       return packager(packageProperties)
     })
-    .then(() => {
-      console.log(chalk.green('Successfully Packaged Electron App!'))
-    })
-    .catch(err => {
-      console.error(chalk.red('There was an error creating the Linux Package'), err)
-    })
+    .then(packagingSuccess, packagingError)
 }
 
 function packagemacOS(){
-  return stylusBuild()
-    .then(webpackBuild)
+  return prepareForPackaging()
     .then(() => {
       console.log(chalk.blue('Packaging Electron App. Please Wait...'))
       return packager(packageProperties)
     })
-    .then(() => {
-      console.log(chalk.green('Successfully Packaged Electron App!'))
-    })
-    .catch(err => {
-      console.error(chalk.red('There was an error creating the MacOS Package'), err)
-    })
+    .then(packagingSuccess, packagingError)
+
+}
+
+function packagingSuccess(){
+  console.log(chalk.green('Successfully Packaged Electron App!'))
+}
+
+function packagingError(err){
+  console.error(chalk.red(`There was an error creating the ${ platformBuildFolder } Package`), err)
 }
 
 
