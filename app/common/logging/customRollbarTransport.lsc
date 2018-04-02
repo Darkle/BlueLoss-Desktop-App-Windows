@@ -39,7 +39,7 @@ CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void -
   callback(null, true)
 
 
-export{
+export {
   CustomRollbarTransport
   rollbarLogger
 }
