@@ -53,17 +53,14 @@ const msiCreator = new MSICreator({
 })
 const archive7zip = new Zip()
 
-
 function stylusBuild(){
   console.log(chalk.blue('Running Stylus Build'))
   return exeq(`stylus ${ stylusInput } -o ${ stylusOutput }`)
-    .catch(err => {console.error(err)})
 }
 
 function webpackBuild(){
   console.log(chalk.blue('Running Webpack Build'))
   return exeq(`cross-env NODE_ENV=production parallel-webpack`)
-    .catch(err => {console.error(err)})
 }
 
 function prepareForPackaging(){
