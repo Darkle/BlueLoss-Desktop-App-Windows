@@ -53,6 +53,7 @@
     "babel-register": "^6.26.0",
     "chalk": "^2.3.2",
     "cross-env": "^5.1.4",
+    "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^1.8.4",
     "electron-packager": "^11.2.0",
@@ -70,7 +71,6 @@
     "sleep-ms": "^2.0.1",
     "snyk": "^1.70.2",
     "stylus": "^0.54.5",
-    "trash": "^4.3.0",
     "webpack": "^4.3.0",
     "webpack-node-externals": "^1.6.0"
   },

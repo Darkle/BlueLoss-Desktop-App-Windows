@@ -5,7 +5,7 @@ const packager = require('electron-packager')
 const { MSICreator } = require('electron-wix-msi')
 const exeq = require('exeq')
 const chalk = require('chalk')
-const trash = require('trash')
+const del = require('del')
 const stringifyObject = require('stringify-object')
 
 const basePath = path.resolve(__dirname, '..')
@@ -66,8 +66,13 @@ function prepareForPackaging(){
     .then(webpackBuild)
     .then(() => {
       console.log(chalk.blue(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
-      return trash(globsForCleanPlatformFolder, { glob: true })
+      return del(globsForCleanPlatformFolder, { glob: true })
     })
+}
+
+function packageApp(){
+  console.log(chalk.blue('Packaging Electron App. Please Wait...'))
+  return packager(packageProperties)
 }
 
 function createWindowsInstaller(){
@@ -78,29 +83,20 @@ function createWindowsInstaller(){
 
 function packageWin64(){
   return prepareForPackaging()
-    .then(() => {
-      console.log(chalk.blue('Packaging Electron App. Please Wait...'))
-      return packager(packageProperties)
-    })
+    .then(packageApp)
     .then(createWindowsInstaller)
     .then(packagingSuccess, packagingError)
 }
 
-function packageLinux(){
+function packageLinux64(){
   return prepareForPackaging()
-    .then(() => {
-      console.log(chalk.blue('Packaging Electron App. Please Wait...'))
-      return packager(packageProperties)
-    })
+    .then(packageApp)
     .then(packagingSuccess, packagingError)
 }
 
 function packagemacOS(){
   return prepareForPackaging()
-    .then(() => {
-      console.log(chalk.blue('Packaging Electron App. Please Wait...'))
-      return packager(packageProperties)
-    })
+    .then(packageApp)
     .then(packagingSuccess, packagingError)
 
 }
@@ -116,7 +112,7 @@ function packagingError(err){
 
 module.exports = {
   packageWin64,
-  packageLinux,
+  packageLinux64,
   packagemacOS,
   createWindowsInstaller,
   stylusBuild,
