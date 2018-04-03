@@ -81,7 +81,7 @@ function prepareForPackaging(){
   return stylusBuild()
     .then(webpackBuild)
     .then(() => {
-      console.log(chalk.blue(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
+      console.log(chalk.yellow(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
       return del(globsForCleanPlatformFolder, { glob: true })
     })
 }
@@ -123,7 +123,6 @@ function packagemacOS(){
   return prepareForPackaging()
     .then(packageApp)
     .then(packagingSuccess, packagingError)
-
 }
 
 function packagingSuccess(){
@@ -131,7 +130,7 @@ function packagingSuccess(){
 }
 
 function packagingError(err){
-  console.error(chalk.red(`There was an error creating the ${ platformBuildFolder } Package`), err)
+  console.error(chalk.red(`There was an error creating the ${ platformBuildFolder } package`), err)
 }
 
 
