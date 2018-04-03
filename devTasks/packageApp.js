@@ -56,11 +56,25 @@ const archive7zip = new Zip()
 function stylusBuild(){
   console.log(chalk.blue('Running Stylus Build'))
   return exeq(`stylus ${ stylusInput } -o ${ stylusOutput }`)
+    .catch(err => {console.error(err)})
 }
 
 function webpackBuild(){
   console.log(chalk.blue('Running Webpack Build'))
   return exeq(`cross-env NODE_ENV=production parallel-webpack`)
+    .catch(err => {console.error(err)})
+}
+
+/**
+ * This is seperate as we want one just for building stylus and webpack
+ * that includes a .catch to catch errors on those two tasks - we dont
+ * want that .catch in the full package task as we want errors to fall
+ * through to the last .catch on that.
+ */
+function buildWebpackAndStylus(){
+  return stylusBuild()
+    .then(webpackBuild)
+    .catch(err => { console.error(err) })
 }
 
 function prepareForPackaging(){
@@ -126,6 +140,5 @@ module.exports = {
   packageLinux64,
   packagemacOS,
   createWindowsInstaller,
-  stylusBuild,
-  webpackBuild,
+  buildWebpackAndStylus,
 }
