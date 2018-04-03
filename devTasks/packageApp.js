@@ -7,6 +7,8 @@ const exeq = require('exeq')
 const chalk = require('chalk')
 const del = require('del')
 const stringifyObject = require('stringify-object')
+const jetpack = require('fs-jetpack')
+const Zip = require('node-7z')
 
 const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')
@@ -17,6 +19,7 @@ const appVersion = require(path.join(basePath, 'package.json')).version
 const iconName = process.platform === 'darwin' ? 'LANLost-Blue.icns' : 'LANLost-Blue.ico'
 const platformBuildFolder = path.join(basePath, 'build', process.platform === 'win32' ? 'windows' : process.platform)
 const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
+const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'LANLost.msi')
 const packageProperties = {
   dir: basePath,
   asar: true,
@@ -48,6 +51,8 @@ const msiCreator = new MSICreator({
     }
   }
 })
+const archive7zip = new Zip()
+
 
 function stylusBuild(){
   console.log(chalk.blue('Running Stylus Build'))
@@ -79,12 +84,21 @@ function createWindowsInstaller(){
   console.log(chalk.blue('Creating Windows Installer. Please Wait...'))
   return msiCreator.create()
   .then(() => msiCreator.compile())
+  .then(() => jetpack.renameAsync(windowsMSIpath, `LANLost-Windows-Installer-(x86_64-${ appVersion }).msi`))
+}
+
+function createWindowsPortable() {
+  return archive7zip.add(
+    path.join(platformBuildFolder, `LANLost-Windows-Portable-(x86_64-${ appVersion }).7z`),
+    path.join(platformBuildFolder, 'LANLost-win32-x64')
+  )
 }
 
 function packageWin64(){
   return prepareForPackaging()
     .then(packageApp)
     .then(createWindowsInstaller)
+    .then(createWindowsPortable)
     .then(packagingSuccess, packagingError)
 }
 
