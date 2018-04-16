@@ -12,19 +12,12 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 - Advanced:
 
-  - <li>For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
-      <ol style="list-style-type: decimal;">
-        <li>
-          <p><code>npm run&nbsp;devTasks</code> (select <code>createEnvFile</code>)</p>
-        </li>
-        <li>
-          <p><code>npm install</code></p>
-        </li>
-        <li>
-          <p><code>npm start</code></p>
-        </li>
-      </ol>
-    </li>
+  - For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
+    - `npm run devTasks` (select `createEnvFile`)
+
+    - then `npm install`
+
+    - then `npm start`
 
 ## Screenshots
 
