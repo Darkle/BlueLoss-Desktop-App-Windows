@@ -1,4 +1,4 @@
-# LANLost - lock your computer when a device is lost
+# LANLost
 
 ## Synopsis
 
@@ -6,7 +6,7 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 ## Installation
 
-- Basic: 
+- Basic:
 
   - Download [here](https://github.com/Darkle/LANLost/releases) and install for your OS.
 
@@ -27,7 +27,7 @@ LANLost is a desktop app that locks your computer when a device on the network i
 
 ## How To Use
 
-When you run LANLost, it sits in your system tray (or menu bar on MacOS) and searches for devices on your network. 
+When you run LANLost, it sits in your system tray (or menu bar on MacOS) and searches for devices on your network.
 
 #### System Tray (Menu Bar) Options:
 
@@ -51,7 +51,7 @@ The following settings are configurable in the LANLost settings window:
 
 - **Time To Lock** (default: 2 minutes): This determins how long LANLost should wait before locking the computer after the device it's looking for on the network has been lost
 
-- **Report Errors** (default: true): This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.  
+- **Report Errors** (default: true): This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.
 
 - Scan Range:
 
@@ -59,7 +59,7 @@ The following settings are configurable in the LANLost settings window:
 
   - **Hosts Scan Range End** (default: 254)
 
-  This is the start and end range LANLost will scan to look for devices on your network. For example, if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254 
+  This is the start and end range LANLost will scan to look for devices on your network. For example, if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254
 
   **Host Scan Timeout** (default: 3000 milliseconds): How many seconds to wait when trying to connect to a device during a scan before timing out. This is not the same as the Time To Lock - when LANLost scans all the IP addresses specified in the scan range, it may take some time for a device to respond. If it doesn't respond within the Host Scan Timeout time, it is ignored.
 
