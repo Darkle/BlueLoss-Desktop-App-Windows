@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-LANLost is a desktop app that locks your computer when a device on the network is lost. It works on either WiFi or an Ethernet network.
+LANLost is a desktop app that locks your computer when a device on the network is lost. It works on either WiFi or an Ethernet network.asdsa
 
 ## Installation
 
