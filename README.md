@@ -67,6 +67,16 @@ The following settings are configurable in the LANLost settings window:
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
 
+## Limitations (Important, Please Read):
+
+- Android:
+
+  - A lot of Android devices will temporarily disable WiFi when the device has gone to sleep & does not have a power cable plugged in & has been asleep for about an hour. I have yet to find a solution to this issue. If you google for [wifi sleep](https://www.google.com/search?q=wifi+sleep+android), you can see that it is a pretty common issue with no clear fix - at least none that I could find (I tried a bunch). The only way around this that I have found is to make sure you have your phone's power cable plugged in.
+
+- iOS:
+
+  - asd
+
 ## Support
 
 Please open an issue for support here: https://github.com/Darkle/LANLost/issues
