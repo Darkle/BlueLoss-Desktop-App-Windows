@@ -43,7 +43,7 @@ LANLost scans the network once every 30 seconds. If the device you have added to
 
 The following settings are configurable in the LANLost settings window:
 
-- **Enable/Disable LANLost** (default: enabled): You can enable/disable LANLost from either the system tray or the status window (see screenshot below)
+- **Enable/Disable LANLost** (default: enabled): You can enable/disable LANLost from either the system tray or the status window (see screenshot above)
 
 - **Run On System Startup** (default: true)
 
