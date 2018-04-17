@@ -75,7 +75,7 @@ The following settings are configurable in the LANLost settings window:
 
 - iOS:
 
-  - asd
+  - iOS seems to do the same and disables the wifi when the device is asleep. It seems if you plug the device in to a power source it should stay connected to WiFi when the device is locked.
 
 ## Support
 
