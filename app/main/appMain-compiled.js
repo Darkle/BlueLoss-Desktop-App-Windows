@@ -844,7 +844,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const oneDaysTime = (0, _ms2.default)('1 day');
 const twoWeeksTime = (0, _ms2.default)('2 weeks');
-const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
+const userAgentString = `Mozilla/5.0 (KHTML, like Gecko) LANLost App https://github.com/Darkle/LANLost`;
 const gotRequestOptions = { headers: { 'user-agent': userAgentString }, json: true };
 const updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json';
 
@@ -916,7 +916,7 @@ const twoDaysTime = (0, _ms2.default)('2 days');
 const threeMinutesTime = (0, _ms2.default)('3 minutes');
 const updateUrl = 'https://linuxnet.ca/ieee/oui/nmap-mac-prefixes';
 const gotErrorMessage = `Failed getting nmap-mac-prefixes file from ${updateUrl}`;
-const userAgentString = `Mozilla/5.0 AppleWebKit (KHTML, like Gecko) Chrome/${process.versions['chrome']} Electron/${process.versions['electron']} Safari LANLost App https://github.com/Darkle/LANLost`;
+const userAgentString = `Mozilla/5.0 (KHTML, like Gecko) LANLost App https://github.com/Darkle/LANLost`;
 const gotRequestOptions = { headers: { 'user-agent': userAgentString } };
 const checkResponseAndGenerateObj = (0, _utils.pipe)(checkResponseBody, generateObjFromResponseText);
 const curriedJetPackWrite = (0, _utils.curry)(_fsJetpack2.default.writeAsync)(ouiDownloadfilePath);
