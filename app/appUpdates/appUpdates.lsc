@@ -8,7 +8,7 @@ import { getProperAppVersion } from '../common/utils.lsc'
 
 oneDaysTime = ms('1 day')
 twoWeeksTime = ms('2 weeks')
-userAgentString = `Mozilla/5.0 (KHTML, like Gecko) LANLost App https://github.com/Darkle/LANLost`
+userAgentString = `Mozilla/5.0 (KHTML, like Gecko) BlueLoss App https://github.com/Darkle/LANLost`
 gotRequestOptions= { headers: { 'user-agent': userAgentString }, json: true }
 updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json'
 

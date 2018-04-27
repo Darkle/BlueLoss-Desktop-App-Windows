@@ -7,8 +7,6 @@ import { getSettings, updateSetting } from '../settings/settings.lsc'
 import { noop } from '../common/utils.lsc'
 import { initTrayMenu } from '../tray/tray.lsc'
 import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { scanNetwork } from '../networkScan/networkScanner.lsc'
-import { scheduleOUIfileUpdate } from '../oui/updateOUIfilePeriodically.lsc'
 import { enableRunOnStartup } from '../common/runOnStartup.lsc'
 import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
@@ -21,8 +19,6 @@ electronApp.once('ready', ():void ->
   if !firstRun: electronApp.dock?.hide()
 
   initTrayMenu()
-  scanNetwork()
-  scheduleOUIfileUpdate()
   checkForAppUpdate()
 
   if firstRun:
