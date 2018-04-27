@@ -1,8 +1,8 @@
 {
-  "name": "lanlost",
-  "productName": "LANLost",
+  "name": "blueloss",
+  "productName": "BlueLoss",
   "version": "0.2.3",
-  "description": "A desktop app that locks your computer when a device is lost on your local network",
+  "description": "A desktop app that locks your computer when a device is lost",
   "main": "app/main/appMain-compiled.js",
   "scripts": {
     "webpackWatch": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
@@ -11,11 +11,11 @@
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
     "debug": "cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js",
     "start": "cross-env NODE_ENV=production electron app/main/appMain-compiled.js",
-    "devTasks": "cross-env NODE_ENV=development node devTasks/tasks.js",
+    "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
   },
-  "repository": "https://github.com/Darkle/LANLost.git",
+  "repository": "https://github.com/Darkle/BlueLoss.git",
   "author": "Darkle <coop.coding@gmail.com>",
   "license": "MIT",
   "dependencies": {

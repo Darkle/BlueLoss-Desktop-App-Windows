@@ -119,7 +119,7 @@ function packageLinux64(){
     .then(packagingSuccess, packagingError)
 }
 
-function packagemacOS(){
+function packageMacOS(){
   return prepareForPackaging()
     .then(packageApp)
     .then(packagingSuccess, packagingError)
@@ -137,7 +137,7 @@ function packagingError(err){
 module.exports = {
   packageWin64,
   packageLinux64,
-  packagemacOS,
+  packageMacOS,
   createWindowsInstaller,
   buildWebpackAndStylus,
 }
