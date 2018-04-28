@@ -330,7 +330,7 @@ function init() {
 }function scanIn20Seconds() {
   setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
 } /**
-   * This to give info to the user if the scan hasn't
+   * This is to give info to the user if the scan hasn't
    * found any Bluetooth Devices in the debug window.
    * (we log when devices are found in the handleScanResults)
    */
