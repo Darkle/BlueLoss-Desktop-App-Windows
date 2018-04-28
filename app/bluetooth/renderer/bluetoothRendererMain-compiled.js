@@ -66,10 +66,31 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./app/debugWindow/renderer/debugWindowRendererMain.lsc");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./app/bluetooth/renderer/bluetoothRendererMain.lsc");
 /******/ })
 /************************************************************************/
 /******/ ({
+
+/***/ "./app/bluetooth/renderer/bluetoothRendererMain.lsc":
+/*!**********************************************************!*\
+  !*** ./app/bluetooth/renderer/bluetoothRendererMain.lsc ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
+
+function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('bluetooth-scan-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
+
+/***/ }),
 
 /***/ "./app/common/utils.lsc":
 /*!******************************!*\
@@ -167,62 +188,6 @@ exports.recursivelyOmitObjProperties = recursivelyOmitObjProperties;
 
 /***/ }),
 
-/***/ "./app/debugWindow/renderer/debugWindowRendererMain.lsc":
-/*!**************************************************************!*\
-  !*** ./app/debugWindow/renderer/debugWindowRendererMain.lsc ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _stringifyObject = __webpack_require__(/*! stringify-object */ "stringify-object");
-
-var _stringifyObject2 = _interopRequireDefault(_stringifyObject);
-
-var _addLineNumbers = __webpack_require__(/*! add-line-numbers */ "add-line-numbers");
-
-var _addLineNumbers2 = _interopRequireDefault(_addLineNumbers);
-
-var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
-
-var _isEmpty2 = _interopRequireDefault(_isEmpty);
-
-var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const preElem = document.querySelector('#debugOutput');
-const { blueLossEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
-let loggingTextSansLineNumbers = '';
-
-_electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg = '', meta }) {
-  loggingTextSansLineNumbers = createLoggingSansLineNumbers(msg, meta);
-  preElem.textContent = (0, _addLineNumbers2.default)(loggingTextSansLineNumbers);
-});
-
-function createMetaObjForLogging(meta) {
-  if ((0, _isEmpty2.default)(meta)) return '';
-  if (meta.stack) meta.stack = meta.stack.split(/\r\n?|\n/);
-  return (0, _stringifyObject2.default)(meta).replace(/'/g, '');
-}function createLoggingSansLineNumbers(msg, meta) {
-  const metaObj = createMetaObjForLogging(meta);
-  let logString = `${loggingTextSansLineNumbers}${msg + metaObj}\n`;
-  if (isDebugWindowOpeningMessage(msg)) {
-    logString = blueLossEnabled ? `${logString}Please Wait...\n` : void 0;
-  }return logString;
-}function isDebugWindowOpeningMessage(msg) {
-  return msg === 'Current BlueLoss settings:';
-}function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
-  _electron.ipcRenderer.send('debug-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
-}window.onerror = handleRendererWindowError;
-window.onunhandledrejection = handleRendererWindowError;
-
-/***/ }),
-
 /***/ "./package.json":
 /*!**********************!*\
   !*** ./package.json ***!
@@ -231,17 +196,6 @@ window.onunhandledrejection = handleRendererWindowError;
 /***/ (function(module) {
 
 module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","bluebird":"^3.5.1","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","ms":"^2.1.1","omit":"^1.0.1","ono":"^4.0.5","rollbar":"^2.3.9","stringify-object":"^3.2.2","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.0","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.0-beta.8","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.71.0","stylus":"^0.54.5","webpack":"^4.6.0","webpack-node-externals":"^1.7.2"},"snyk":true};
-
-/***/ }),
-
-/***/ "add-line-numbers":
-/*!***********************************!*\
-  !*** external "add-line-numbers" ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("add-line-numbers");
 
 /***/ }),
 
@@ -256,17 +210,6 @@ module.exports = require("electron");
 
 /***/ }),
 
-/***/ "is-empty":
-/*!***************************!*\
-  !*** external "is-empty" ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("is-empty");
-
-/***/ }),
-
 /***/ "ms":
 /*!*********************!*\
   !*** external "ms" ***!
@@ -275,17 +218,6 @@ module.exports = require("is-empty");
 /***/ (function(module, exports) {
 
 module.exports = require("ms");
-
-/***/ }),
-
-/***/ "stringify-object":
-/*!***********************************!*\
-  !*** external "stringify-object" ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("stringify-object");
 
 /***/ })
 

@@ -1,5 +1,7 @@
 import { remote, ipcRenderer } from 'electron'
 
+import { omitInheritedProperties } from '../../common/utils.lsc'
+
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
@@ -23,23 +25,10 @@ handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, erro
     { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
   )
 
-omitInheritedProperties(obj) ->
-  if !isObject(obj): return {}
-  Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
-    if isObject(obj[propName]):
-      return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
-    {...prev, ...{ [propName]: obj[propName] }}
-  , {})
-
 identity(param) -> param
-isObject(obj):boolean ->
-  obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
-isFunction(value):boolean -> typeof value === 'function'
-
 
 export {
   getInitialSettingsFromMainProcess,
   handleRendererWindowError,
   identity,
-  omitInheritedProperties,
 }

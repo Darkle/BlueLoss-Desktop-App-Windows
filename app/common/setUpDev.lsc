@@ -14,6 +14,7 @@ debugWindowDirPath = path.resolve(__dirname, '..', 'debugWindow', 'renderer')
 debugWindowHTMLfilePath = path.join(debugWindowDirPath, 'debugWindow.html')
 debugWindowJSfilePath = path.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js')
 notificationWindowHTMLfilePath = path.join(__dirname, '..', 'appUpdates', 'updateNotification.html')
+bluetoothRendereJSfilePath = path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothRendererMain-compiled.js')
 
 setUpDev():void ->
   if !ISDEV: return
@@ -25,6 +26,7 @@ setUpDev():void ->
     debugWindowHTMLfilePath,
     debugWindowJSfilePath,
     notificationWindowHTMLfilePath,
+    bluetoothRendereJSfilePath,
   ])
   BrowserWindow.addDevToolsExtension(devtronPath)
   // auto open the settings window in dev so dont have to manually open it each time electron restarts

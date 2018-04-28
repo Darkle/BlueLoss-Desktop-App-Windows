@@ -1,0 +1,11 @@
+import { ipcRenderer } from 'electron'
+
+import { omitInheritedProperties } from '../../common/utils.lsc'
+
+handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->
+  ipcRenderer.send('bluetooth-scan-window-renderer:error-sent',
+    { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
+  )
+
+window.onerror = handleRendererWindowError
+window.onunhandledrejection = handleRendererWindowError

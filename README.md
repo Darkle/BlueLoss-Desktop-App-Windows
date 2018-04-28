@@ -49,21 +49,9 @@ The following settings are configurable in the BlueLoss settings window:
 
 - **Tray Icon Color** (default: blue): You can change the system tray (or menu bar) icon color to either white or blue
 
-- **Time To Lock** (default: 2 minutes): This determins how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost
+- **Time To Lock** (default: 1 minute): This determins how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost
 
 - **Report Errors** (default: true): This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.
-
-- Scan Range:
-
-  - **Hosts Scan Range Start** (default: 2)
-
-  - **Hosts Scan Range End** (default: 254)
-
-  This is the start and end range BlueLoss will scan to look for devices on your network. For example, if your network address is 192.168.1, and the Hosts Scan Range Start is 2 and the Hosts Scan Range End is 254, then BlueLoss will scan from IP address 192.168.1.2 up to 192.168.1.254
-
-  **Host Scan Timeout** (default: 3000 milliseconds): How many seconds to wait when trying to connect to a device during a scan before timing out. This is not the same as the Time To Lock - when BlueLoss scans all the IP addresses specified in the scan range, it may take some time for a device to respond. If it doesn't respond within the Host Scan Timeout time, it is ignored.
-
-- **Download OUI File Updates** (default: true): BlueLoss periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
 

@@ -55,6 +55,9 @@ ipcMain.on('settings-renderer:error-sent', (event, error):void ->
 ipcMain.on('debug-window-renderer:error-sent', (event, error):void ->
   logger.error('debug-window-renderer:error-sent', error)
 )
+ipcMain.on('bluetooth-scan-window-renderer:error-sent', (event, error):void ->
+  logger.error('bluetooth-scan-window-renderer:error-sent', error)
+)
 
 
 export {

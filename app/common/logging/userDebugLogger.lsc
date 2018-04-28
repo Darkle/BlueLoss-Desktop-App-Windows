@@ -1,10 +1,9 @@
 import util from 'util'
 
 import winston from 'winston'
-import R from 'ramda'
 
 import { debugWindow } from '../../debugWindow/debugWindow.lsc'
-import { omitInheritedProperties } from '../utils.lsc'
+import { omitInheritedProperties, recursivelyOmitObjProperties } from '../utils.lsc'
 
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
@@ -18,9 +17,12 @@ util.inherits(UserDebugLoggerTransport, winston.Transport)
 UserDebugLoggerTransport.prototype.log = (level, msg = '', meta = {}, callback):void ->
   debugWindow?.webContents?.send?(
     'mainprocess:debug-info-sent',
-    { level, msg, meta: R.omit(['__stackCleaned__'], omitInheritedProperties(meta)) }
+    { level, msg, meta: cleanMetaObj(meta) }
   )
   callback(null, true)
+
+cleanMetaObj(meta:Object):Object ->
+  recursivelyOmitObjProperties(omitInheritedProperties(meta), ['__stackCleaned__'])
 
 
 export {

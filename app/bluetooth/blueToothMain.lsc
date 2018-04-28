@@ -1,0 +1,64 @@
+import path from 'path'
+import url from 'url'
+import { BrowserWindow } from 'electron'
+
+import ms from 'ms'
+import Promise from 'bluebird'
+
+import { handleScanResults } from './handleScanResults.lsc'
+import { logger } from '../common/logging/logging.lsc'
+import { getSettings } from '../settings/settings.lsc'
+
+bluetoothHiddenWindowHTMLpath = url.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
+})
+
+bluetoothHiddenWindowProperties = {
+  show: ISDEV,
+  webPreferences: {
+    experimentalFeatures: true, // for web-bluetooth
+    devTools: ISDEV
+  }
+}
+
+let scannerWindow = null  // so it doesn't get garbage collected
+scanInterval = ms('10 seconds')
+
+init():void ->
+  createBluetoothScannerWindow()
+  scanforDevices()
+
+createBluetoothScannerWindow():void ->
+  now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
+  scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
+  if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+
+  scannerWindow.webContents.once('did-finish-load', scanforDevices)
+  scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
+  scannerWindow.webContents.once('crashed', (event):void ->
+    logger.error('scannerWindow.webContents crashed', event)
+  )
+  scannerWindow.once('unresponsive', (event):void ->
+    logger.error('scannerWindow unresponsive', event)
+  )
+
+scanforDevices():void ->
+  if !getSettings().blueLossEnabled: return scanIn10Seconds()
+
+  Promise.resolve(
+    scannerWindow.webContents
+      .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)
+    )
+    .catch(logger.error)
+    .finally(scanIn10Seconds)
+
+scanIn10Seconds():void ->
+  setTimeout(scanforDevices, scanInterval)
+
+
+export {
+  init,
+}
+

@@ -7,10 +7,6 @@ defaultSettings: {
   devicesToSearchFor: Object,
   timeToLock: number,
   reportErrors: boolean,
-  /**
-   * Some settings are just used internally and never exposed to the user -
-   * e.g. firstRun, settingsWindowPosition.
-   */
   firstRun: boolean,
   settingsWindowPosition: SettingsWindowPositionType,
   dateLastCheckedForAppUpdate: number,
@@ -20,7 +16,7 @@ defaultSettings: {
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
-  timeToLock: 2,
+  timeToLock: 1,
   reportErrors: true,
   firstRun: true,
   settingsWindowPosition: null,

@@ -4,7 +4,7 @@ import stringifyObject from 'stringify-object'
 import addLineNumbers from 'add-line-numbers'
 import isEmpty from 'is-empty'
 
-import { omitInheritedProperties } from '../../settingsWindow/renderer/utils.lsc'
+import { omitInheritedProperties } from '../../common/utils.lsc'
 
 preElem = document.querySelector('#debugOutput')
 { blueLossEnabled } = omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
