@@ -11,14 +11,14 @@ trayIconsFolder = path.resolve(__dirname, '..', 'tray', 'icons')
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
   tray.setContextMenu(createContextMenu())
-  tray.setToolTip('LANLost')
+  tray.setToolTip('BlueLoss')
   tray.on('double-click', toggleSettingsWindow)
 
 createContextMenu():Object ->
   Menu.buildFromTemplate(
     [
       {
-        label: 'Open LANLost Settings',
+        label: 'Open BlueLoss Settings',
         click: showSettingsWindow
       },
       {
@@ -26,17 +26,17 @@ createContextMenu():Object ->
         click: toggleEnabledFromTray
       },
       {
-        label: 'Quit LANLost',
+        label: 'Quit BlueLoss',
         click: electronApp.quit
       }
     ]
   )
 
 getNewTrayIconPath(trayIconColor: string):string ->
-  path.join(trayIconsFolder, `LANLost-${ capitalizeFirstLetter(trayIconColor) }-128x128.png`)
+  path.join(trayIconsFolder, `BlueLoss-${ capitalizeFirstLetter(trayIconColor) }-128x128.png`)
 
 generateEnabledDisabledLabel():string ->
-  `${ if getSettings().lanLostEnabled: 'Disable' else: 'Enable' } LANLost`
+  `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
 
 changeTrayIcon(newTrayIconColor: string):void ->
   tray.setImage(getNewTrayIconPath(newTrayIconColor))
@@ -45,7 +45,7 @@ updateTrayMenu():void ->
   tray.setContextMenu(createContextMenu())
 
 toggleEnabledFromTray():void ->
-  updateSetting('lanLostEnabled', !getSettings().lanLostEnabled)
+  updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
 
 export {
   initTrayMenu,

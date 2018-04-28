@@ -44,7 +44,7 @@ function bumpVersion(){
       jetpack.writeAsync(settingsDefaultsFilePath, newFileData)
     )
     .then(() => {
-      console.log(`Successfully bumped LANLost version to ${ newAppVersion }`)
+      console.log(`Successfully bumped BlueLoss version to ${ newAppVersion }`)
     })
     .catch(err => {
       console.error('There was an error running bumpVersion', err)

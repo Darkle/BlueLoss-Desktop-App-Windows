@@ -4,8 +4,8 @@ import DeviceCard from '../components/deviceCard.lsc'
 
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'statusTab': 'flex' else: 'none'
-  statusAnimationVisibility = if state.lanLostEnabled: 'visible' else: 'hidden'
-  lanLostStatusText = if state.lanLostEnabled: 'Enabled' else: 'Disabled'
+  statusAnimationVisibility = if state.blueLossEnabled: 'visible' else: 'hidden'
+  blueLossStatusText = if state.blueLossEnabled: 'Enabled' else: 'Disabled'
   lookingForHeaderDisplay = if Object.keys(state.devicesToSearchFor).length: 'block' else: 'none'
 
   <div id="statusTabInfoWindow" style={ { display: infoWindowDisplay } } >
@@ -21,13 +21,13 @@ export default ({ actions, state }) ->
       </div>
       <x-box id="disableButton">
         <x-switch
-          id="lanLostenableswitch"
-          toggled={ state.lanLostEnabled }
+          id="blueLossEnableswitch"
+          toggled={ state.blueLossEnabled }
           onchange={(event):void ->
-            actions.updateSetting({ settingName: 'lanLostEnabled', settingValue: event.currentTarget.toggled})
+            actions.updateSetting({ settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled})
           }
         ></x-switch>
-        <x-label for="lanLostenableswitch" id="lanLostenableswitch">LANLost { lanLostStatusText }</x-label>
+        <x-label for="blueLossEnableswitch" id="blueLossEnableswitch">BlueLoss { blueLossStatusText }</x-label>
       </x-box>
     </div>
     <div id="devicesContainer">
@@ -37,7 +37,7 @@ export default ({ actions, state }) ->
       {
         Object.values(state.devicesToSearchFor).map(device ->
           <DeviceCard
-            key={device.macAddress}
+            key={device.deviceId}
             actions={actions}
             lookingForDevice={true}
             device={device}
@@ -49,10 +49,10 @@ export default ({ actions, state }) ->
       </div>
       {
         state.devicesCanSee
-          .filter(({macAddress}) -> !state.devicesToSearchFor[macAddress])
+          .filter(({deviceId}) -> !state.devicesToSearchFor[deviceId])
           .map(device ->
             <DeviceCard
-              key={device.macAddress}
+              key={device.deviceId}
               actions={actions}
               lookingForDevice={false}
               device={device}

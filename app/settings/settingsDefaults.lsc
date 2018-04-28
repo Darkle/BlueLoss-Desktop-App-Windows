@@ -1,41 +1,28 @@
 import { SettingsWindowPositionType } from '../types/types.lsc'
 
 defaultSettings: {
-  lanLostEnabled: boolean,
+  blueLossEnabled: boolean,
   runOnStartup: boolean,
   trayIconColor: string,
   devicesToSearchFor: Object,
   timeToLock: number,
   reportErrors: boolean,
-  hostsScanRangeStart: number,
-  hostsScanRangeEnd: number,
-  hostScanTimeout: number,
-  enableOUIfileUpdate: boolean,
   /**
    * Some settings are just used internally and never exposed to the user -
-   * e.g. firstRun, canSearchForMacVendorInfo, dateLastCheckedForOUIupdate,
-   * settingsWindowPosition.
+   * e.g. firstRun, settingsWindowPosition.
    */
   firstRun: boolean,
-  canSearchForMacVendorInfo: boolean,
-  dateLastCheckedForOUIupdate: number,
   settingsWindowPosition: SettingsWindowPositionType,
   dateLastCheckedForAppUpdate: number,
   skipUpdateVersion: string,
 } = {
-  lanLostEnabled: true,
+  blueLossEnabled: true,
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
   reportErrors: true,
-  hostsScanRangeStart: 2,
-  hostsScanRangeEnd: 254,
-  hostScanTimeout: 3000,
-  enableOUIfileUpdate: true,
   firstRun: true,
-  canSearchForMacVendorInfo: true,
-  dateLastCheckedForOUIupdate: Date.now(),
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
   skipUpdateVersion: '0.2.3',

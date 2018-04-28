@@ -8,11 +8,11 @@ export default ({ actions, state }) ->
     <x-box vertical>
       <x-card>
         <header>
-          <h3>LANLost { remote.app.getVersion() }</h3>
+          <h3>BlueLoss { remote.app.getVersion() }</h3>
         </header>
         <main id="aboutDetails">
           <p>
-            <a id="aboutRepoLink" onclick={ actions.openLink } data-external-link="https://github.com/Darkle/LANLost" href="https://github.com/Darkle/LANLost">https://github.com/Darkle/LANLost</a>
+            <a id="aboutRepoLink" onclick={ actions.openLink } data-external-link="https://github.com/Darkle/BlueLoss" href="https://github.com/Darkle/BlueLoss">https://github.com/Darkle/BlueLoss</a>
           </p>
           <table>
             <tr>

@@ -15,7 +15,7 @@ debugWindowHTMLpath = url.format({
 debugWindowProperties = {
   width: 786,
   height: 616,
-  title: 'LANLost',
+  title: 'BlueLoss Debug Window',
   autoHideMenuBar: true,
   resizable: false,
   fullscreenable: false,
@@ -50,7 +50,7 @@ showDebugWindow():void ->
   )
   debugWindow.webContents.once('dom-ready', ():void ->
     logStartupSettings()
-    logger.debug('Current LANLost settings:', omitGawkFromSettings(getSettings()))
+    logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
   )
   debugWindow.webContents.once('crashed', (event):void ->
     logger.error('debugWindow.webContents crashed', event)

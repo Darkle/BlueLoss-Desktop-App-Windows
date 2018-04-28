@@ -16,10 +16,10 @@ const iconsFolderPath = path.join(basePath, 'resources', 'icons', 'Blue')
 const stylusInput = path.join(basePath, 'app', 'settingsWindow', 'renderer', 'assets', 'styles', 'stylus', 'index.styl')
 const stylusOutput = path.join(basePath, 'app', 'settingsWindow', 'renderer', 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
 const appVersion = require(path.join(basePath, 'package.json')).version
-const iconName = process.platform === 'darwin' ? 'LANLost-Blue.icns' : 'LANLost-Blue.ico'
+const iconName = process.platform === 'darwin' ? 'BlueLoss-Blue.icns' : 'BlueLoss-Blue.ico'
 const platformBuildFolder = path.join(basePath, 'build', process.platform === 'win32' ? 'windows' : process.platform)
 const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
-const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'LANLost.msi')
+const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'BlueLoss.msi')
 const packageProperties = {
   dir: basePath,
   asar: true,
@@ -28,21 +28,21 @@ const packageProperties = {
   icon: path.join(iconsFolderPath, iconName),
   overwrite: true,
   prune: true,
-  name: 'LANLost',
+  name: 'BlueLoss',
   'app-copyright': 'MIT License',
   out: platformBuildFolder,
-  appBundleId: 'com.darkle.LANLost',
+  appBundleId: 'com.darkle.BlueLoss',
   appCategoryType: 'public.app-category.utilities'
 }
 const msiCreator = new MSICreator({
-  appDirectory: path.join(platformBuildFolder, 'LANLost-win32-x64'),
-  description: 'LANLost - A desktop app that locks your computer when a device is lost on your local network',
-  exe: 'LANLost',
-  name: 'LANLost',
+  appDirectory: path.join(platformBuildFolder, 'BlueLoss-win32-x64'),
+  description: 'BlueLoss - A desktop app that locks your computer when a device is lost',
+  exe: 'BlueLoss',
+  name: 'BlueLoss',
   version: appVersion,
   manufacturer: 'CoopCoding',
   outputDirectory: path.join(platformBuildFolder, 'installer'),
-  shortcutFolderName: 'LANLost',
+  shortcutFolderName: 'BlueLoss',
   ui: {
     chooseDirectory: true,
     images: {
@@ -94,14 +94,14 @@ function packageApp(){
 function createWindowsInstaller(){
   console.log(chalk.blue('Creating Windows Installer. Please Wait...'))
   return msiCreator.create()
-  .then(() => msiCreator.compile())
-  .then(() => jetpack.renameAsync(windowsMSIpath, `LANLost-Windows-Installer-(x86_64-${ appVersion }).msi`))
+    .then(() => msiCreator.compile())
+    .then(() => jetpack.renameAsync(windowsMSIpath, `BlueLoss-Windows-Installer-(x86_64-${ appVersion }).msi`))
 }
 
 function createWindowsPortable() {
   return archive7zip.add(
-    path.join(platformBuildFolder, `LANLost-Windows-Portable-(x86_64-${ appVersion }).7z`),
-    path.join(platformBuildFolder, 'LANLost-win32-x64')
+    path.join(platformBuildFolder, `BlueLoss-Windows-Portable-(x86_64-${ appVersion }).7z`),
+    path.join(platformBuildFolder, 'BlueLoss-win32-x64')
   )
 }
 

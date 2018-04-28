@@ -1,17 +1,13 @@
 import ms from 'ms'
+import R from 'ramda'
 
 appVersion = require('../../package.json').version
 
-omitGawkFromSettings(settings) ->
-  recursiveOmitFilterAndInheritedPropertiesFromObj(settings, ['__gawk__'])
-
-recursiveOmitFilterAndInheritedPropertiesFromObj(settings, properties:Array<string>) ->
-  omitInheritedProperties(settings, properties)
+omitGawkFromSettings(settings) -> R.omit(['__gawk__'], omitInheritedProperties(settings))
 
 omitInheritedProperties(obj: any, propertyFiltersArr: Array<?string> = []) ->
+  if !isObject(obj): return {}
   Object.getOwnPropertyNames(obj).reduce((prev, propName) ->
-    for elem propertyToFilter in propertyFiltersArr:
-      if propertyToFilter === propName: return prev
     if isObject(obj[propName]):
       return {...prev, ...{ [propName]: omitInheritedProperties(obj[propName], propertyFiltersArr) }}
     {...prev, ...{ [propName]: obj[propName] }}
@@ -36,7 +32,6 @@ capitalizeFirstLetter(string: string):string -> string.charAt(0).toUpperCase() +
 
 export {
   omitGawkFromSettings,
-  recursiveOmitFilterAndInheritedPropertiesFromObj,
   omitInheritedProperties,
   noop,
   isObject,

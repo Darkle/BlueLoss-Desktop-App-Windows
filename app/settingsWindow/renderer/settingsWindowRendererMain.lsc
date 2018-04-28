@@ -10,13 +10,13 @@ import { DeviceType, SettingsTypes } from '../../types/types.lsc'
 logInDev = if ISDEV: withLogger else: identity
 settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
 /**
- * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
+ * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
  * for them.
  */
 ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsTypes):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(setting)
 )
-ipcRenderer.on('mainprocess:update-of-network-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
+ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
 

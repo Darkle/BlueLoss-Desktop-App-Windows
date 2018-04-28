@@ -20,7 +20,7 @@ pGetMAC = util.promisify(arp.getMAC)
 scanInterval = ms('30 seconds')
 
 scanNetwork():void ->
-  if !getSettings().lanLostEnabled:
+  if !getSettings().blueLossEnabled:
     return scanNetworkIn30Seconds()
 
   logger.debug(`new scan started`)

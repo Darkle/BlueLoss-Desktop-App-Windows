@@ -2,19 +2,19 @@ import AutoLaunch from 'auto-launch'
 
 import { logger } from './logging/logging.lsc'
 
-lanLostAutoLauncher = new AutoLaunch({
-  name: 'LANLost',
+blueLossAutoLauncher = new AutoLaunch({
+  name: 'BlueLoss',
   isHidden: true
 })
 
 enableRunOnStartup(firstRun):void ->
   if firstRun and ISDEV: return
-  lanLostAutoLauncher.enable().catch((err):void ->
+  blueLossAutoLauncher.enable().catch((err):void ->
     logger.error('enableRunOnStartup error: ', err)
   )
 
 disableRunOnStartup():void ->
-  lanLostAutoLauncher.disable().catch((err):void ->
+  blueLossAutoLauncher.disable().catch((err):void ->
     logger.error('disableRunOnStartup error: ', err)
   )
 

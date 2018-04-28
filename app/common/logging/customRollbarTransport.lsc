@@ -17,7 +17,7 @@ rollbarConfig = {
       platform: process.platform,
       processVersions: process.versions,
       arch: process.arch,
-      LANLostVersion: getProperAppVersion()
+      BlueLossVersion: getProperAppVersion()
     },
     // Ignore the server stuff cause that includes info about the host pc name.
     transform(payload){

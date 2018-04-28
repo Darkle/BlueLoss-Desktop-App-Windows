@@ -8,9 +8,9 @@ import { getProperAppVersion } from '../common/utils.lsc'
 
 oneDaysTime = ms('1 day')
 twoWeeksTime = ms('2 weeks')
-userAgentString = `Mozilla/5.0 (KHTML, like Gecko) BlueLoss App https://github.com/Darkle/LANLost`
+userAgentString = `Mozilla/5.0 (KHTML, like Gecko) BlueLoss App https://github.com/Darkle/BlueLoss`
 gotRequestOptions= { headers: { 'user-agent': userAgentString }, json: true }
-updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/LANLost/master/updateInfo.json'
+updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/BlueLoss/master/updateInfo.json'
 
 checkForUpdate():void ->
   if shouldCheckForUpdate(): return

@@ -12,19 +12,14 @@ import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
 import { logger } from '../common/logging/logging.lsc'
 
-settingsDBpath = path.join(electronApp.getPath('userData'), 'lanlost-settings.json')
+let devicesLastSeenHasBeenUpdatedOnStartup = false
+settingsDBpath = path.join(electronApp.getPath('userData'), 'blueloss-settings.json')
 adapter = new FileSync(settingsDBpath)
 db = low(adapter)
 
 db.defaults(defaultSettings).write()
 
 settings = gawk(db.getState())
-/**
- * settingsLoadedOnStartup is for the debug window - on debug window load, we show
- * the settings loaded on startup as well as the current settings now to help debug any
- * settings issues.
- */
-settingsLoadedOnStartup = {...omitGawkFromSettings(settings)}
 
 initSettingsObservers(settings)
 initSettingsIPClisteners()
@@ -38,69 +33,66 @@ updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   logSettingsUpdate(newSettingKey, newSettingValue)
 
 addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
-  { macAddress } = deviceToAdd
-  if deviceIsInDevicesToSearchFor(macAddress): return
+  { deviceId } = deviceToAdd
+  if deviceIsInDevicesToSearchFor(deviceId): return
 
   updateSetting('devicesToSearchFor',
-    {...settings.devicesToSearchFor, ...{ [ macAddress ]: deviceToAdd }}
+    {...settings.devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
   )
 
 removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
-  { macAddress } = deviceToRemove
-  if !deviceIsInDevicesToSearchFor(macAddress): return
+  { deviceId } = deviceToRemove
+  if !deviceIsInDevicesToSearchFor(deviceId): return
 
-  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(macAddress))
+  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
 
-filterDevicesToSearchFor(macAddressToRemove: string):Object ->
+filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
   {
-    ...for key macAddress, val device in settings.devicesToSearchFor:
-      if macAddress != macAddressToRemove: { [ macAddress ]: device }
+    ...for key deviceId, val device in settings.devicesToSearchFor:
+      if deviceId != deviceIdToRemove: { [ deviceId ]: device }
   }
 
-deviceIsInDevicesToSearchFor(macAddress: string):boolean ->
-  settings.devicesToSearchFor[macAddress]
+deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
+  settings.devicesToSearchFor[deviceId]
 
-modifyADeviceInDevicesToSearchFor(macAddress: string, propName: string, propValue: any):Object ->
+modifyADeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
   {
     ...settings.devicesToSearchFor,
     ...{
-      [ macAddress ]: {
-        ...settings.devicesToSearchFor[macAddress],
+      [ deviceId ]: {
+        ...settings.devicesToSearchFor[deviceId],
         ...{ [ propName ]: propValue }
       }
     }
   }
 
 /**
- * When a user starts up LANLost after previously exiting, the
+ * When a user starts up BlueLoss after previously exiting, the
  * lastSeen value will be out of date for the devices in
- * devicesToSearchFor. This would cause LANLost to lock the
+ * devicesToSearchFor. This would cause BlueLoss to lock the
  * system straight away because the lastSeen value + timeToLock
  *  will be less than Date.now(). So to prevent this, we give all
  * devices in devicesToSearchFor a lastSeen of 10 years from now.
  * (when a device is seen again during a scan, lastSeen is updated.)
  */
 updateLastSeenForDevicesLookingForOnStartup():void ->
-  for val { macAddress } in settings.devicesToSearchFor:
+  for val { deviceId } in settings.devicesToSearchFor:
     updateSetting('devicesToSearchFor',
-      modifyADeviceInDevicesToSearchFor(macAddress, 'lastSeen', tenYearsFromNow())
+      modifyADeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
     )
+  now devicesLastSeenHasBeenUpdatedOnStartup = true
 
 logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   /**
    * There's a circular dependancy issue with logging stuff on app startup,
-   * so using nextTick hack.
+   * so using a variable to keep track.
    * (updateLastSeenForDevicesLookingForOnStartup is called on startup,
    * which changes the devicesToSearchFor setting value, which in turn
-   * causes logSettingsUpdate to be called).
+   * causes logSettingsUpdate to be called, which relies on the logger, which isnt ready yet).
    */
-  process.nextTick(() ->
-    logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
-    logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
-  )
-
-logStartupSettings() ->
-  logger.debug('Settings Loaded At LANLost Startup:', settingsLoadedOnStartup)
+  if !devicesLastSeenHasBeenUpdatedOnStartup: return
+  logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
+  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
 
 
 export {
@@ -108,6 +100,5 @@ export {
   getSettings,
   addNewDeviceToSearchFor,
   removeNewDeviceToSearchFor,
-  logStartupSettings,
   modifyADeviceInDevicesToSearchFor,
 }

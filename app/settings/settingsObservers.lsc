@@ -7,8 +7,8 @@ import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
 
 initSettingsObservers(settings):void ->
-  gawk.watch(settings, ['lanLostEnabled'], (enabled: boolean):void ->
-    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {lanLostEnabled: enabled})
+  gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
     updateTrayMenu()
   )
   gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->

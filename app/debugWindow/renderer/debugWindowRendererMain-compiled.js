@@ -171,7 +171,7 @@ var _utils = __webpack_require__(1);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const preElem = document.querySelector('#debugOutput');
-const { lanLostEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
+const { blueLossEnabled } = (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings'));
 let loggingTextSansLineNumbers = '';
 
 _electron.ipcRenderer.on('mainprocess:debug-info-sent', function (event, { msg = '', meta }) {
@@ -187,7 +187,7 @@ function createMetaObjForLogging(meta) {
   const metaObj = createMetaObjForLogging(meta);
   let logString = `${loggingTextSansLineNumbers}${msg + metaObj}\n`;
   if (isDebugWindowOpeningMessage(msg)) {
-    logString = lanLostEnabled ? `${logString}Please Wait...\n` : void 0;
+    logString = blueLossEnabled ? `${logString}Please Wait...\n` : void 0;
   }return logString;
 }function isDebugWindowOpeningMessage(msg) {
   return msg === 'Current LANLost settings:';

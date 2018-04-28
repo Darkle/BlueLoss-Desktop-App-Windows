@@ -678,13 +678,13 @@ function initTrayMenu() {
 }function getNewTrayIconPath(trayIconColor) {
   return _path2.default.join(trayIconsFolder, `LANLost-${(0, _utils.capitalizeFirstLetter)(trayIconColor)}-128x128.png`);
 }function generateEnabledDisabledLabel() {
-  return `${(0, _settings.getSettings)().lanLostEnabled ? 'Disable' : 'Enable'} LANLost`;
+  return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} LANLost`;
 }function changeTrayIcon(newTrayIconColor) {
   tray.setImage(getNewTrayIconPath(newTrayIconColor));
 }function updateTrayMenu() {
   tray.setContextMenu(createContextMenu());
 }function toggleEnabledFromTray() {
-  (0, _settings.updateSetting)('lanLostEnabled', !(0, _settings.getSettings)().lanLostEnabled);
+  (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
 }exports.initTrayMenu = initTrayMenu;
 exports.changeTrayIcon = changeTrayIcon;
 exports.createContextMenu = createContextMenu;
@@ -988,7 +988,7 @@ var _settings = __webpack_require__(0);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function lockTheSystem() {
-  if (!(0, _settings.getSettings)().lanLostEnabled) return;
+  if (!(0, _settings.getSettings)().blueLossEnabled) return;
   // lockSystem throws on error, so use try/catch
   try {
     (0, _lockSystem2.default)();
@@ -1183,7 +1183,7 @@ const pGetMAC = _util2.default.promisify(_nodeArp2.default.getMAC);
 const scanInterval = (0, _ms2.default)('30 seconds');
 
 function scanNetwork() {
-  if (!(0, _settings.getSettings)().lanLostEnabled) {
+  if (!(0, _settings.getSettings)().blueLossEnabled) {
     return scanNetworkIn30Seconds();
   }_logging.logger.debug(`new scan started`);
 
@@ -1365,10 +1365,10 @@ var _runOnStartup = __webpack_require__(14);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function initSettingsObservers(settings) {
-  _gawk2.default.watch(settings, ['lanLostEnabled'], function (enabled) {
+  _gawk2.default.watch(settings, ['blueLossEnabled'], function (enabled) {
     var _settingsWindow$webCo;
 
-    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { lanLostEnabled: enabled });
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { blueLossEnabled: enabled });
     (0, _tray.updateTrayMenu)();
   });
   _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
@@ -1395,7 +1395,7 @@ exports.defaultSettings = undefined;
 var _types = __webpack_require__(6);
 
 const defaultSettings = {
-  lanLostEnabled: true,
+  blueLossEnabled: true,
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},

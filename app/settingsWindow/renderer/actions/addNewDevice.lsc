@@ -8,13 +8,13 @@ import { DeviceType } from '../../../types/types.lsc'
 * https://github.com/hyperapp/hyperapp#actions
 */
 export default addNewDevice(newDevice: DeviceType) -> state ->
-  if state.devicesToSearchFor[newDevice.macAddress]: return {}
+  if state.devicesToSearchFor[newDevice.deviceId]: return {}
   ipcRenderer.send('renderer:device-added-in-ui', newDevice)
   ({
     devicesToSearchFor: {
       ...state.devicesToSearchFor,
       ...{
-        [ newDevice.macAddress ]: newDevice
+        [ newDevice.deviceId ]: newDevice
       }
     }
   })

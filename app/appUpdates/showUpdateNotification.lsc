@@ -14,7 +14,7 @@ updateHTMLfilePath = url.format({
   slashes: true,
   pathname: path.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
 })
-iconFileName = path.join(__dirname, '..', 'appUpdates', `LANLost-Blue-512x512.png`)
+iconFileName = path.join(__dirname, '..', 'appUpdates', `BlueLoss-Blue-512x512.png`)
 
 showUpdateNotification(latestUpdateVersion: string):void ->
   now notificationWindow = new BrowserWindow(
@@ -30,7 +30,7 @@ showUpdateNotification(latestUpdateVersion: string):void ->
       autoHideMenuBar: true,
       show: false,
       icon: iconFileName,
-      title: 'An Update Is Available For LANLost'
+      title: 'An Update Is Available For BlueLoss'
     }
   )
 
@@ -61,7 +61,7 @@ showUpdateNotification(latestUpdateVersion: string):void ->
 
 ipcMain.on('renderer:open-update-web-page', ():void ->
   notificationWindow?.close?()
-  shell.openExternal('https://github.com/Darkle/LANLost/releases')
+  shell.openExternal('https://github.com/Darkle/BlueLoss/releases')
 )
 
 ipcMain.on('renderer:skip-update-version', (event, versionToSkip: string): void ->

@@ -218,7 +218,7 @@ exports.defaultSettings = undefined;
 var _types = __webpack_require__(2);
 
 const defaultSettings = {
-  lanLostEnabled: true,
+  blueLossEnabled: true,
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
@@ -688,8 +688,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'statusTab' ? 'flex' : 'none';
-  const statusAnimationVisibility = state.lanLostEnabled ? 'visible' : 'hidden';
-  const lanLostStatusText = state.lanLostEnabled ? 'Enabled' : 'Disabled';
+  const statusAnimationVisibility = state.blueLossEnabled ? 'visible' : 'hidden';
+  const lanLostStatusText = state.blueLossEnabled ? 'Enabled' : 'Disabled';
   const lookingForHeaderDisplay = Object.keys(state.devicesToSearchFor).length ? 'block' : 'none';
 
   return (0, _hyperapp.h)(
@@ -716,9 +716,9 @@ exports.default = function ({ actions, state }) {
         { id: 'disableButton' },
         (0, _hyperapp.h)('x-switch', {
           id: 'lanLostenableswitch',
-          toggled: state.lanLostEnabled,
+          toggled: state.blueLossEnabled,
           onchange: function (event) {
-            actions.updateSetting({ settingName: 'lanLostEnabled', settingValue: event.currentTarget.toggled });
+            actions.updateSetting({ settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled });
           }
         }),
         (0, _hyperapp.h)(
@@ -1447,7 +1447,7 @@ const logInDev =  false ? undefined : _utils.identity; // eslint-disable-line no
 
 const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
 /**
- * Some settings (such as 'lanLostEnabled') can be changed from the main process, so listen
+ * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
  * for them.
  */
 _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {

@@ -39,6 +39,7 @@
     "ms": "^2.1.1",
     "node-arp": "^1.0.6",
     "ono": "^4.0.5",
+    "ramda": "^0.25.0",
     "rollbar": "^2.3.9",
     "stringify-object": "^3.2.2",
     "winston": "^2.4.1"

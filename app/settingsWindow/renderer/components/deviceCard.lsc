@@ -1,16 +1,15 @@
 import { h } from 'hyperapp'
 
 export default deviceCard({lookingForDevice, device, actions}) ->
-  { vendorName, macAddress, ipAddress } = device
+  { deviceName, deviceId } = device
   <x-card class="deviceCard">
     <x-box>
       <x-box class="cardDeviceIcon">
         <img src={ `assets/icons/devicesIconForCards-${ if lookingForDevice: 'blue' else: 'grey' }.svg` } />
       </x-box>
       <x-box vertical class="deviceDetails">
-        <strong class="vendorName">{ vendorName }</strong>
-        <p class="deviceIPAddress">{ ipAddress }</p>
-        <p class="deviceMacAddress">{ macAddress }</p>
+        <strong class="vendorName">{ deviceName }</strong>
+        <p class="deviceMacAddress">{ deviceId }</p>
       </x-box>
       <x-box class="addRemoveButton">
         {

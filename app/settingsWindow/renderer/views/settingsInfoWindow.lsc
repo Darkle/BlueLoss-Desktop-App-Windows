@@ -3,8 +3,6 @@ import { h } from 'hyperapp'
 import { defaultSettings } from '../../../settings/settingsDefaults.lsc'
 
 minTimeToLock = defaultSettings.timeToLock
-minHostsScanRangeStart = defaultSettings.hostsScanRangeStart
-minhostsScanRangeEnd = defaultSettings.hostsScanRangeEnd
 
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'settingsTab': 'flex' else: 'none'
@@ -30,75 +28,7 @@ export default ({ actions, state }) ->
           <x-label>
             <strong>Time To Lock</strong>
           </x-label>
-          <x-label>Once a device has been lost, LANLost will wait this many minutes before locking the computer.</x-label>
-        </x-box>
-      </x-label>
-    </x-box>
-    <x-box id="hostScanTimeoutSetting">
-      <x-numberinput
-        id="hostScanTimeout"
-        value={ state.hostScanTimeout / 1000 }
-        suffix=" seconds"
-        min="0"
-        onchange={({ currentTarget: { value } }):void ->
-          newhostScanTimeout = if value < 0: 0 else: value * 1000
-          actions.updateSetting({ settingName: 'hostScanTimeout', settingValue: ( newhostScanTimeout )})
-        }
-      >
-        <x-stepper></x-stepper>
-      </x-numberinput>
-      <x-label for="hostScanTimeout" id="hostScanTimeoutLabel">
-        <x-box vertical>
-          <x-label>
-            <strong>Host Scan Timeout</strong>
-          </x-label>
-          <x-label>How many seconds to wait when trying to connect to a device during a scan before timing out.</x-label>
-        </x-box>
-      </x-label>
-    </x-box>
-    <x-box id="hostsScanRangeSetting">
-      <x-box vertical>
-        <x-numberinput
-          id="hostsScanRangeStart"
-          value={ state.hostsScanRangeStart }
-          min="2"
-          prefix="start "
-          onchange={({ currentTarget: { value } }):void ->
-            let newhostsScanRangeStart = value
-            if value < minHostsScanRangeStart: now newhostsScanRangeStart = minHostsScanRangeStart
-            if value >= state.hostsScanRangeEnd: now newhostsScanRangeStart = state.hostsScanRangeEnd - 1
-            actions.updateSetting({ settingName: 'hostsScanRangeStart', settingValue: ( newhostsScanRangeStart )})
-          }
-        >
-          <x-stepper></x-stepper>
-        </x-numberinput>
-        <x-numberinput
-          id="hostsScanRangeEnd"
-          value={ state.hostsScanRangeEnd }
-          min="2"
-          prefix="end "
-          onchange={({ currentTarget: { value } }):void ->
-            let newhostsScanRangeEnd = value
-            if value > minhostsScanRangeEnd: now newhostsScanRangeEnd = minhostsScanRangeEnd
-            if value <= state.hostsScanRangeStart: now newhostsScanRangeEnd = state.hostsScanRangeStart + 1
-            actions.updateSetting({ settingName: 'hostsScanRangeEnd', settingValue: ( newhostsScanRangeEnd )})
-          }
-        >
-          <x-stepper></x-stepper>
-        </x-numberinput>
-      </x-box>
-      <x-label id="hostsScanRangeLabel">
-        <x-box vertical>
-          <x-label>
-            <strong>Hosts Scan Range</strong>
-          </x-label>
-          <x-label>The start and end range LANLost will scan to look for devices on your network.
-            <span class="extraInfo">
-              <abbr title="e.g. if your network address is 192.168.1, and the scan start is 2 and the scan end is 254, then LANLost will scan from IP address 192.168.1.2 up to 192.168.1.254">
-                <img src={ `assets/icons/extraLabelinfo.svg` } />
-              </abbr>
-            </span>
-          </x-label>
+          <x-label>Once a device has been lost, BlueLoss will wait this many minutes before locking the computer.</x-label>
         </x-box>
       </x-label>
     </x-box>
@@ -152,23 +82,6 @@ export default ({ actions, state }) ->
           <x-label>
             <strong>Run On System Startup</strong>
           </x-label>
-        </x-box>
-      </x-label>
-    </x-box>
-    <x-box>
-      <x-checkbox
-        id="ouiUpdateCheckbox"
-        toggled={ state.enableOUIfileUpdate }
-        onchange={(event):void ->
-          actions.updateSetting({ settingName: 'enableOUIfileUpdate', settingValue: event.currentTarget.toggled})
-        }
-      ></x-checkbox>
-      <x-label for="ouiUpdateCheckbox" id="ouiUpdateCheckboxLabel">
-        <x-box vertical>
-          <x-label>
-            <strong>Download OUI File Updates</strong>
-          </x-label>
-          <x-label>LANLost periodically checks for updates to the IEEE MAC vendors list in order to give you the vendor name for devices on your network.</x-label>
         </x-box>
       </x-label>
     </x-box>

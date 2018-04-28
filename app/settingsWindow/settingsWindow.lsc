@@ -2,9 +2,11 @@ import path from 'path'
 import url from 'url'
 import { app as electronApp, BrowserWindow, Menu } from 'electron'
 
+import R from 'ramda'
+
 import { getSettings, updateSetting } from '../settings/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { recursiveOmitFilterAndInheritedPropertiesFromObj, capitalizeFirstLetter } from '../common/utils.lsc'
+import { omitInheritedProperties, capitalizeFirstLetter } from '../common/utils.lsc'
 settingsWindowRendererDirPath = path.join(__dirname, '..', 'settingsWindow', 'renderer')
 iconsDir = path.join(settingsWindowRendererDirPath, 'assets', 'icons')
 settingsHTMLpath = url.format({
@@ -16,7 +18,7 @@ settingsWindowProperties = {
   ...{
     width: 786,
     height: 616,
-    title: 'LANLost',
+    title: 'BlueLoss',
     autoHideMenuBar: true,
     resizable: false,
     fullscreenable: false,
@@ -52,10 +54,7 @@ showSettingsWindow():void ->
   * appMain-compiled.js and the remote.require() looks for the .lsc file - it doesn't know that the
   * settings module has been compiled and now lives inside of the appMain-compiled.js file.
   */
-  global.settingsWindowRendererInitialSettings = recursiveOmitFilterAndInheritedPropertiesFromObj(
-    getSettings(),
-    ['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate', 'firstRun']
-  )
+  global.settingsWindowRendererInitialSettings = createSettingsWindowInitialSettings()
 
   now settingsWindow = new BrowserWindow({
     ...settingsWindowProperties,
@@ -92,7 +91,7 @@ getStoredWindowPosition():Object ->
 getIconPath():string ->
   let trayIconColor = getSettings?().trayIconColor
   if !trayIconColor: now trayIconColor = 'blue'
-  iconFileName = `LANLost-${ capitalizeFirstLetter(trayIconColor) }-512x512.png`
+  iconFileName = `BlueLoss-${ capitalizeFirstLetter(trayIconColor) }-512x512.png`
   path.join(iconsDir, iconFileName)
 
 toggleSettingsWindow():void ->
@@ -101,6 +100,10 @@ toggleSettingsWindow():void ->
   elif settingsWindow.isVisible():
     settingsWindow.close()
 
+createSettingsWindowInitialSettings():Object -> R.compose(
+    R.omit(['__gawk__', 'canSearchForMacVendorInfo', 'dateLastCheckedForOUIupdate', 'firstRun'])
+    omitInheritedProperties
+  )(getSettings())
 
 export {
   showSettingsWindow,
