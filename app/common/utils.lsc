@@ -1,4 +1,4 @@
-import ms from 'ms'
+import tp from 'timeproxy'
 
 appVersion = require('../../package.json').version
 
@@ -27,14 +27,15 @@ omitInheritedProperties(obj: Object):Object ->
  */
 getProperAppVersion():string -> appVersion
 noop() -> return
+pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
+compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
+curry(f) -> (...a) -> (...b) -> f(...a, ...b)
+curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
+range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
 isObject(obj):boolean ->
   obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
 isFunction(value):boolean -> typeof value === 'function'
-pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
-curry(f) -> (...a) -> (...b) -> f(...a, ...b)
-curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
-range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start)
-tenYearsFromNow():number -> Date.now() + ms('10 years')
+tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 capitalizeFirstLetter(string: string):string -> string.charAt(0).toUpperCase() + string.slice(1)
 
 export {
@@ -46,6 +47,7 @@ export {
   curry,
   curryRight,
   range,
+  compose,
   tenYearsFromNow,
   capitalizeFirstLetter,
   getProperAppVersion,

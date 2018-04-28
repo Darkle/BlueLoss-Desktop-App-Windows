@@ -1,0 +1,29 @@
+import tp from 'timeproxy'
+
+import { tenYearsFromNow } from '../common/utils.lsc'
+import { lockTheSystem } from '../common/lockSystem.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import { updateDeviceSearchingFor } from './handleScanResults.lsc'
+
+lockSystemIfDeviceLost():void ->
+  { devicesToSearchFor, timeToLock } = getSettings()
+  /**
+   * If a device is lost we lock the computer, however, after that, if
+   * the computer is unlocked without the device coming back, we don't want
+   * to keep locking the computer because the device is still lost. So we
+   * give the device that has just been lost a lastSeen value of 10 years
+   * from now (not using Infinity cause it doesn't JSON.stringify for storage).
+   */
+  for val { lastSeen, deviceId } in devicesToSearchFor:
+    if deviceHasBeenLost(lastSeen, timeToLock):
+      lockTheSystem()
+      updateDeviceSearchingFor(deviceId, tenYearsFromNow())
+
+
+deviceHasBeenLost(lastTimeSawDevice: number, timeToLock: number):boolean ->
+  Date.now() > (lastTimeSawDevice + tp`${ timeToLock } minutes`)
+
+
+export {
+  lockSystemIfDeviceLost
+}

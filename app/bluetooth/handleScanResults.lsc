@@ -1,27 +1,26 @@
 import isEmpty from 'is-empty'
-import ms from 'ms'
 
 import { logger } from '../common/logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
-import { getSettings, updateSetting, modifyADeviceInDevicesToSearchFor } from '../settings/settings.lsc'
+import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { lockTheSystem } from '../common/lockSystem.lsc'
-import { tenYearsFromNow } from '../common/utils.lsc'
+import { compose } from '../common/utils.lsc'
+
+processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
 
 /**
-* deviceList example:
-*  [
-*    { deviceName: 'MotoG3', deviceId: 'E1:77:42:CF:F2:11' }.,
-*    { deviceName: 'Foo\'s iPad', deviceId: '12:22:F1:AD:46:17' }
-*    ...
-*  ]
-*/
-handleScanResults(event, deviceList, callback):void ->
+ * Note: handleScanResults doesn't get called from
+ * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
+ * if there are no results from the
+ * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)`
+ * call. That's why we do the lockCheck in scanforDevices.
+ */
+handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
   logger.info('Bluetooth scan results', deviceList)
 
   { devicesToSearchFor } = getSettings()
-  timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
+  timeStampedDeviceList = processDeviceList(deviceList)
 
   settingsWindow?.webContents?.send(
     'mainprocess:update-of-bluetooth-devices-can-see',
@@ -31,35 +30,36 @@ handleScanResults(event, deviceList, callback):void ->
   if isEmpty(devicesToSearchFor): return
   /**
    * If any devices we are looking for showed up in the latest scan,
-   * add the current time to the stored device in devicesToSearchFor.
+   * update the device's lastSeen value to now in devicesToSearchFor.
    */
   for elem { deviceId } in deviceList:
-    if !devicesToSearchFor[deviceId]: continue
-    updateSetting('devicesToSearchFor',
-      modifyADeviceInDevicesToSearchFor(deviceId, 'lastSeen', Date.now())
-    )
-
-  /**
-   * If a device is lost we lock the computer, however, after that, if
-   * the computer is unlocked without the device coming back, we don't want
-   * to keep locking the computer because the device is still lost. So we
-   * give the device that has just been lost a lastSeen value of 10 years
-   * from now (not using Infinity cause it doesn't JSON.stringify for storage).
-   */
-  for val { lastSeen, deviceId } in devicesToSearchFor:
-    if !deviceHasBeenLost(lastSeen): continue
-    lockTheSystem()
-    updateSetting('devicesToSearchFor',
-      modifyADeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
-    )
+    if devicesToSearchFor[deviceId]:
+      updateDeviceSearchingFor(deviceId, Date.now())
 
   callback('')  // http://bit.ly/2kZhD74
 
-deviceHasBeenLost(lastTimeSawDevice: number):boolean ->
-  Date.now() > (lastTimeSawDevice + ms(`${ getSettings().timeToLock } mins`))
 
-addTimeStampToSeenDevices(deviceList):Array<DeviceType> ->
+addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
   [ ...for elem device in deviceList: [{...device, lastSeen: Date.now()}] ]
+
+/*****
+* Check for duplicates in deviceList cause of this bug (which I've run into too):
+* https://github.com/electron/electron/issues/10800
+* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
+* that has a device name (sometimes they have an empty string for a device name).
+*/
+dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
+  deviceList.reduce((newDeviceList, newDevice) ->
+    newDeviceId = newDevice.deviceId
+    deviceAlreadyInNewList = newDeviceList.find(device -> device.deviceId === newDeviceId )
+    if !deviceAlreadyInNewList: return [...newDeviceList, newDevice]
+    if !deviceAlreadyInNewList?.deviceName?.length and newDevice.deviceName.length:
+      return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
+    newDeviceList
+  , [])
+
+updateDeviceSearchingFor(deviceId, timeStamp):void ->
+  updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', timeStamp)
 
 export {
   handleScanResults

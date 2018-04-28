@@ -1,4 +1,4 @@
-import ms from 'ms'
+import tp from 'timeproxy'
 import got from 'got'
 
 import { getSettings, updateSetting } from '../settings/settings.lsc'
@@ -6,8 +6,6 @@ import { logger } from '../common/logging/logging.lsc'
 import { showUpdateNotification } from './showUpdateNotification.lsc'
 import { getProperAppVersion } from '../common/utils.lsc'
 
-oneDaysTime = ms('1 day')
-twoWeeksTime = ms('2 weeks')
 userAgentString = `Mozilla/5.0 (KHTML, like Gecko) BlueLoss App https://github.com/Darkle/BlueLoss`
 gotRequestOptions= { headers: { 'user-agent': userAgentString }, json: true }
 updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/BlueLoss/master/updateInfo.json'
@@ -29,13 +27,13 @@ checkForUpdate():void ->
   checkForUpdateTomorrow()
 
 shouldCheckForUpdate():boolean ->
-  Date.now() > (getSettings().dateLastCheckedForAppUpdate + twoWeeksTime)
+  Date.now() > (getSettings().dateLastCheckedForAppUpdate + tp.TWO_WEEKS)
 
 shouldShowUpdateNotification(latestVersion: string):boolean ->
   getProperAppVersion() !== latestVersion and latestVersion !== getSettings().skipUpdateVersion
 
 checkForUpdateTomorrow():void ->
-  setTimeout(checkForUpdate, oneDaysTime)
+  setTimeout(checkForUpdate, tp.ONE_DAY)
 
 
 export {

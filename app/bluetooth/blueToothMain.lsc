@@ -2,12 +2,12 @@ import path from 'path'
 import url from 'url'
 import { BrowserWindow } from 'electron'
 
-import ms from 'ms'
-import Promise from 'bluebird'
+import tp from 'timeproxy'
 
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../common/logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
+import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
 bluetoothHiddenWindowHTMLpath = url.format({
   protocol: 'file',
@@ -24,35 +24,37 @@ bluetoothHiddenWindowProperties = {
 }
 
 let scannerWindow = null  // so it doesn't get garbage collected
-scanInterval = ms('10 seconds')
+scanInterval = tp.TEN_SECONDS
 
 init():void ->
-  createBluetoothScannerWindow()
-  scanforDevices()
+  createBluetoothScannerWindow().then(scanforDevices)
 
-createBluetoothScannerWindow():void ->
-  now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
-  scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
-  if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+createBluetoothScannerWindow():Promise ->
+  new Promise((resolve):void ->
+    now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
+    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
+    if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  scannerWindow.webContents.once('did-finish-load', scanforDevices)
-  scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
-  scannerWindow.webContents.once('crashed', (event):void ->
-    logger.error('scannerWindow.webContents crashed', event)
-  )
-  scannerWindow.once('unresponsive', (event):void ->
-    logger.error('scannerWindow unresponsive', event)
+    scannerWindow.webContents.once('dom-ready', resolve)
+    scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
+    scannerWindow.webContents.once('crashed', (event):void ->
+      logger.error('scannerWindow.webContents crashed', event)
+    )
+    scannerWindow.once('unresponsive', (event):void ->
+      logger.error('scannerWindow unresponsive', event)
+    )
   )
 
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scanIn10Seconds()
 
-  Promise.resolve(
-    scannerWindow.webContents
-      .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)
-    )
+  scannerWindow
+    .webContents
+    .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)
     .catch(logger.error)
-    .finally(scanIn10Seconds)
+    .then(lockSystemIfDeviceLost)
+    .then(scanIn10Seconds)
+
 
 scanIn10Seconds():void ->
   setTimeout(scanforDevices, scanInterval)

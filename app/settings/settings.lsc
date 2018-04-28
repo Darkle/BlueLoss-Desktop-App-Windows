@@ -55,16 +55,18 @@ filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
 deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
   settings.devicesToSearchFor[deviceId]
 
-modifyADeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
-  {
-    ...settings.devicesToSearchFor,
-    ...{
-      [ deviceId ]: {
-        ...settings.devicesToSearchFor[deviceId],
-        ...{ [ propName ]: propValue }
+updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
+  updateSetting('devicesToSearchFor',
+    {
+      ...settings.devicesToSearchFor,
+      ...{
+        [ deviceId ]: {
+          ...settings.devicesToSearchFor[deviceId],
+          ...{ [ propName ]: propValue }
+        }
       }
     }
-  }
+  )
 
 /**
  * When a user starts up BlueLoss after previously exiting, the
@@ -77,9 +79,7 @@ modifyADeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue:
  */
 updateLastSeenForDevicesLookingForOnStartup():void ->
   for val { deviceId } in settings.devicesToSearchFor:
-    updateSetting('devicesToSearchFor',
-      modifyADeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
-    )
+    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
   now devicesLastSeenHasBeenUpdatedOnStartup = true
 
 logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
@@ -100,5 +100,5 @@ export {
   getSettings,
   addNewDeviceToSearchFor,
   removeNewDeviceToSearchFor,
-  modifyADeviceInDevicesToSearchFor,
+  updateDeviceInDevicesToSearchFor,
 }

@@ -86,9 +86,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.checkForUpdate = undefined;
 
-var _ms = __webpack_require__(/*! ms */ "ms");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
 
-var _ms2 = _interopRequireDefault(_ms);
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
 var _got = __webpack_require__(/*! got */ "got");
 
@@ -104,8 +104,6 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const oneDaysTime = (0, _ms2.default)('1 day');
-const twoWeeksTime = (0, _ms2.default)('2 weeks');
 const userAgentString = `Mozilla/5.0 (KHTML, like Gecko) BlueLoss App https://github.com/Darkle/BlueLoss`;
 const gotRequestOptions = { headers: { 'user-agent': userAgentString }, json: true };
 const updateInfoUrl = 'https://raw.githubusercontent.com/Darkle/BlueLoss/master/updateInfo.json';
@@ -125,11 +123,11 @@ function checkForUpdate() {
 
   checkForUpdateTomorrow();
 }function shouldCheckForUpdate() {
-  return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + twoWeeksTime;
+  return Date.now() > (0, _settings.getSettings)().dateLastCheckedForAppUpdate + _timeproxy2.default.TWO_WEEKS;
 }function shouldShowUpdateNotification(latestVersion) {
   return (0, _utils.getProperAppVersion)() !== latestVersion && latestVersion !== (0, _settings.getSettings)().skipUpdateVersion;
 }function checkForUpdateTomorrow() {
-  setTimeout(checkForUpdate, oneDaysTime);
+  setTimeout(checkForUpdate, _timeproxy2.default.ONE_DAY);
 }exports.checkForUpdate = checkForUpdate;
 
 /***/ }),
@@ -274,19 +272,17 @@ var _url2 = _interopRequireDefault(_url);
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _ms = __webpack_require__(/*! ms */ "ms");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
 
-var _ms2 = _interopRequireDefault(_ms);
-
-var _bluebird = __webpack_require__(/*! bluebird */ "bluebird");
-
-var _bluebird2 = _interopRequireDefault(_bluebird);
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/bluetooth/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
+
+var _lockCheck = __webpack_require__(/*! ./lockCheck.lsc */ "./app/bluetooth/lockCheck.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -305,28 +301,29 @@ const bluetoothHiddenWindowProperties = {
 };
 
 let scannerWindow = null; // so it doesn't get garbage collected
-const scanInterval = (0, _ms2.default)('10 seconds');
+const scanInterval = _timeproxy2.default.TEN_SECONDS;
 
 function init() {
-  createBluetoothScannerWindow();
-  scanforDevices();
+  createBluetoothScannerWindow().then(scanforDevices);
 }function createBluetoothScannerWindow() {
-  scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
-  scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
-  if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
+  return new Promise(function (resolve) {
+    scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
+    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
+    if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
 
-  scannerWindow.webContents.once('did-finish-load', scanforDevices);
-  scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
-  scannerWindow.webContents.once('crashed', function (event) {
-    _logging.logger.error('scannerWindow.webContents crashed', event);
-  });
-  scannerWindow.once('unresponsive', function (event) {
-    _logging.logger.error('scannerWindow unresponsive', event);
+    scannerWindow.webContents.once('dom-ready', resolve);
+    scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
+    scannerWindow.webContents.once('crashed', function (event) {
+      _logging.logger.error('scannerWindow.webContents crashed', event);
+    });
+    scannerWindow.once('unresponsive', function (event) {
+      _logging.logger.error('scannerWindow unresponsive', event);
+    });
   });
 }function scanforDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn10Seconds();
 
-  _bluebird2.default.resolve(scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)).catch(_logging.logger.error).finally(scanIn10Seconds);
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true).catch(_logging.logger.error).then(_lockCheck.lockSystemIfDeviceLost).then(scanIn10Seconds);
 }function scanIn10Seconds() {
   setTimeout(scanforDevices, scanInterval);
 }exports.init = init;
@@ -354,10 +351,6 @@ var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
 
 var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
-var _ms = __webpack_require__(/*! ms */ "ms");
-
-var _ms2 = _interopRequireDefault(_ms);
-
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
@@ -366,20 +359,19 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/setti
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/settingsWindow/settingsWindow.lsc");
 
-var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
-
 var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const processDeviceList = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeDeviceList);
+
 /**
-* deviceList example:
-*  [
-*    { deviceName: 'MotoG3', deviceId: 'E1:77:42:CF:F2:11' }.,
-*    { deviceName: 'Foo\'s iPad', deviceId: '12:22:F1:AD:46:17' }
-*    ...
-*  ]
-*/
+ * Note: handleScanResults doesn't get called from
+ * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
+ * if there are no results from the
+ * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)`
+ * call. That's why we do the lockCheck in scanforDevices.
+ */
 function handleScanResults(event, deviceList, callback) {
   var _settingsWindow$webCo;
 
@@ -387,45 +379,109 @@ function handleScanResults(event, deviceList, callback) {
   _logging.logger.info('Bluetooth scan results', deviceList);
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
-  const timeStampedDeviceList = addTimeStampToSeenDevices(deviceList);
+  const timeStampedDeviceList = processDeviceList(deviceList);
 
   _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-bluetooth-devices-can-see', { devicesCanSee: timeStampedDeviceList });
 
   if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
   /**
    * If any devices we are looking for showed up in the latest scan,
-   * add the current time to the stored device in devicesToSearchFor.
+   * update the device's lastSeen value to now in devicesToSearchFor.
    */
   for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
     const { deviceId } = deviceList[_i];
-    if (!devicesToSearchFor[deviceId]) continue;
-    (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(deviceId, 'lastSeen', Date.now()));
-  } /**
-     * If a device is lost we lock the computer, however, after that, if
-     * the computer is unlocked without the device coming back, we don't want
-     * to keep locking the computer because the device is still lost. So we
-     * give the device that has just been lost a lastSeen value of 10 years
-     * from now (not using Infinity cause it doesn't JSON.stringify for storage).
-     */
-  for (let _i2 = 0, _keys = Object.keys(devicesToSearchFor), _len2 = _keys.length; _i2 < _len2; _i2++) {
-    const _k = _keys[_i2];const { lastSeen, deviceId } = devicesToSearchFor[_k];
-    if (!deviceHasBeenLost(lastSeen)) continue;
-    (0, _lockSystem.lockTheSystem)();
-    (0, _settings.updateSetting)('devicesToSearchFor', (0, _settings.modifyADeviceInDevicesToSearchFor)(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)()));
+    if (devicesToSearchFor[deviceId]) {
+      updateDeviceSearchingFor(deviceId, Date.now());
+    }
   }callback('');
 } // http://bit.ly/2kZhD74
 
-function deviceHasBeenLost(lastTimeSawDevice) {
-  return Date.now() > lastTimeSawDevice + (0, _ms2.default)(`${(0, _settings.getSettings)().timeToLock} mins`);
-}function addTimeStampToSeenDevices(deviceList) {
+
+function addTimeStampToSeenDevices(deviceList) {
   return (() => {
-    const _arr = [];for (let _i3 = 0, _len3 = deviceList.length; _i3 < _len3; _i3++) {
-      const device = deviceList[_i3];_arr.push(_extends({}, device, { lastSeen: Date.now() }));
+    const _arr = [];for (let _i2 = 0, _len2 = deviceList.length; _i2 < _len2; _i2++) {
+      const device = deviceList[_i2];_arr.push(_extends({}, device, { lastSeen: Date.now() }));
     }return _arr;
   })();
 }
 
-exports.handleScanResults = handleScanResults;
+/*****
+* Check for duplicates in deviceList cause of this bug (which I've run into too):
+* https://github.com/electron/electron/issues/10800
+* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
+* that has a device name (sometimes they have an empty string for a device name).
+*/
+function dedupeDeviceList(deviceList) {
+  return deviceList.reduce(function (newDeviceList, newDevice) {
+    var _deviceAlreadyInNewLi;
+
+    const newDeviceId = newDevice.deviceId;
+    const deviceAlreadyInNewList = newDeviceList.find(function (device) {
+      return device.deviceId === newDeviceId;
+    });
+    if (!deviceAlreadyInNewList) return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
+    if (!(deviceAlreadyInNewList == null ? void 0 : (_deviceAlreadyInNewLi = deviceAlreadyInNewList.deviceName) == null ? void 0 : _deviceAlreadyInNewLi.length) && newDevice.deviceName.length) {
+      var _ref;
+
+      return [...(_ref = newDeviceList.filter(function (device) {
+        return device.deviceId !== newDeviceId;
+      }), _ref === void 0 ? [] : _ref), newDevice];
+    }return newDeviceList;
+  }, []);
+}function updateDeviceSearchingFor(deviceId, timeStamp) {
+  (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', timeStamp);
+}exports.handleScanResults = handleScanResults;
+
+/***/ }),
+
+/***/ "./app/bluetooth/lockCheck.lsc":
+/*!*************************************!*\
+  !*** ./app/bluetooth/lockCheck.lsc ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.lockSystemIfDeviceLost = undefined;
+
+var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
+
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
+
+var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
+
+var _lockSystem = __webpack_require__(/*! ../common/lockSystem.lsc */ "./app/common/lockSystem.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
+
+var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/bluetooth/handleScanResults.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function lockSystemIfDeviceLost() {
+  const { devicesToSearchFor, timeToLock } = (0, _settings.getSettings)();
+  /**
+   * If a device is lost we lock the computer, however, after that, if
+   * the computer is unlocked without the device coming back, we don't want
+   * to keep locking the computer because the device is still lost. So we
+   * give the device that has just been lost a lastSeen value of 10 years
+   * from now (not using Infinity cause it doesn't JSON.stringify for storage).
+   */
+  for (let _i = 0, _keys = Object.keys(devicesToSearchFor), _len = _keys.length; _i < _len; _i++) {
+    const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
+    if (deviceHasBeenLost(lastSeen, timeToLock)) {
+      (0, _lockSystem.lockTheSystem)();
+      (0, _handleScanResults.updateDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
+    }
+  }
+}function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
+  return Date.now() > lastTimeSawDevice + _timeproxy2.default`${timeToLock} minutes`;
+}exports.lockSystemIfDeviceLost = lockSystemIfDeviceLost;
 
 /***/ }),
 
@@ -765,13 +821,13 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.recursivelyOmitObjProperties = exports.getProperAppVersion = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
+exports.recursivelyOmitObjProperties = exports.getProperAppVersion = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _ms = __webpack_require__(/*! ms */ "ms");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
 
-var _ms2 = _interopRequireDefault(_ms);
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -803,15 +859,15 @@ function getProperAppVersion() {
   return appVersion;
 }function noop() {
   return;
-}function isObject(obj) {
-  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
-}function isFunction(value) {
-  return typeof value === 'function';
 }function pipe(...fns) {
   return function (param) {
     return fns.reduce(function (result, fn) {
       return fn(result);
     }, param);
+  };
+}function compose(...fns) {
+  return function (value) {
+    return fns.reduceRight((accumulator, current) => current(accumulator), value);
   };
 }function curry(f) {
   return function (...a) {
@@ -829,8 +885,13 @@ function getProperAppVersion() {
   return Array.from({ length: end - start + 1 }, function (v, k) {
     return k + start;
   });
+} //includes end number
+function isObject(obj) {
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
+}function isFunction(value) {
+  return typeof value === 'function';
 }function tenYearsFromNow() {
-  return Date.now() + (0, _ms2.default)('10 years');
+  return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
 }function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }exports.omitGawkFromSettings = omitGawkFromSettings;
@@ -841,6 +902,7 @@ exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
 exports.range = range;
+exports.compose = compose;
 exports.tenYearsFromNow = tenYearsFromNow;
 exports.capitalizeFirstLetter = capitalizeFirstLetter;
 exports.getProperAppVersion = getProperAppVersion;
@@ -1024,7 +1086,7 @@ process.on('uncaughtException', function (err) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.modifyADeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = undefined;
+exports.updateDeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -1100,10 +1162,10 @@ function getSettings() {
 
 function deviceIsInDevicesToSearchFor(deviceId) {
   return settings.devicesToSearchFor[deviceId];
-}function modifyADeviceInDevicesToSearchFor(deviceId, propName, propValue) {
-  return _extends({}, settings.devicesToSearchFor, {
+}function updateDeviceInDevicesToSearchFor(deviceId, propName, propValue) {
+  return updateSetting('devicesToSearchFor', _extends({}, settings.devicesToSearchFor, {
     [deviceId]: _extends({}, settings.devicesToSearchFor[deviceId], { [propName]: propValue })
-  });
+  }));
 } /**
    * When a user starts up BlueLoss after previously exiting, the
    * lastSeen value will be out of date for the devices in
@@ -1116,7 +1178,7 @@ function deviceIsInDevicesToSearchFor(deviceId) {
 function updateLastSeenForDevicesLookingForOnStartup() {
   for (let _obj3 = settings.devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
     const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
-    updateSetting('devicesToSearchFor', modifyADeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)()));
+    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
   }devicesLastSeenHasBeenUpdatedOnStartup = true;
 }function logSettingsUpdate(newSettingKey, newSettingValue) {
   /**
@@ -1133,7 +1195,7 @@ function updateLastSeenForDevicesLookingForOnStartup() {
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
-exports.modifyADeviceInDevicesToSearchFor = modifyADeviceInDevicesToSearchFor;
+exports.updateDeviceInDevicesToSearchFor = updateDeviceInDevicesToSearchFor;
 
 /***/ }),
 
@@ -2992,6 +3054,194 @@ module.exports = omit;
 
 /***/ }),
 
+/***/ "./node_modules/timeproxy/lib/constants.js":
+/*!*************************************************!*\
+  !*** ./node_modules/timeproxy/lib/constants.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var multipliers = exports.multipliers = {
+    QUARTER: 1 / 4,
+    QUARTERS: 1 / 4,
+    THIRD: 1 / 3,
+    THIRDS: 1 / 3,
+    HALF: 1 / 2,
+    HALVES: 1 / 2,
+    A: 1,
+    AN: 1,
+    HUNDRED: 100,
+    THOUSAND: 1000,
+    MILLION: 1000000,
+    BILLION: 1000000000
+};
+
+var numbers = exports.numbers = {
+    ZERO: 0,
+    ONE: 1,
+    TWO: 2,
+    THREE: 3,
+    FOUR: 4,
+    FIVE: 5,
+    SIX: 6,
+    SEVEN: 7,
+    EIGHT: 8,
+    NINE: 9,
+    TEN: 10,
+    ELEVEN: 11,
+    TWELVE: 12,
+    THIRTEEN: 13,
+    FOURTEEN: 14,
+    FIFTEEN: 15,
+    SIXTEEN: 16,
+    SEVENTEEN: 17,
+    EIGHTEEN: 18,
+    NINETEEN: 19,
+    TWENTY: 20,
+    THIRTY: 30,
+    FOURTY: 40,
+    FIFTY: 50,
+    SIXTY: 60,
+    SEVENTY: 70,
+    EIGHTY: 80,
+    NINETY: 90
+};
+
+var units = exports.units = {
+    MILLISECOND: 1,
+    MILLISECONDS: 1,
+    SECOND: 1000,
+    SECONDS: 1000,
+    MINUTE: 1000 * 60,
+    MINUTES: 1000 * 60,
+    HOUR: 1000 * 60 * 60,
+    HOURS: 1000 * 60 * 60,
+    DAY: 1000 * 60 * 60 * 24,
+    DAYS: 1000 * 60 * 60 * 24,
+    WEEK: 1000 * 60 * 60 * 24 * 7,
+    WEEKS: 1000 * 60 * 60 * 24 * 7
+};
+
+/***/ }),
+
+/***/ "./node_modules/timeproxy/lib/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/timeproxy/lib/index.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _constants = __webpack_require__(/*! ./constants */ "./node_modules/timeproxy/lib/constants.js");
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+exports.default = new Proxy(function () {}, {
+    apply: function apply(a, b, args) {
+        if (!args[0] || !args[0].raw) {
+            return find.apply(undefined, _toConsumableArray(args));
+        }
+        return find(String.raw.apply(String, _toConsumableArray(args)));
+    },
+    get: function get(target, name) {
+        return find(name);
+    }
+});
+
+
+var isNumeric = function isNumeric(token) {
+    return !isNaN(token);
+};
+var isNumber = function isNumber(token) {
+    return _constants.numbers[token] !== undefined;
+};
+var isMultiplier = function isMultiplier(token) {
+    return _constants.multipliers[token] !== undefined;
+};
+var isUnit = function isUnit(token) {
+    return _constants.units[token] !== undefined;
+};
+
+function parse(token) {
+    if (isNumeric(token)) {
+        return { type: 'number', value: Number(token) };
+    }
+    if (isNumber(token)) {
+        return { type: 'number', value: _constants.numbers[token] };
+    }
+    if (isMultiplier(token)) {
+        return { type: 'multiplier', value: _constants.multipliers[token] };
+    }
+    if (isUnit(token)) {
+        return { type: 'unit', value: _constants.units[token] };
+    }
+    throw new Error('Could not parse expression ' + token + '.');
+}
+
+function find(name) {
+    if (!name) {
+        return 0;
+    }
+
+    var isFuture = name.startsWith('IN');
+    var isPast = name.endsWith('AGO');
+
+    var terms = name.split(/[_\s\-]+/).map(function (term) {
+        return term.toUpperCase();
+    }).filter(function (term) {
+        return !['IN', 'AGO', 'AND', 'OF'].includes(term);
+    }).map(parse);
+
+    var sum = 0;
+    var partSum = 0;
+
+    for (var i = 0; i < terms.length; i++) {
+        var term = terms[i];
+
+        switch (term.type) {
+            case 'number':
+                {
+                    partSum += term.value;
+                    break;
+                }
+            case 'multiplier':
+                {
+                    partSum = (partSum || 1) * term.value;
+                    break;
+                }
+            case 'unit':
+                {
+                    sum = sum + partSum * term.value;
+                    partSum = 0;
+                    break;
+                }
+        }
+    }
+
+    sum += partSum;
+
+    if (isFuture) {
+        return Date.now() + sum;
+    } else if (isPast) {
+        return Date.now() - sum;
+    }
+    return sum;
+}
+
+/***/ }),
+
 /***/ "./package.json":
 /*!**********************!*\
   !*** ./package.json ***!
@@ -2999,7 +3249,7 @@ module.exports = omit;
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","bluebird":"^3.5.1","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ms":"^2.1.1","ono":"^4.0.5","rollbar":"^2.3.9","stringify-object":"^3.2.2","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.0","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.0-beta.8","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.71.0","stylus":"^0.54.5","webpack":"^4.6.0","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","stringify-object":"^3.2.2","timeproxy":"^1.2.1","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.0","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.0-beta.8","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.71.0","stylus":"^0.54.5","webpack":"^4.6.0","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -3011,17 +3261,6 @@ module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","
 /***/ (function(module, exports) {
 
 module.exports = require("auto-launch");
-
-/***/ }),
-
-/***/ "bluebird":
-/*!***************************!*\
-  !*** external "bluebird" ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("bluebird");
 
 /***/ }),
 
@@ -3132,17 +3371,6 @@ module.exports = require("lowdb");
 /***/ (function(module, exports) {
 
 module.exports = require("lowdb/adapters/FileSync");
-
-/***/ }),
-
-/***/ "ms":
-/*!*********************!*\
-  !*** external "ms" ***!
-  \*********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("ms");
 
 /***/ }),
 

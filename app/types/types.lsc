@@ -1,8 +1,6 @@
 
-/**
- * Settings Types
- */
-type DeviceType = { vendorName: ?string, ipAddress: string, macAddress: string, lastSeen: number }
+
+type DeviceType = { deviceName: string, deviceId: string, lastSeen: ?number }
 type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
 type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
 
