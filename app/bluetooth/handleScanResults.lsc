@@ -7,7 +7,6 @@ import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { compose } from '../common/utils.lsc'
 
 processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
-
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
@@ -51,10 +50,14 @@ addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
 dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
   deviceList.reduce((newDeviceList, newDevice) ->
     newDeviceId = newDevice.deviceId
+
     deviceAlreadyInNewList = newDeviceList.find(device -> device.deviceId === newDeviceId )
+
     if !deviceAlreadyInNewList: return [...newDeviceList, newDevice]
+
     if !deviceAlreadyInNewList?.deviceName?.length and newDevice.deviceName.length:
       return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
+
     newDeviceList
   , [])
 

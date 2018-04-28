@@ -373,7 +373,6 @@ var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const processDeviceList = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeDeviceList);
-
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
