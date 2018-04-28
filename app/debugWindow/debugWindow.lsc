@@ -3,7 +3,7 @@ import url from 'url'
 import { BrowserWindow, Menu, ipcMain } from 'electron'
 
 import { logger } from '../common/logging/logging.lsc'
-import { logStartupSettings, getSettings } from '../settings/settings.lsc'
+import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { omitGawkFromSettings } from '../common/utils.lsc'
 
@@ -49,7 +49,6 @@ showDebugWindow():void ->
     now debugWindow = null
   )
   debugWindow.webContents.once('dom-ready', ():void ->
-    logStartupSettings()
     logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
   )
   debugWindow.webContents.once('crashed', (event):void ->

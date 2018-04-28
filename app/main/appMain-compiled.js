@@ -301,7 +301,6 @@ const bluetoothHiddenWindowProperties = {
 };
 
 let scannerWindow = null; // so it doesn't get garbage collected
-const scanInterval = _timeproxy2.default.TEN_SECONDS;
 
 function init() {
   createBluetoothScannerWindow().then(scanforDevices);
@@ -321,11 +320,16 @@ function init() {
     });
   });
 }function scanforDevices() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn10Seconds();
+  if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn20Seconds();
 
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true).catch(_logging.logger.error).then(_lockCheck.lockSystemIfDeviceLost).then(scanIn10Seconds);
-}function scanIn10Seconds() {
-  setTimeout(scanforDevices, scanInterval);
+  _logging.logger.debug('New Scan Run');
+
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true).catch(_logging.logger.error);
+
+  (0, _lockCheck.lockSystemIfDeviceLost)();
+  scanIn20Seconds();
+}function scanIn20Seconds() {
+  setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
 }exports.init = init;
 
 /***/ }),
@@ -376,7 +380,7 @@ function handleScanResults(event, deviceList, callback) {
   var _settingsWindow$webCo;
 
   event.preventDefault();
-  _logging.logger.info('Bluetooth scan results', deviceList);
+  _logging.logger.debug('Bluetooth scan results', deviceList);
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = processDeviceList(deviceList);
@@ -989,7 +993,6 @@ function showDebugWindow() {
     exports.debugWindow = debugWindow = null;
   });
   debugWindow.webContents.once('dom-ready', function () {
-    (0, _settings.logStartupSettings)();
     _logging.logger.debug('Current BlueLoss settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
   });
   debugWindow.webContents.once('crashed', function (event) {

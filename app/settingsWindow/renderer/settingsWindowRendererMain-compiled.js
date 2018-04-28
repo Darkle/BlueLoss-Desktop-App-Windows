@@ -1326,7 +1326,7 @@ exports.default = function ({ actions, state }) {
       (0, _hyperapp.h)(
         'div',
         { id: 'deviceAddHeader' },
-        'Devices To Add:'
+        'Devices Available:'
       ),
       state.devicesCanSee.filter(function ({ deviceId }) {
         return !state.devicesToSearchFor[deviceId];

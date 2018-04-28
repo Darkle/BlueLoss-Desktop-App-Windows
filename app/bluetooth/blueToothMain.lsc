@@ -24,7 +24,6 @@ bluetoothHiddenWindowProperties = {
 }
 
 let scannerWindow = null  // so it doesn't get garbage collected
-scanInterval = tp.TEN_SECONDS
 
 init():void ->
   createBluetoothScannerWindow().then(scanforDevices)
@@ -46,18 +45,21 @@ createBluetoothScannerWindow():Promise ->
   )
 
 scanforDevices():void ->
-  if !getSettings().blueLossEnabled: return scanIn10Seconds()
+  if !getSettings().blueLossEnabled: return scanIn20Seconds()
+
+  logger.debug('New Scan Run')
 
   scannerWindow
     .webContents
-    .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)
+    .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)
     .catch(logger.error)
-    .then(lockSystemIfDeviceLost)
-    .then(scanIn10Seconds)
+
+    lockSystemIfDeviceLost()
+    scanIn20Seconds()
 
 
-scanIn10Seconds():void ->
-  setTimeout(scanforDevices, scanInterval)
+scanIn20Seconds():void ->
+  setTimeout(scanforDevices, tp.TWENTY_SECONDS)
 
 
 export {
