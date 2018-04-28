@@ -324,12 +324,23 @@ function init() {
 
   _logging.logger.debug('New Scan Run');
 
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true).catch(_logging.logger.error);
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true).catch(handleRequestDeviceError);
 
   (0, _lockCheck.lockSystemIfDeviceLost)();
   scanIn20Seconds();
 }function scanIn20Seconds() {
   setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
+} /**
+   * This to give info to the user if the scan hasn't
+   * found any Bluetooth Devices in the debug window.
+   * (we log when devices found in the handleScanResults)
+   */
+function handleRequestDeviceError(err) {
+  if ((err == null ? void 0 : err.message) === 'User cancelled the requestDevice() chooser.' && (err == null ? void 0 : err.name) === 'NotFoundError') {
+    _logging.logger.debug('No Bluetooth Devices Found In Scan');
+  } else {
+    _logging.logger.error(err);
+  }
 }exports.init = init;
 
 /***/ }),
@@ -380,7 +391,7 @@ function handleScanResults(event, deviceList, callback) {
   var _settingsWindow$webCo;
 
   event.preventDefault();
-  _logging.logger.debug('Bluetooth scan results', deviceList);
+  _logging.logger.debug('Bluetooth scan results', { deviceList: deviceList });
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = processDeviceList(deviceList);
@@ -1194,7 +1205,6 @@ function updateLastSeenForDevicesLookingForOnStartup() {
    */
   if (!devicesLastSeenHasBeenUpdatedOnStartup) return;
   _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
-  _logging.logger.debug(`Settings Are Now: `, (0, _utils.omitGawkFromSettings)(getSettings()));
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;

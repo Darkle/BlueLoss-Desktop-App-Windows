@@ -52,14 +52,25 @@ scanforDevices():void ->
   scannerWindow
     .webContents
     .executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)
-    .catch(logger.error)
+    .catch(handleRequestDeviceError)
 
     lockSystemIfDeviceLost()
     scanIn20Seconds()
 
-
 scanIn20Seconds():void ->
   setTimeout(scanforDevices, tp.TWENTY_SECONDS)
+
+/**
+ * This to give info to the user if the scan hasn't
+ * found any Bluetooth Devices in the debug window.
+ * (we log when devices found in the handleScanResults)
+ */
+handleRequestDeviceError(err):void ->
+  if err?.message === 'User cancelled the requestDevice() chooser.'
+    and err?.name === 'NotFoundError':
+      logger.debug('No Bluetooth Devices Found In Scan')
+  else:
+    logger.error(err)
 
 
 export {

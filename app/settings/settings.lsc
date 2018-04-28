@@ -5,7 +5,7 @@ import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 
-import { omitGawkFromSettings, tenYearsFromNow } from '../common/utils.lsc'
+import { tenYearsFromNow } from '../common/utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
@@ -92,7 +92,6 @@ logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
    */
   if !devicesLastSeenHasBeenUpdatedOnStartup: return
   logger.debug(`Updated Setting: updated '${ newSettingKey }' with: ${ newSettingValue }`)
-  logger.debug(`Settings Are Now: `, omitGawkFromSettings(getSettings()))
 
 
 export {

@@ -17,7 +17,7 @@ processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
-  logger.debug('Bluetooth scan results', deviceList)
+  logger.debug('Bluetooth scan results', { deviceList: deviceList })
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = processDeviceList(deviceList)
