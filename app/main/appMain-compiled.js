@@ -343,7 +343,7 @@ function init() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.handleScanResults = undefined;
+exports.updateDeviceSearchingFor = exports.handleScanResults = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -431,6 +431,7 @@ function dedupeDeviceList(deviceList) {
 }function updateDeviceSearchingFor(deviceId, timeStamp) {
   (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', timeStamp);
 }exports.handleScanResults = handleScanResults;
+exports.updateDeviceSearchingFor = updateDeviceSearchingFor;
 
 /***/ }),
 

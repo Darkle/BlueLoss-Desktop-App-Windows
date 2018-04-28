@@ -62,5 +62,6 @@ updateDeviceSearchingFor(deviceId, timeStamp):void ->
   updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', timeStamp)
 
 export {
-  handleScanResults
+  handleScanResults,
+  updateDeviceSearchingFor,
 }
