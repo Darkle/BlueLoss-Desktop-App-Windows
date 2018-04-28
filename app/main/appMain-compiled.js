@@ -291,7 +291,6 @@ const bluetoothHiddenWindowHTMLpath = _url2.default.format({
   slashes: true,
   pathname: _path2.default.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
 });
-
 const bluetoothHiddenWindowProperties = {
   show: true,
   webPreferences: {
@@ -299,7 +298,7 @@ const bluetoothHiddenWindowProperties = {
     devTools: true
   }
 };
-
+const invokeUserGesture = true;
 let scannerWindow = null; // so it doesn't get garbage collected
 
 function init() {
@@ -324,7 +323,7 @@ function init() {
 
   _logging.logger.debug('New Scan Run');
 
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true).catch(handleRequestDeviceError);
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError);
 
   (0, _lockCheck.lockSystemIfDeviceLost)();
   scanIn20Seconds();
@@ -333,7 +332,7 @@ function init() {
 } /**
    * This to give info to the user if the scan hasn't
    * found any Bluetooth Devices in the debug window.
-   * (we log when devices found in the handleScanResults)
+   * (we log when devices are found in the handleScanResults)
    */
 function handleRequestDeviceError(err) {
   if ((err == null ? void 0 : err.message) === 'User cancelled the requestDevice() chooser.' && (err == null ? void 0 : err.name) === 'NotFoundError') {
