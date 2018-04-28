@@ -12,12 +12,12 @@ processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
  * if there are no results from the
- * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)`
+ * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
  * call. That's why we do the lockCheck in scanforDevices.
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
-  logger.debug('Bluetooth scan results', { deviceList: deviceList })
+  logger.debug('Bluetooth scan results', { deviceList })
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = processDeviceList(deviceList)

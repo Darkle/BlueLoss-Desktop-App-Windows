@@ -46,7 +46,7 @@ createBluetoothScannerWindow():Promise ->
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scanIn20Seconds()
 
-  logger.debug('New Scan Run')
+  logger.debug('====================New Scan Started====================')
 
   scannerWindow
     .webContents
@@ -63,16 +63,11 @@ scanIn20Seconds():void ->
   setTimeout(scanforDevices, tp.TWENTY_SECONDS)
 
 /**
- * This is to give info to the user in the debug window if the scan hasn't
- * found any Bluetooth Devices.
- * (we log when devices are found in the handleScanResults)
+ * NotFoundError is the norm.
  */
 handleRequestDeviceError(err):void ->
-  if err?.message === 'User cancelled the requestDevice() chooser.'
-    and err?.name === 'NotFoundError':
-      logger.debug('No Bluetooth Devices Found In Scan')
-  else:
-    logger.error(err)
+  if err?.name === 'NotFoundError': return
+  logger.error(err)
 
 
 export {

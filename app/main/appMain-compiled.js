@@ -321,7 +321,7 @@ function init() {
 }function scanforDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn20Seconds();
 
-  _logging.logger.debug('New Scan Run');
+  _logging.logger.debug('====================New Scan Started====================');
 
   scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError);
 
@@ -330,16 +330,11 @@ function init() {
 }function scanIn20Seconds() {
   setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
 } /**
-   * This is to give info to the user in the debug window if the scan hasn't
-   * found any Bluetooth Devices.
-   * (we log when devices are found in the handleScanResults)
+   * NotFoundError is the norm.
    */
 function handleRequestDeviceError(err) {
-  if ((err == null ? void 0 : err.message) === 'User cancelled the requestDevice() chooser.' && (err == null ? void 0 : err.name) === 'NotFoundError') {
-    _logging.logger.debug('No Bluetooth Devices Found In Scan');
-  } else {
-    _logging.logger.error(err);
-  }
+  if ((err == null ? void 0 : err.name) === 'NotFoundError') return;
+  _logging.logger.error(err);
 }exports.init = init;
 
 /***/ }),
@@ -383,14 +378,14 @@ const processDeviceList = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeD
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
  * if there are no results from the
- * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(e =>{})`, true)`
+ * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
  * call. That's why we do the lockCheck in scanforDevices.
  */
 function handleScanResults(event, deviceList, callback) {
   var _settingsWindow$webCo;
 
   event.preventDefault();
-  _logging.logger.debug('Bluetooth scan results', { deviceList: deviceList });
+  _logging.logger.debug('Bluetooth scan results', { deviceList });
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = processDeviceList(deviceList);
@@ -654,8 +649,8 @@ const userDebugTransportOptions = {
 if (true) {
   logger.add(_winston2.default.transports.Console, {
     handleExceptions: true,
-    humanReadableUnhandledException: true,
-    json: true
+    humanReadableUnhandledException: true
+    // json: true
   });
 } // dont send errors to rollbar in dev && only if enabled.
 if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
@@ -1203,7 +1198,7 @@ function updateLastSeenForDevicesLookingForOnStartup() {
    * causes logSettingsUpdate to be called, which relies on the logger, which isnt ready yet).
    */
   if (!devicesLastSeenHasBeenUpdatedOnStartup) return;
-  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with: ${newSettingValue}`);
+  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with:`, { [newSettingKey]: (0, _utils.omitGawkFromSettings)(newSettingValue) });
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
