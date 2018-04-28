@@ -56,7 +56,7 @@ dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
     if !deviceAlreadyInNewList:
       return [...newDeviceList, newDevice]
 
-    if !deviceAlreadyInNewList?.deviceName?.length and newDevice.deviceName.length:
+    if deviceAlreadyInNewList?.deviceName?.length === 0 and newDevice.deviceName.length:
       return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
 
     newDeviceList
