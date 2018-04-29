@@ -3,11 +3,12 @@ import { ipcRenderer, remote } from 'electron'
 import stringifyObject from 'stringify-object'
 import addLineNumbers from 'add-line-numbers'
 import isEmpty from 'is-empty'
+// import is from 'typa'
+import ConsoleLogHTML from 'console-log-html'
 
 import { omitInheritedProperties } from '../../common/utils.lsc'
 
 preElem = document.querySelector('#debugOutput')
-{ blueLossEnabled } = omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
 let loggingTextSansLineNumbers = ''
 
 ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void ->
@@ -23,12 +24,18 @@ createMetaObjForLogging(meta):string ->
 createLoggingSansLineNumbers(msg, meta):string ->
   metaObj = createMetaObjForLogging(meta)
   let logString = `${ loggingTextSansLineNumbers }${ msg + metaObj }\n`
-  if isDebugWindowOpeningMessage(msg):
-    now logString = if blueLossEnabled: `${ logString }Please Wait...\n`
+  if msg === 'Current BlueLoss settings:':
+    now logString = `${ logString }Please Wait...\n`
   logString
 
-isDebugWindowOpeningMessage(msg):boolean ->
-  msg === 'Current BlueLoss settings:'
+
+// ConsoleLogHTML.connect(document.getElementById("debugOutputContainer"), { logToConsole: false })
+
+// ipcRenderer.on('mainprocess:debug-info-sent', (event, { msg = '', meta }):void ->
+//   console.log(msg, meta)
+//   if msg === 'Current BlueLoss settings:': console.log('Please Wait...')
+// )
+
 
 handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->
   ipcRenderer.send('debug-window-renderer:error-sent',
@@ -37,4 +44,3 @@ handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, erro
 
 window.onerror = handleRendererWindowError
 window.onunhandledrejection = handleRendererWindowError
-
