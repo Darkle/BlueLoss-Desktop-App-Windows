@@ -119,12 +119,13 @@ var _typa2 = _interopRequireDefault(_typa);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json").version;
 /**
  * If you run Electron by pointing it to a js file that's not in the base parent directory with the
  * package.json it will report the Electron binary version rather than what's in your package.json.
  * https://github.com/electron/electron/issues/7085
  */
+const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json").version;
+
 function getProperAppVersion() {
   return appVersion;
 }function omitGawkFromSettings(settings) {

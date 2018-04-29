@@ -1,12 +1,13 @@
 import tp from 'timeproxy'
 import is from 'typa'
 
-appVersion = require('../../package.json').version
 /**
  * If you run Electron by pointing it to a js file that's not in the base parent directory with the
  * package.json it will report the Electron binary version rather than what's in your package.json.
  * https://github.com/electron/electron/issues/7085
  */
+appVersion = require('../../package.json').version
+
 getProperAppVersion():string -> appVersion
 
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
