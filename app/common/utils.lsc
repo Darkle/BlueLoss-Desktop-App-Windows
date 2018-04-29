@@ -2,10 +2,16 @@ import tp from 'timeproxy'
 import is from 'typa'
 
 appVersion = require('../../package.json').version
+/**
+ * If you run Electron by pointing it to a js file that's not in the base parent directory with the
+ * package.json it will report the Electron binary version rather than what's in your package.json.
+ * https://github.com/electron/electron/issues/7085
+ */
+getProperAppVersion():string -> appVersion
 
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 
-recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<?string> = []):Object ->
+recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
   Object.keys(obj).reduce((newObj, propName) ->
     for elem propertyToFilter in propertyFiltersArr:
       if propertyToFilter === propName: return newObj
@@ -21,12 +27,6 @@ omitInheritedProperties(obj: Object):Object ->
     {...newObj, ...{ [propName]: obj[propName] }}
   , {})
 
-/**
- * If you run Electron by pointing it to a js file that's not in the base parent directory with the
- * package.json it will report the Electron binary version rather than what's in your package.json.
- * https://github.com/electron/electron/issues/7085
- */
-getProperAppVersion():string -> appVersion
 noop() -> return
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
