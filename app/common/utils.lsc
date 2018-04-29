@@ -39,7 +39,6 @@ generateLogTimeStamp():String ->
   today = new Date()
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
 
-
 export {
   omitGawkFromSettings,
   omitInheritedProperties,

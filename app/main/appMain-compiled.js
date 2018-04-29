@@ -529,7 +529,7 @@ function lockTheSystem() {
   try {
     (0, _lockSystem2.default)();
   } catch (err) {
-    _logging.logger.error('Error occured trying locking the system : ', err);
+    _logging.logger.error('Error occured trying to lock the system : ', err);
   }
 }exports.lockTheSystem = lockTheSystem;
 
@@ -670,9 +670,6 @@ function addRollbarLogging() {
   logger.remove('rollbarTransport');
 }_electron.ipcMain.on('settings-renderer:error-sent', function (event, error) {
   logger.error('settings-renderer:error-sent', error);
-});
-_electron.ipcMain.on('debug-window-renderer:error-sent', function (event, error) {
-  logger.error('debug-window-renderer:error-sent', error);
 });
 _electron.ipcMain.on('bluetooth-scan-window-renderer:error-sent', function (event, error) {
   logger.error('bluetooth-scan-window-renderer:error-sent', error);

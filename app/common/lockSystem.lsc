@@ -9,7 +9,7 @@ lockTheSystem():void ->
   try:
     lockSystem()
   catch(err):
-    logger.error('Error occured trying locking the system : ', err)
+    logger.error('Error occured trying to lock the system : ', err)
 
 
 export {
