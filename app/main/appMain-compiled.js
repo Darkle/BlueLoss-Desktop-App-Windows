@@ -172,9 +172,9 @@ const notificationWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role:
 const updateHTMLfilePath = _url2.default.format({
   protocol: 'file',
   slashes: true,
-  pathname: _path2.default.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
+  pathname: _path2.default.resolve(__dirname, '..', 'appUpdates', 'renderer', 'updateNotification.html')
 });
-const iconFileName = _path2.default.join(__dirname, '..', 'appUpdates', `BlueLoss-Blue-512x512.png`);
+const iconsDir = _path2.default.join(__dirname, '..', 'settingsWindow', 'renderer', 'assets', 'icons');
 
 function showUpdateNotification(latestUpdateVersion) {
   notificationWindow = new _electron.BrowserWindow({
@@ -188,7 +188,7 @@ function showUpdateNotification(latestUpdateVersion) {
     titleBarStyle: 'hidden',
     autoHideMenuBar: true,
     show: false,
-    icon: iconFileName,
+    icon: getIconPath(),
     title: 'An Update Is Available For BlueLoss'
   });
 
@@ -243,6 +243,11 @@ function getPlatformNotificationWindowWidth() {
     case 'win32':
       return 160;
   }
+}function getIconPath() {
+  let trayIconColor = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().trayIconColor;
+  if (!trayIconColor) trayIconColor = 'blue';
+  const iconFileName = `BlueLoss-${trayIconColor}-512x512.png`;
+  return _path2.default.join(iconsDir, iconFileName);
 }exports.showUpdateNotification = showUpdateNotification;
 
 /***/ }),

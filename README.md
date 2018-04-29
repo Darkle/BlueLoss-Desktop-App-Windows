@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-BlueLoss is a desktop app that locks your computer when a device on the network is lost. It works on either WiFi or an Ethernet network.
+BlueLoss is a desktop app that locks your computer when a Bluetooth device.
 
 ## Installation
 

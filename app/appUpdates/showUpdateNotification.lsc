@@ -5,16 +5,16 @@ import { ipcMain, BrowserWindow, Menu, shell } from 'electron'
 import Positioner from 'electron-positioner'
 
 import { logger } from '../common/logging/logging.lsc'
-import { updateSetting } from '../settings/settings.lsc'
+import { updateSetting, getSettings } from '../settings/settings.lsc'
 
 let notificationWindow = null
 notificationWindowMenu = if ISDEV: Menu.buildFromTemplate([{role: 'reload'}]) else: null
 updateHTMLfilePath = url.format({
   protocol: 'file',
   slashes: true,
-  pathname: path.resolve(__dirname, '..', 'appUpdates', 'updateNotification.html')
+  pathname: path.resolve(__dirname, '..', 'appUpdates', 'renderer', 'updateNotification.html')
 })
-iconFileName = path.join(__dirname, '..', 'appUpdates', `BlueLoss-Blue-512x512.png`)
+iconsDir = path.join(__dirname, '..', 'settingsWindow', 'renderer', 'assets', 'icons')
 
 showUpdateNotification(latestUpdateVersion: string):void ->
   now notificationWindow = new BrowserWindow(
@@ -29,7 +29,7 @@ showUpdateNotification(latestUpdateVersion: string):void ->
       titleBarStyle: 'hidden',
       autoHideMenuBar: true,
       show: false,
-      icon: iconFileName,
+      icon: getIconPath(),
       title: 'An Update Is Available For BlueLoss'
     }
   )
@@ -88,6 +88,12 @@ getPlatformNotificationWindowHeight():number ->
     case 'win32':
       return 160
   }
+
+getIconPath():string ->
+  let trayIconColor = getSettings?().trayIconColor
+  if !trayIconColor: now trayIconColor = 'blue'
+  iconFileName = `BlueLoss-${ trayIconColor }-512x512.png`
+  path.join(iconsDir, iconFileName)
 
 export{
   showUpdateNotification
