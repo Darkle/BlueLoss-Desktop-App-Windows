@@ -716,7 +716,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
-* window. The log data is sent to the debug window renderer and displayed there.
+* window. The log data is sent to the debug window renderer devtools console.
 */
 const UserDebugLoggerTransport = _winston2.default.transports.CustomLogger = function (options) {
   Object.assign(this, options);
