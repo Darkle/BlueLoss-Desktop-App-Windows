@@ -29,7 +29,6 @@ init():void ->
 createBluetoothScannerWindow():Promise ->
   new Promise((resolve):void ->
     now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
-    // can't use data uri for loadURL here as get a security error - prolly to do with webbluetooth.
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
     if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 

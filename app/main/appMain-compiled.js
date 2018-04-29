@@ -305,7 +305,6 @@ function init() {
 }function createBluetoothScannerWindow() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
-    // can't use data uri for loadURL here as get a security error - prolly to do with webbluetooth.
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
     if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
 
