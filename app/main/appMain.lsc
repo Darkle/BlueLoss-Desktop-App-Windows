@@ -26,7 +26,7 @@ electronApp.once('ready', ():void ->
   if firstRun:
     updateSetting('firstRun', !firstRun)
     showSettingsWindow()
-    enableRunOnStartup(firstRun)
+    if !ISDEV: enableRunOnStartup(firstRun)
 )
 
 electronApp.on('window-all-closed', noop)

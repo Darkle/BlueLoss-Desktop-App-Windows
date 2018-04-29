@@ -1069,7 +1069,7 @@ _electron.app.once('ready', function () {
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
-    (0, _runOnStartup.enableRunOnStartup)(firstRun);
+    if (false) {}
   }
 });
 
