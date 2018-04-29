@@ -15,7 +15,7 @@ bluetoothHiddenWindowHTMLpath = url.format({
   pathname: path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
 })
 bluetoothHiddenWindowProperties = {
-  show: ISDEV,
+  show: false,
   webPreferences: {
     experimentalFeatures: true, // for web-bluetooth
     devTools: ISDEV

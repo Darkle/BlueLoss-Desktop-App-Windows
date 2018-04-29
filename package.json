@@ -20,7 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "@hyperapp/logger": "^0.5.0",
-    "add-line-numbers": "^1.0.1",
     "auto-launch": "^5.0.5",
     "dotenv": "^5.0.1",
     "electron-positioner": "^3.0.0",
