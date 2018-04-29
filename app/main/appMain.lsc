@@ -37,8 +37,3 @@ process.on('uncaughtException', (err):void ->
   process.exit(1) // eslint-disable-line no-process-exit
 )
 
-
-
-setTimeout(() => {
-  logger.error(new Error('Yooooo1!'))
-}, 10000)

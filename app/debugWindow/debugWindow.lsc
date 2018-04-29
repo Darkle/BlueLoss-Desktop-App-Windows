@@ -1,3 +1,5 @@
+import path from 'path'
+import url from 'url'
 import { BrowserWindow, ipcMain } from 'electron'
 
 import { logger } from '../common/logging/logging.lsc'
@@ -5,21 +7,33 @@ import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { omitGawkFromSettings } from '../common/utils.lsc'
 
+debugWindowHTMLpath = url.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
+})
 let debugWindow = null
 
 showDebugWindow():void ->
   if debugWindow:
     return debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  now debugWindow = new BrowserWindow()
-  debugWindow.loadURL('data:text/html')
-  if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
+  now debugWindow = new BrowserWindow({ show: false})
+  debugWindow.loadURL(debugWindowHTMLpath)
+  debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
   debugWindow.once('closed', ():void ->
     now debugWindow = null
   )
+  /**
+   * Without a delay, the console has trouble showing the VM:line to the right of
+   * what you just logged, instead it shows (unknown) which kinda looks like we're
+   * printing 'Current BlueLoss settings: (unknown)'
+   */
   debugWindow.webContents.once('devtools-opened', ():void ->
-    logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
+    setTimeout(() => {
+      logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
+    }, 500)
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {userDebug: false})

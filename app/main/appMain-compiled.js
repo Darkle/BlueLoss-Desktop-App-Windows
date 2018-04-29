@@ -294,8 +294,7 @@ const bluetoothHiddenWindowHTMLpath = _url2.default.format({
 const bluetoothHiddenWindowProperties = {
   show: false,
   webPreferences: {
-    experimentalFeatures: true, // for web-bluetooth
-    devTools: true
+    experimentalFeatures: true // for web-bluetooth
   }
 };
 const invokeUserGesture = true;
@@ -306,7 +305,8 @@ function init() {
 }function createBluetoothScannerWindow() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
-    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath); // can't sue data uri here as web bluetooth seems to need https
+    // can't use data uri for loadURL here as get a security error - prolly to do with webbluetooth.
+    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
     if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
 
     scannerWindow.webContents.once('dom-ready', resolve);
@@ -954,6 +954,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.debugWindow = undefined;
 
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _url = __webpack_require__(/*! url */ "url");
+
+var _url2 = _interopRequireDefault(_url);
+
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
@@ -964,20 +972,34 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const debugWindowHTMLpath = _url2.default.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
+});
 let debugWindow = null;
 
 function showDebugWindow() {
   if (debugWindow) {
     return debugWindow.webContents.openDevTools({ mode: 'undocked' });
-  }exports.debugWindow = debugWindow = new _electron.BrowserWindow();
-  debugWindow.loadURL('data:text/html');
-  if (true) debugWindow.webContents.openDevTools({ mode: 'undocked' });
+  }exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
+  debugWindow.loadURL(debugWindowHTMLpath);
+  debugWindow.webContents.openDevTools({ mode: 'undocked' });
 
   debugWindow.once('closed', function () {
     exports.debugWindow = debugWindow = null;
   });
+  /**
+   * Without a delay, the console has trouble showing the VM:line to the right of
+   * what you just logged, instead it shows (unknown) which kinda looks like we're
+   * printing 'Current BlueLoss settings: (unknown)'
+   */
   debugWindow.webContents.once('devtools-opened', function () {
-    _logging.logger.debug('Current BlueLoss settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
+    setTimeout(() => {
+      return _logging.logger.debug('Current BlueLoss settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
+    }, 500);
   });
   debugWindow.webContents.once('devtools-closed', function () {
     var _settingsWindow$webCo;
@@ -1060,10 +1082,6 @@ process.on('uncaughtException', function (err) {
   process.exit(1);
 } // eslint-disable-line no-process-exit
 );
-
-setTimeout(() => {
-  return _logging.logger.error(new Error('Yooooo1!'));
-}, 10000);
 
 /***/ }),
 
