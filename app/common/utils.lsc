@@ -9,8 +9,15 @@ import is from 'typa'
 appVersion = require('../../package.json').version
 
 getProperAppVersion():string -> appVersion
-
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
+noop() -> return
+pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
+compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
+curry(f) -> (...a) -> (...b) -> f(...a, ...b)
+curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
+identity(param) -> param
+range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
+tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
 recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
   Object.keys(obj).reduce((newObj, propName) ->
@@ -28,18 +35,10 @@ omitInheritedProperties(obj: Object):Object ->
     {...newObj, ...{ [propName]: obj[propName] }}
   , {})
 
-noop() -> return
-pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
-compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
-curry(f) -> (...a) -> (...b) -> f(...a, ...b)
-curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
-identity(param) -> param
-range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
-tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
-
 generateLogTimeStamp():String ->
   today = new Date()
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
+
 
 export {
   omitGawkFromSettings,

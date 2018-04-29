@@ -871,21 +871,6 @@ function getProperAppVersion() {
   return appVersion;
 }function omitGawkFromSettings(settings) {
   return recursivelyOmitObjProperties(settings, ['__gawk__']);
-}function recursivelyOmitObjProperties(obj, propertyFiltersArr = []) {
-  return Object.keys(obj).reduce(function (newObj, propName) {
-    for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
-      const propertyToFilter = propertyFiltersArr[_i];
-      if (propertyToFilter === propName) return newObj;
-    }if (_typa2.default.obj(obj[propName])) {
-      return _extends({}, newObj, { [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) });
-    }return _extends({}, newObj, { [propName]: obj[propName] });
-  }, {});
-}function omitInheritedProperties(obj) {
-  return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
-    if (_typa2.default.obj(obj[propName])) {
-      return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
-    }return _extends({}, newObj, { [propName]: obj[propName] });
-  }, {});
 }function noop() {
   return;
 }function pipe(...fns) {
@@ -919,6 +904,21 @@ function getProperAppVersion() {
 } //includes end number
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
+}function recursivelyOmitObjProperties(obj, propertyFiltersArr = []) {
+  return Object.keys(obj).reduce(function (newObj, propName) {
+    for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
+      const propertyToFilter = propertyFiltersArr[_i];
+      if (propertyToFilter === propName) return newObj;
+    }if (_typa2.default.obj(obj[propName])) {
+      return _extends({}, newObj, { [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) });
+    }return _extends({}, newObj, { [propName]: obj[propName] });
+  }, {});
+}function omitInheritedProperties(obj) {
+  return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
+    if (_typa2.default.obj(obj[propName])) {
+      return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
+    }return _extends({}, newObj, { [propName]: obj[propName] });
+  }, {});
 }function generateLogTimeStamp() {
   const today = new Date();
   return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
