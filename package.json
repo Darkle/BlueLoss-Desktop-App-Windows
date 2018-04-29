@@ -37,6 +37,7 @@
     "rollbar": "^2.3.9",
     "stringify-object": "^3.2.2",
     "timeproxy": "^1.2.1",
+    "typa": "^0.1.18",
     "winston": "^2.4.1"
   },
   "devDependencies": {

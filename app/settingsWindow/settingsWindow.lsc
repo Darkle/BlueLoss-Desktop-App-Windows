@@ -6,7 +6,7 @@ import omit from 'lodash.omit'
 
 import { getSettings, updateSetting } from '../settings/settings.lsc'
 import { logger } from '../common/logging/logging.lsc'
-import { omitInheritedProperties, capitalizeFirstLetter, omitGawkFromSettings } from '../common/utils.lsc'
+import { omitInheritedProperties, omitGawkFromSettings } from '../common/utils.lsc'
 
 settingsWindowRendererDirPath = path.join(__dirname, '..', 'settingsWindow', 'renderer')
 iconsDir = path.join(settingsWindowRendererDirPath, 'assets', 'icons')
@@ -92,7 +92,7 @@ getStoredWindowPosition():Object ->
 getIconPath():string ->
   let trayIconColor = getSettings?().trayIconColor
   if !trayIconColor: now trayIconColor = 'blue'
-  iconFileName = `BlueLoss-${ capitalizeFirstLetter(trayIconColor) }-512x512.png`
+  iconFileName = `BlueLoss-${ trayIconColor }-512x512.png`
   path.join(iconsDir, iconFileName)
 
 toggleSettingsWindow():void ->

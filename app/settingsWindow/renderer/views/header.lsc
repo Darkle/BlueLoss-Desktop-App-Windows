@@ -4,7 +4,7 @@ export default ({ actions }) ->
   <div id="header">
     <div id="logo">
       <div id="headerIcon">
-        <img src="assets/icons/asd.svg" />
+        <img src="assets/icons/BlueLossIcon.svg" />
       </div>
       <div id="headerText">BlueLoss</div>
     </div>

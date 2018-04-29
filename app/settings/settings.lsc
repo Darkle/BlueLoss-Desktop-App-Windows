@@ -4,6 +4,7 @@ import { app as electronApp } from 'electron'
 import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
+import is from 'typa'
 
 import { tenYearsFromNow, omitGawkFromSettings } from '../common/utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
@@ -91,11 +92,11 @@ logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
    * causes logSettingsUpdate to be called, which relies on the logger, which isnt ready yet).
    */
   if !devicesLastSeenHasBeenUpdatedOnStartup: return
-  logger.debug(
-    `Updated Setting: updated '${ newSettingKey }' with:`,
-    { [newSettingKey]: omitGawkFromSettings(newSettingValue) }
-  )
-
+  debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
+  if is.obj(newSettingValue):
+    logger.debug(debugMessage, { [newSettingKey]: omitGawkFromSettings(newSettingValue) })
+  else:
+    logger.debug(`${ debugMessage } ${ newSettingValue }`)
 
 export {
   updateSetting,

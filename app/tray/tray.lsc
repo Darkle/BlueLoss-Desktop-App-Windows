@@ -3,7 +3,6 @@ import { Tray, Menu, app as electronApp } from 'electron'
 
 import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { updateSetting, getSettings } from '../settings/settings.lsc'
-import { capitalizeFirstLetter } from '../common/utils.lsc'
 
 let tray = null
 trayIconsFolder = path.resolve(__dirname, '..', 'tray', 'icons')
@@ -33,7 +32,7 @@ createContextMenu():Object ->
   )
 
 getNewTrayIconPath(trayIconColor: string):string ->
-  path.join(trayIconsFolder, `BlueLoss-${ capitalizeFirstLetter(trayIconColor) }-128x128.png`)
+  path.join(trayIconsFolder, `BlueLoss-${ trayIconColor }-128x128.png`)
 
 generateEnabledDisabledLabel():string ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`

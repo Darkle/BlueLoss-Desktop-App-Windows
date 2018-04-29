@@ -86,7 +86,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.checkForUpdate = undefined;
 
-var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
@@ -272,7 +272,7 @@ var _url2 = _interopRequireDefault(_url);
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
@@ -421,14 +421,15 @@ function addTimeStampToSeenDevices(deviceList) {
 */
 function dedupeDeviceList(deviceList) {
   return deviceList.reduce(function (newDeviceList, newDevice) {
-    var _deviceAlreadyInNewLi;
-
     const newDeviceId = newDevice.deviceId;
+
     const deviceAlreadyInNewList = newDeviceList.find(function (device) {
       return device.deviceId === newDeviceId;
     });
-    if (!deviceAlreadyInNewList) return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
-    if (!(deviceAlreadyInNewList == null ? void 0 : (_deviceAlreadyInNewLi = deviceAlreadyInNewList.deviceName) == null ? void 0 : _deviceAlreadyInNewLi.length) && newDevice.deviceName.length) {
+
+    if (!deviceAlreadyInNewList) {
+      return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
+    }if (betterNamedDevice(deviceAlreadyInNewList, newDevice)) {
       var _ref;
 
       return [...(_ref = newDeviceList.filter(function (device) {
@@ -436,6 +437,10 @@ function dedupeDeviceList(deviceList) {
       }), _ref === void 0 ? [] : _ref), newDevice];
     }return newDeviceList;
   }, []);
+}function betterNamedDevice(existingDevice, newDevice) {
+  var _existingDevice$devic;
+
+  return (existingDevice == null ? void 0 : (_existingDevice$devic = existingDevice.deviceName) == null ? void 0 : _existingDevice$devic.length) === 0 && newDevice.deviceName.length > 0;
 }function updateDeviceSearchingFor(deviceId, timeStamp) {
   (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', timeStamp);
 }exports.handleScanResults = handleScanResults;
@@ -458,7 +463,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.lockSystemIfDeviceLost = undefined;
 
-var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
@@ -830,13 +835,17 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.recursivelyOmitObjProperties = exports.getProperAppVersion = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.isObject = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
+exports.recursivelyOmitObjProperties = exports.getProperAppVersion = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _timeproxy = __webpack_require__(/*! timeproxy */ "./node_modules/timeproxy/lib/index.js");
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
+
+var _typa = __webpack_require__(/*! typa */ "./node_modules/typa/dist/typa.min.js");
+
+var _typa2 = _interopRequireDefault(_typa);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -849,13 +858,13 @@ function omitGawkFromSettings(settings) {
     for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
       const propertyToFilter = propertyFiltersArr[_i];
       if (propertyToFilter === propName) return newObj;
-    }if (isObject(obj[propName])) {
+    }if (_typa2.default.obj(obj[propName])) {
       return _extends({}, newObj, { [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) });
     }return _extends({}, newObj, { [propName]: obj[propName] });
   }, {});
 }function omitInheritedProperties(obj) {
   return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
-    if (isObject(obj[propName])) {
+    if (_typa2.default.obj(obj[propName])) {
       return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
     }return _extends({}, newObj, { [propName]: obj[propName] });
   }, {});
@@ -890,30 +899,25 @@ function getProperAppVersion() {
       return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
     };
   };
+}function identity(param) {
+  return param;
 }function range(start, end) {
   return Array.from({ length: end - start + 1 }, function (v, k) {
     return k + start;
   });
 } //includes end number
-function isObject(obj) {
-  return obj !== null && typeof obj === 'object' && !Array.isArray(obj) && !isFunction(obj);
-}function isFunction(value) {
-  return typeof value === 'function';
-}function tenYearsFromNow() {
+function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.noop = noop;
-exports.isObject = isObject;
 exports.pipe = pipe;
 exports.curry = curry;
 exports.curryRight = curryRight;
 exports.range = range;
 exports.compose = compose;
+exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
-exports.capitalizeFirstLetter = capitalizeFirstLetter;
 exports.getProperAppVersion = getProperAppVersion;
 exports.recursivelyOmitObjProperties = recursivelyOmitObjProperties;
 
@@ -1116,6 +1120,10 @@ var _FileSync = __webpack_require__(/*! lowdb/adapters/FileSync */ "lowdb/adapte
 
 var _FileSync2 = _interopRequireDefault(_FileSync);
 
+var _typa = __webpack_require__(/*! typa */ "./node_modules/typa/dist/typa.min.js");
+
+var _typa2 = _interopRequireDefault(_typa);
+
 var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
@@ -1197,7 +1205,12 @@ function updateLastSeenForDevicesLookingForOnStartup() {
    * causes logSettingsUpdate to be called, which relies on the logger, which isnt ready yet).
    */
   if (!devicesLastSeenHasBeenUpdatedOnStartup) return;
-  _logging.logger.debug(`Updated Setting: updated '${newSettingKey}' with:`, { [newSettingKey]: (0, _utils.omitGawkFromSettings)(newSettingValue) });
+  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
+  if (_typa2.default.obj(newSettingValue)) {
+    _logging.logger.debug(debugMessage, { [newSettingKey]: (0, _utils.omitGawkFromSettings)(newSettingValue) });
+  } else {
+    _logging.logger.debug(`${debugMessage} ${newSettingValue}`);
+  }
 }exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
 exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
@@ -1349,7 +1362,7 @@ var _url2 = _interopRequireDefault(_url);
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _lodash = __webpack_require__(/*! lodash.omit */ "./node_modules/lodash.omit/index.js");
+var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -1440,7 +1453,7 @@ function showSettingsWindow() {
 }function getIconPath() {
   let trayIconColor = typeof _settings.getSettings !== 'function' ? void 0 : (0, _settings.getSettings)().trayIconColor;
   if (!trayIconColor) trayIconColor = 'blue';
-  const iconFileName = `BlueLoss-${(0, _utils.capitalizeFirstLetter)(trayIconColor)}-512x512.png`;
+  const iconFileName = `BlueLoss-${trayIconColor}-512x512.png`;
   return _path2.default.join(iconsDir, iconFileName);
 }function toggleSettingsWindow() {
   if (!settingsWindow) {
@@ -1485,8 +1498,6 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/settings/settings.lsc");
 
-var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let tray = null;
@@ -1509,7 +1520,7 @@ function initTrayMenu() {
     click: _electron.app.quit
   }]);
 }function getNewTrayIconPath(trayIconColor) {
-  return _path2.default.join(trayIconsFolder, `BlueLoss-${(0, _utils.capitalizeFirstLetter)(trayIconColor)}-128x128.png`);
+  return _path2.default.join(trayIconsFolder, `BlueLoss-${trayIconColor}-128x128.png`);
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
 }function changeTrayIcon(newTrayIconColor) {
@@ -1562,1690 +1573,22 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/lodash.omit/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/lodash.omit/index.js ***!
-  \*******************************************/
+/***/ "./node_modules/typa/dist/typa.min.js":
+/*!********************************************!*\
+  !*** ./node_modules/typa/dist/typa.min.js ***!
+  \********************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-/**
- * lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-
-/** Used as the size to enable large array optimizations. */
-var LARGE_ARRAY_SIZE = 200;
-
-/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0,
-    MAX_SAFE_INTEGER = 9007199254740991;
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    funcTag = '[object Function]',
-    genTag = '[object GeneratorFunction]',
-    symbolTag = '[object Symbol]';
-
-/**
- * Used to match `RegExp`
- * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
- */
-var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-
-/** Used to detect host constructors (Safari). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^(?:0|[1-9]\d*)$/;
-
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
-
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-/**
- * A faster alternative to `Function#apply`, this function invokes `func`
- * with the `this` binding of `thisArg` and the arguments of `args`.
- *
- * @private
- * @param {Function} func The function to invoke.
- * @param {*} thisArg The `this` binding of `func`.
- * @param {Array} args The arguments to invoke `func` with.
- * @returns {*} Returns the result of `func`.
- */
-function apply(func, thisArg, args) {
-  switch (args.length) {
-    case 0: return func.call(thisArg);
-    case 1: return func.call(thisArg, args[0]);
-    case 2: return func.call(thisArg, args[0], args[1]);
-    case 3: return func.call(thisArg, args[0], args[1], args[2]);
-  }
-  return func.apply(thisArg, args);
-}
-
-/**
- * A specialized version of `_.includes` for arrays without support for
- * specifying an index to search from.
- *
- * @private
- * @param {Array} [array] The array to inspect.
- * @param {*} target The value to search for.
- * @returns {boolean} Returns `true` if `target` is found, else `false`.
- */
-function arrayIncludes(array, value) {
-  var length = array ? array.length : 0;
-  return !!length && baseIndexOf(array, value, 0) > -1;
-}
-
-/**
- * This function is like `arrayIncludes` except that it accepts a comparator.
- *
- * @private
- * @param {Array} [array] The array to inspect.
- * @param {*} target The value to search for.
- * @param {Function} comparator The comparator invoked per element.
- * @returns {boolean} Returns `true` if `target` is found, else `false`.
- */
-function arrayIncludesWith(array, value, comparator) {
-  var index = -1,
-      length = array ? array.length : 0;
-
-  while (++index < length) {
-    if (comparator(value, array[index])) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * A specialized version of `_.map` for arrays without support for iteratee
- * shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
- */
-function arrayMap(array, iteratee) {
-  var index = -1,
-      length = array ? array.length : 0,
-      result = Array(length);
-
-  while (++index < length) {
-    result[index] = iteratee(array[index], index, array);
-  }
-  return result;
-}
-
-/**
- * Appends the elements of `values` to `array`.
- *
- * @private
- * @param {Array} array The array to modify.
- * @param {Array} values The values to append.
- * @returns {Array} Returns `array`.
- */
-function arrayPush(array, values) {
-  var index = -1,
-      length = values.length,
-      offset = array.length;
-
-  while (++index < length) {
-    array[offset + index] = values[index];
-  }
-  return array;
-}
-
-/**
- * The base implementation of `_.findIndex` and `_.findLastIndex` without
- * support for iteratee shorthands.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {Function} predicate The function invoked per iteration.
- * @param {number} fromIndex The index to search from.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {number} Returns the index of the matched value, else `-1`.
- */
-function baseFindIndex(array, predicate, fromIndex, fromRight) {
-  var length = array.length,
-      index = fromIndex + (fromRight ? 1 : -1);
-
-  while ((fromRight ? index-- : ++index < length)) {
-    if (predicate(array[index], index, array)) {
-      return index;
-    }
-  }
-  return -1;
-}
-
-/**
- * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {*} value The value to search for.
- * @param {number} fromIndex The index to search from.
- * @returns {number} Returns the index of the matched value, else `-1`.
- */
-function baseIndexOf(array, value, fromIndex) {
-  if (value !== value) {
-    return baseFindIndex(array, baseIsNaN, fromIndex);
-  }
-  var index = fromIndex - 1,
-      length = array.length;
-
-  while (++index < length) {
-    if (array[index] === value) {
-      return index;
-    }
-  }
-  return -1;
-}
-
-/**
- * The base implementation of `_.isNaN` without support for number objects.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is `NaN`, else `false`.
- */
-function baseIsNaN(value) {
-  return value !== value;
-}
-
-/**
- * The base implementation of `_.times` without support for iteratee shorthands
- * or max array length checks.
- *
- * @private
- * @param {number} n The number of times to invoke `iteratee`.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the array of results.
- */
-function baseTimes(n, iteratee) {
-  var index = -1,
-      result = Array(n);
-
-  while (++index < n) {
-    result[index] = iteratee(index);
-  }
-  return result;
-}
-
-/**
- * The base implementation of `_.unary` without support for storing metadata.
- *
- * @private
- * @param {Function} func The function to cap arguments for.
- * @returns {Function} Returns the new capped function.
- */
-function baseUnary(func) {
-  return function(value) {
-    return func(value);
-  };
-}
-
-/**
- * Checks if a cache value for `key` exists.
- *
- * @private
- * @param {Object} cache The cache to query.
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function cacheHas(cache, key) {
-  return cache.has(key);
-}
-
-/**
- * Gets the value at `key` of `object`.
- *
- * @private
- * @param {Object} [object] The object to query.
- * @param {string} key The key of the property to get.
- * @returns {*} Returns the property value.
- */
-function getValue(object, key) {
-  return object == null ? undefined : object[key];
-}
-
-/**
- * Checks if `value` is a host object in IE < 9.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
- */
-function isHostObject(value) {
-  // Many host objects are `Object` objects that can coerce to strings
-  // despite having improperly defined `toString` methods.
-  var result = false;
-  if (value != null && typeof value.toString != 'function') {
-    try {
-      result = !!(value + '');
-    } catch (e) {}
-  }
-  return result;
-}
-
-/**
- * Creates a unary function that invokes `func` with its argument transformed.
- *
- * @private
- * @param {Function} func The function to wrap.
- * @param {Function} transform The argument transform.
- * @returns {Function} Returns the new function.
- */
-function overArg(func, transform) {
-  return function(arg) {
-    return func(transform(arg));
-  };
-}
-
-/** Used for built-in method references. */
-var arrayProto = Array.prototype,
-    funcProto = Function.prototype,
-    objectProto = Object.prototype;
-
-/** Used to detect overreaching core-js shims. */
-var coreJsData = root['__core-js_shared__'];
-
-/** Used to detect methods masquerading as native. */
-var maskSrcKey = (function() {
-  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-  return uid ? ('Symbol(src)_1.' + uid) : '';
-}());
-
-/** Used to resolve the decompiled source of functions. */
-var funcToString = funcProto.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/** Built-in value references. */
-var Symbol = root.Symbol,
-    getPrototype = overArg(Object.getPrototypeOf, Object),
-    propertyIsEnumerable = objectProto.propertyIsEnumerable,
-    splice = arrayProto.splice,
-    spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeGetSymbols = Object.getOwnPropertySymbols,
-    nativeMax = Math.max;
-
-/* Built-in method references that are verified to be native. */
-var Map = getNative(root, 'Map'),
-    nativeCreate = getNative(Object, 'create');
-
-/**
- * Creates a hash object.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function Hash(entries) {
-  var index = -1,
-      length = entries ? entries.length : 0;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-/**
- * Removes all key-value entries from the hash.
- *
- * @private
- * @name clear
- * @memberOf Hash
- */
-function hashClear() {
-  this.__data__ = nativeCreate ? nativeCreate(null) : {};
-}
-
-/**
- * Removes `key` and its value from the hash.
- *
- * @private
- * @name delete
- * @memberOf Hash
- * @param {Object} hash The hash to modify.
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function hashDelete(key) {
-  return this.has(key) && delete this.__data__[key];
-}
-
-/**
- * Gets the hash value for `key`.
- *
- * @private
- * @name get
- * @memberOf Hash
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function hashGet(key) {
-  var data = this.__data__;
-  if (nativeCreate) {
-    var result = data[key];
-    return result === HASH_UNDEFINED ? undefined : result;
-  }
-  return hasOwnProperty.call(data, key) ? data[key] : undefined;
-}
-
-/**
- * Checks if a hash value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf Hash
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function hashHas(key) {
-  var data = this.__data__;
-  return nativeCreate ? data[key] !== undefined : hasOwnProperty.call(data, key);
-}
-
-/**
- * Sets the hash `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf Hash
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the hash instance.
- */
-function hashSet(key, value) {
-  var data = this.__data__;
-  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
-  return this;
-}
-
-// Add methods to `Hash`.
-Hash.prototype.clear = hashClear;
-Hash.prototype['delete'] = hashDelete;
-Hash.prototype.get = hashGet;
-Hash.prototype.has = hashHas;
-Hash.prototype.set = hashSet;
-
-/**
- * Creates an list cache object.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function ListCache(entries) {
-  var index = -1,
-      length = entries ? entries.length : 0;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-/**
- * Removes all key-value entries from the list cache.
- *
- * @private
- * @name clear
- * @memberOf ListCache
- */
-function listCacheClear() {
-  this.__data__ = [];
-}
-
-/**
- * Removes `key` and its value from the list cache.
- *
- * @private
- * @name delete
- * @memberOf ListCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function listCacheDelete(key) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  if (index < 0) {
-    return false;
-  }
-  var lastIndex = data.length - 1;
-  if (index == lastIndex) {
-    data.pop();
-  } else {
-    splice.call(data, index, 1);
-  }
-  return true;
-}
-
-/**
- * Gets the list cache value for `key`.
- *
- * @private
- * @name get
- * @memberOf ListCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function listCacheGet(key) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  return index < 0 ? undefined : data[index][1];
-}
-
-/**
- * Checks if a list cache value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf ListCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function listCacheHas(key) {
-  return assocIndexOf(this.__data__, key) > -1;
-}
-
-/**
- * Sets the list cache `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf ListCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the list cache instance.
- */
-function listCacheSet(key, value) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  if (index < 0) {
-    data.push([key, value]);
-  } else {
-    data[index][1] = value;
-  }
-  return this;
-}
-
-// Add methods to `ListCache`.
-ListCache.prototype.clear = listCacheClear;
-ListCache.prototype['delete'] = listCacheDelete;
-ListCache.prototype.get = listCacheGet;
-ListCache.prototype.has = listCacheHas;
-ListCache.prototype.set = listCacheSet;
-
-/**
- * Creates a map cache object to store key-value pairs.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function MapCache(entries) {
-  var index = -1,
-      length = entries ? entries.length : 0;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-/**
- * Removes all key-value entries from the map.
- *
- * @private
- * @name clear
- * @memberOf MapCache
- */
-function mapCacheClear() {
-  this.__data__ = {
-    'hash': new Hash,
-    'map': new (Map || ListCache),
-    'string': new Hash
-  };
-}
-
-/**
- * Removes `key` and its value from the map.
- *
- * @private
- * @name delete
- * @memberOf MapCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function mapCacheDelete(key) {
-  return getMapData(this, key)['delete'](key);
-}
-
-/**
- * Gets the map value for `key`.
- *
- * @private
- * @name get
- * @memberOf MapCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function mapCacheGet(key) {
-  return getMapData(this, key).get(key);
-}
-
-/**
- * Checks if a map value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf MapCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function mapCacheHas(key) {
-  return getMapData(this, key).has(key);
-}
-
-/**
- * Sets the map `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf MapCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the map cache instance.
- */
-function mapCacheSet(key, value) {
-  getMapData(this, key).set(key, value);
-  return this;
-}
-
-// Add methods to `MapCache`.
-MapCache.prototype.clear = mapCacheClear;
-MapCache.prototype['delete'] = mapCacheDelete;
-MapCache.prototype.get = mapCacheGet;
-MapCache.prototype.has = mapCacheHas;
-MapCache.prototype.set = mapCacheSet;
-
-/**
- *
- * Creates an array cache object to store unique values.
- *
- * @private
- * @constructor
- * @param {Array} [values] The values to cache.
- */
-function SetCache(values) {
-  var index = -1,
-      length = values ? values.length : 0;
-
-  this.__data__ = new MapCache;
-  while (++index < length) {
-    this.add(values[index]);
-  }
-}
-
-/**
- * Adds `value` to the array cache.
- *
- * @private
- * @name add
- * @memberOf SetCache
- * @alias push
- * @param {*} value The value to cache.
- * @returns {Object} Returns the cache instance.
- */
-function setCacheAdd(value) {
-  this.__data__.set(value, HASH_UNDEFINED);
-  return this;
-}
-
-/**
- * Checks if `value` is in the array cache.
- *
- * @private
- * @name has
- * @memberOf SetCache
- * @param {*} value The value to search for.
- * @returns {number} Returns `true` if `value` is found, else `false`.
- */
-function setCacheHas(value) {
-  return this.__data__.has(value);
-}
-
-// Add methods to `SetCache`.
-SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
-SetCache.prototype.has = setCacheHas;
-
-/**
- * Creates an array of the enumerable property names of the array-like `value`.
- *
- * @private
- * @param {*} value The value to query.
- * @param {boolean} inherited Specify returning inherited property names.
- * @returns {Array} Returns the array of property names.
- */
-function arrayLikeKeys(value, inherited) {
-  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-  // Safari 9 makes `arguments.length` enumerable in strict mode.
-  var result = (isArray(value) || isArguments(value))
-    ? baseTimes(value.length, String)
-    : [];
-
-  var length = result.length,
-      skipIndexes = !!length;
-
-  for (var key in value) {
-    if ((inherited || hasOwnProperty.call(value, key)) &&
-        !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-/**
- * Gets the index at which the `key` is found in `array` of key-value pairs.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {*} key The key to search for.
- * @returns {number} Returns the index of the matched value, else `-1`.
- */
-function assocIndexOf(array, key) {
-  var length = array.length;
-  while (length--) {
-    if (eq(array[length][0], key)) {
-      return length;
-    }
-  }
-  return -1;
-}
-
-/**
- * The base implementation of methods like `_.difference` without support
- * for excluding multiple arrays or iteratee shorthands.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {Array} values The values to exclude.
- * @param {Function} [iteratee] The iteratee invoked per element.
- * @param {Function} [comparator] The comparator invoked per element.
- * @returns {Array} Returns the new array of filtered values.
- */
-function baseDifference(array, values, iteratee, comparator) {
-  var index = -1,
-      includes = arrayIncludes,
-      isCommon = true,
-      length = array.length,
-      result = [],
-      valuesLength = values.length;
-
-  if (!length) {
-    return result;
-  }
-  if (iteratee) {
-    values = arrayMap(values, baseUnary(iteratee));
-  }
-  if (comparator) {
-    includes = arrayIncludesWith;
-    isCommon = false;
-  }
-  else if (values.length >= LARGE_ARRAY_SIZE) {
-    includes = cacheHas;
-    isCommon = false;
-    values = new SetCache(values);
-  }
-  outer:
-  while (++index < length) {
-    var value = array[index],
-        computed = iteratee ? iteratee(value) : value;
-
-    value = (comparator || value !== 0) ? value : 0;
-    if (isCommon && computed === computed) {
-      var valuesIndex = valuesLength;
-      while (valuesIndex--) {
-        if (values[valuesIndex] === computed) {
-          continue outer;
-        }
-      }
-      result.push(value);
-    }
-    else if (!includes(values, computed, comparator)) {
-      result.push(value);
-    }
-  }
-  return result;
-}
-
-/**
- * The base implementation of `_.flatten` with support for restricting flattening.
- *
- * @private
- * @param {Array} array The array to flatten.
- * @param {number} depth The maximum recursion depth.
- * @param {boolean} [predicate=isFlattenable] The function invoked per iteration.
- * @param {boolean} [isStrict] Restrict to values that pass `predicate` checks.
- * @param {Array} [result=[]] The initial result value.
- * @returns {Array} Returns the new flattened array.
- */
-function baseFlatten(array, depth, predicate, isStrict, result) {
-  var index = -1,
-      length = array.length;
-
-  predicate || (predicate = isFlattenable);
-  result || (result = []);
-
-  while (++index < length) {
-    var value = array[index];
-    if (depth > 0 && predicate(value)) {
-      if (depth > 1) {
-        // Recursively flatten arrays (susceptible to call stack limits).
-        baseFlatten(value, depth - 1, predicate, isStrict, result);
-      } else {
-        arrayPush(result, value);
-      }
-    } else if (!isStrict) {
-      result[result.length] = value;
-    }
-  }
-  return result;
-}
-
-/**
- * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
- * `keysFunc` and `symbolsFunc` to get the enumerable property names and
- * symbols of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @param {Function} symbolsFunc The function to get the symbols of `object`.
- * @returns {Array} Returns the array of property names and symbols.
- */
-function baseGetAllKeys(object, keysFunc, symbolsFunc) {
-  var result = keysFunc(object);
-  return isArray(object) ? result : arrayPush(result, symbolsFunc(object));
-}
-
-/**
- * The base implementation of `_.isNative` without bad shim checks.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function,
- *  else `false`.
- */
-function baseIsNative(value) {
-  if (!isObject(value) || isMasked(value)) {
-    return false;
-  }
-  var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
-  return pattern.test(toSource(value));
-}
-
-/**
- * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function baseKeysIn(object) {
-  if (!isObject(object)) {
-    return nativeKeysIn(object);
-  }
-  var isProto = isPrototype(object),
-      result = [];
-
-  for (var key in object) {
-    if (!(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-/**
- * The base implementation of `_.pick` without support for individual
- * property identifiers.
- *
- * @private
- * @param {Object} object The source object.
- * @param {string[]} props The property identifiers to pick.
- * @returns {Object} Returns the new object.
- */
-function basePick(object, props) {
-  object = Object(object);
-  return basePickBy(object, props, function(value, key) {
-    return key in object;
-  });
-}
-
-/**
- * The base implementation of  `_.pickBy` without support for iteratee shorthands.
- *
- * @private
- * @param {Object} object The source object.
- * @param {string[]} props The property identifiers to pick from.
- * @param {Function} predicate The function invoked per property.
- * @returns {Object} Returns the new object.
- */
-function basePickBy(object, props, predicate) {
-  var index = -1,
-      length = props.length,
-      result = {};
-
-  while (++index < length) {
-    var key = props[index],
-        value = object[key];
-
-    if (predicate(value, key)) {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-/**
- * The base implementation of `_.rest` which doesn't validate or coerce arguments.
- *
- * @private
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
- */
-function baseRest(func, start) {
-  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
-  return function() {
-    var args = arguments,
-        index = -1,
-        length = nativeMax(args.length - start, 0),
-        array = Array(length);
-
-    while (++index < length) {
-      array[index] = args[start + index];
-    }
-    index = -1;
-    var otherArgs = Array(start + 1);
-    while (++index < start) {
-      otherArgs[index] = args[index];
-    }
-    otherArgs[start] = array;
-    return apply(func, this, otherArgs);
-  };
-}
-
-/**
- * Creates an array of own and inherited enumerable property names and
- * symbols of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names and symbols.
- */
-function getAllKeysIn(object) {
-  return baseGetAllKeys(object, keysIn, getSymbolsIn);
-}
-
-/**
- * Gets the data for `map`.
- *
- * @private
- * @param {Object} map The map to query.
- * @param {string} key The reference key.
- * @returns {*} Returns the map data.
- */
-function getMapData(map, key) {
-  var data = map.__data__;
-  return isKeyable(key)
-    ? data[typeof key == 'string' ? 'string' : 'hash']
-    : data.map;
-}
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = getValue(object, key);
-  return baseIsNative(value) ? value : undefined;
-}
-
-/**
- * Creates an array of the own enumerable symbol properties of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of symbols.
- */
-var getSymbols = nativeGetSymbols ? overArg(nativeGetSymbols, Object) : stubArray;
-
-/**
- * Creates an array of the own and inherited enumerable symbol properties
- * of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of symbols.
- */
-var getSymbolsIn = !nativeGetSymbols ? stubArray : function(object) {
-  var result = [];
-  while (object) {
-    arrayPush(result, getSymbols(object));
-    object = getPrototype(object);
-  }
-  return result;
-};
-
-/**
- * Checks if `value` is a flattenable `arguments` object or array.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is flattenable, else `false`.
- */
-function isFlattenable(value) {
-  return isArray(value) || isArguments(value) ||
-    !!(spreadableSymbol && value && value[spreadableSymbol]);
-}
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return !!length &&
-    (typeof value == 'number' || reIsUint.test(value)) &&
-    (value > -1 && value % 1 == 0 && value < length);
-}
-
-/**
- * Checks if `value` is suitable for use as unique object key.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
- */
-function isKeyable(value) {
-  var type = typeof value;
-  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
-    ? (value !== '__proto__')
-    : (value === null);
-}
-
-/**
- * Checks if `func` has its source masked.
- *
- * @private
- * @param {Function} func The function to check.
- * @returns {boolean} Returns `true` if `func` is masked, else `false`.
- */
-function isMasked(func) {
-  return !!maskSrcKey && (maskSrcKey in func);
-}
-
-/**
- * Checks if `value` is likely a prototype object.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
- */
-function isPrototype(value) {
-  var Ctor = value && value.constructor,
-      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
-
-  return value === proto;
-}
-
-/**
- * This function is like
- * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
- * except that it includes inherited enumerable properties.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function nativeKeysIn(object) {
-  var result = [];
-  if (object != null) {
-    for (var key in Object(object)) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-/**
- * Converts `value` to a string key if it's not a string or symbol.
- *
- * @private
- * @param {*} value The value to inspect.
- * @returns {string|symbol} Returns the key.
- */
-function toKey(value) {
-  if (typeof value == 'string' || isSymbol(value)) {
-    return value;
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
-}
-
-/**
- * Converts `func` to its source code.
- *
- * @private
- * @param {Function} func The function to process.
- * @returns {string} Returns the source code.
- */
-function toSource(func) {
-  if (func != null) {
-    try {
-      return funcToString.call(func);
-    } catch (e) {}
-    try {
-      return (func + '');
-    } catch (e) {}
-  }
-  return '';
-}
-
-/**
- * Performs a
- * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
- * comparison between two values to determine if they are equivalent.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to compare.
- * @param {*} other The other value to compare.
- * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
- * @example
- *
- * var object = { 'a': 1 };
- * var other = { 'a': 1 };
- *
- * _.eq(object, object);
- * // => true
- *
- * _.eq(object, other);
- * // => false
- *
- * _.eq('a', 'a');
- * // => true
- *
- * _.eq('a', Object('a'));
- * // => false
- *
- * _.eq(NaN, NaN);
- * // => true
- */
-function eq(value, other) {
-  return value === other || (value !== value && other !== other);
-}
-
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-function isArguments(value) {
-  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
-    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
-}
-
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(document.body.children);
- * // => false
- *
- * _.isArray('abc');
- * // => false
- *
- * _.isArray(_.noop);
- * // => false
- */
-var isArray = Array.isArray;
-
-/**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- * @example
- *
- * _.isArrayLike([1, 2, 3]);
- * // => true
- *
- * _.isArrayLike(document.body.children);
- * // => true
- *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
- */
-function isArrayLike(value) {
-  return value != null && isLength(value.length) && !isFunction(value);
-}
-
-/**
- * This method is like `_.isArrayLike` except that it also checks if `value`
- * is an object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array-like object,
- *  else `false`.
- * @example
- *
- * _.isArrayLikeObject([1, 2, 3]);
- * // => true
- *
- * _.isArrayLikeObject(document.body.children);
- * // => true
- *
- * _.isArrayLikeObject('abc');
- * // => false
- *
- * _.isArrayLikeObject(_.noop);
- * // => false
- */
-function isArrayLikeObject(value) {
-  return isObjectLike(value) && isArrayLike(value);
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a function, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in Safari 8-9 which returns 'object' for typed array and other constructors.
-  var tag = isObject(value) ? objectToString.call(value) : '';
-  return tag == funcTag || tag == genTag;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This method is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && objectToString.call(value) == symbolTag);
-}
-
-/**
- * Creates an array of the own and inherited enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keysIn(new Foo);
- * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
- */
-function keysIn(object) {
-  return isArrayLike(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
-}
-
-/**
- * The opposite of `_.pick`; this method creates an object composed of the
- * own and inherited enumerable string keyed properties of `object` that are
- * not omitted.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Object
- * @param {Object} object The source object.
- * @param {...(string|string[])} [props] The property identifiers to omit.
- * @returns {Object} Returns the new object.
- * @example
- *
- * var object = { 'a': 1, 'b': '2', 'c': 3 };
- *
- * _.omit(object, ['a', 'c']);
- * // => { 'b': '2' }
- */
-var omit = baseRest(function(object, props) {
-  if (object == null) {
-    return {};
-  }
-  props = arrayMap(baseFlatten(props, 1), toKey);
-  return basePick(object, baseDifference(getAllKeysIn(object), props));
-});
-
-/**
- * This method returns a new empty array.
- *
- * @static
- * @memberOf _
- * @since 4.13.0
- * @category Util
- * @returns {Array} Returns the new empty array.
- * @example
- *
- * var arrays = _.times(2, _.stubArray);
- *
- * console.log(arrays);
- * // => [[], []]
- *
- * console.log(arrays[0] === arrays[1]);
- * // => false
- */
-function stubArray() {
-  return [];
-}
-
-module.exports = omit;
-
-
-/***/ }),
-
-/***/ "./node_modules/timeproxy/lib/constants.js":
-/*!*************************************************!*\
-  !*** ./node_modules/timeproxy/lib/constants.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var multipliers = exports.multipliers = {
-    QUARTER: 1 / 4,
-    QUARTERS: 1 / 4,
-    THIRD: 1 / 3,
-    THIRDS: 1 / 3,
-    HALF: 1 / 2,
-    HALVES: 1 / 2,
-    A: 1,
-    AN: 1,
-    HUNDRED: 100,
-    THOUSAND: 1000,
-    MILLION: 1000000,
-    BILLION: 1000000000
-};
-
-var numbers = exports.numbers = {
-    ZERO: 0,
-    ONE: 1,
-    TWO: 2,
-    THREE: 3,
-    FOUR: 4,
-    FIVE: 5,
-    SIX: 6,
-    SEVEN: 7,
-    EIGHT: 8,
-    NINE: 9,
-    TEN: 10,
-    ELEVEN: 11,
-    TWELVE: 12,
-    THIRTEEN: 13,
-    FOURTEEN: 14,
-    FIFTEEN: 15,
-    SIXTEEN: 16,
-    SEVENTEEN: 17,
-    EIGHTEEN: 18,
-    NINETEEN: 19,
-    TWENTY: 20,
-    THIRTY: 30,
-    FOURTY: 40,
-    FIFTY: 50,
-    SIXTY: 60,
-    SEVENTY: 70,
-    EIGHTY: 80,
-    NINETY: 90
-};
-
-var units = exports.units = {
-    MILLISECOND: 1,
-    MILLISECONDS: 1,
-    SECOND: 1000,
-    SECONDS: 1000,
-    MINUTE: 1000 * 60,
-    MINUTES: 1000 * 60,
-    HOUR: 1000 * 60 * 60,
-    HOURS: 1000 * 60 * 60,
-    DAY: 1000 * 60 * 60 * 24,
-    DAYS: 1000 * 60 * 60 * 24,
-    WEEK: 1000 * 60 * 60 * 24 * 7,
-    WEEKS: 1000 * 60 * 60 * 24 * 7
-};
-
-/***/ }),
-
-/***/ "./node_modules/timeproxy/lib/index.js":
-/*!*********************************************!*\
-  !*** ./node_modules/timeproxy/lib/index.js ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _constants = __webpack_require__(/*! ./constants */ "./node_modules/timeproxy/lib/constants.js");
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-exports.default = new Proxy(function () {}, {
-    apply: function apply(a, b, args) {
-        if (!args[0] || !args[0].raw) {
-            return find.apply(undefined, _toConsumableArray(args));
-        }
-        return find(String.raw.apply(String, _toConsumableArray(args)));
-    },
-    get: function get(target, name) {
-        return find(name);
-    }
-});
-
-
-var isNumeric = function isNumeric(token) {
-    return !isNaN(token);
-};
-var isNumber = function isNumber(token) {
-    return _constants.numbers[token] !== undefined;
-};
-var isMultiplier = function isMultiplier(token) {
-    return _constants.multipliers[token] !== undefined;
-};
-var isUnit = function isUnit(token) {
-    return _constants.units[token] !== undefined;
-};
-
-function parse(token) {
-    if (isNumeric(token)) {
-        return { type: 'number', value: Number(token) };
-    }
-    if (isNumber(token)) {
-        return { type: 'number', value: _constants.numbers[token] };
-    }
-    if (isMultiplier(token)) {
-        return { type: 'multiplier', value: _constants.multipliers[token] };
-    }
-    if (isUnit(token)) {
-        return { type: 'unit', value: _constants.units[token] };
-    }
-    throw new Error('Could not parse expression ' + token + '.');
-}
-
-function find(name) {
-    if (!name) {
-        return 0;
-    }
-
-    var isFuture = name.startsWith('IN');
-    var isPast = name.endsWith('AGO');
-
-    var terms = name.split(/[_\s\-]+/).map(function (term) {
-        return term.toUpperCase();
-    }).filter(function (term) {
-        return !['IN', 'AGO', 'AND', 'OF'].includes(term);
-    }).map(parse);
-
-    var sum = 0;
-    var partSum = 0;
-
-    for (var i = 0; i < terms.length; i++) {
-        var term = terms[i];
-
-        switch (term.type) {
-            case 'number':
-                {
-                    partSum += term.value;
-                    break;
-                }
-            case 'multiplier':
-                {
-                    partSum = (partSum || 1) * term.value;
-                    break;
-                }
-            case 'unit':
-                {
-                    sum = sum + partSum * term.value;
-                    partSum = 0;
-                    break;
-                }
-        }
-    }
-
-    sum += partSum;
-
-    if (isFuture) {
-        return Date.now() + sum;
-    } else if (isPast) {
-        return Date.now() - sum;
-    }
-    return sum;
-}
+var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.ASSUME_ES5=!1;$jscomp.ASSUME_NO_NATIVE_MAP=!1;$jscomp.ASSUME_NO_NATIVE_SET=!1;$jscomp.defineProperty=$jscomp.ASSUME_ES5||"function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,d){a!=Array.prototype&&a!=Object.prototype&&(a[b]=d.value)};$jscomp.getGlobal=function(a){return"undefined"!=typeof window&&window===a?a:"undefined"!=typeof global&&null!=global?global:a};$jscomp.global=$jscomp.getGlobal(this);$jscomp.SYMBOL_PREFIX="jscomp_symbol_";
+$jscomp.initSymbol=function(){$jscomp.initSymbol=function(){};$jscomp.global.Symbol||($jscomp.global.Symbol=$jscomp.Symbol)};$jscomp.Symbol=function(){var a=0;return function(b){return $jscomp.SYMBOL_PREFIX+(b||"")+a++}}();
+$jscomp.initSymbolIterator=function(){$jscomp.initSymbol();var a=$jscomp.global.Symbol.iterator;a||(a=$jscomp.global.Symbol.iterator=$jscomp.global.Symbol("iterator"));"function"!=typeof Array.prototype[a]&&$jscomp.defineProperty(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return $jscomp.arrayIterator(this)}});$jscomp.initSymbolIterator=function(){}};$jscomp.arrayIterator=function(a){var b=0;return $jscomp.iteratorPrototype(function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}})};
+$jscomp.iteratorPrototype=function(a){$jscomp.initSymbolIterator();a={next:a};a[$jscomp.global.Symbol.iterator]=function(){return this};return a};$jscomp.iteratorFromArray=function(a,b){$jscomp.initSymbolIterator();a instanceof String&&(a+="");var d=0,c={next:function(){if(d<a.length){var e=d++;return{value:b(e,a[e]),done:!1}}c.next=function(){return{done:!0,value:void 0}};return c.next()}};c[Symbol.iterator]=function(){return c};return c};
+$jscomp.polyfill=function(a,b,d,c){if(b){d=$jscomp.global;a=a.split(".");for(c=0;c<a.length-1;c++){var e=a[c];e in d||(d[e]={});d=d[e]}a=a[a.length-1];c=d[a];b=b(c);b!=c&&null!=b&&$jscomp.defineProperty(d,a,{configurable:!0,writable:!0,value:b})}};$jscomp.polyfill("Array.prototype.keys",function(a){return a?a:function(){return $jscomp.iteratorFromArray(this,function(a){return a})}},"es6","es3");
+$jscomp.polyfill("Number.isFinite",function(a){return a?a:function(a){return"number"!==typeof a?!1:!isNaN(a)&&Infinity!==a&&-Infinity!==a}},"es6","es3");$jscomp.polyfill("Number.isInteger",function(a){return a?a:function(a){return Number.isFinite(a)?a===Math.floor(a):!1}},"es6","es3");function arr(a){return a&&"object"===typeof a&&a.constructor===Array}function bad(a){return nll(a)||undef(a)||empty(a)||err(a)}function bool(a){return"boolean"===typeof a}
+function empty(a){return str(a)&&""===a||arr(a)&&0===a.length||obj(a)&&0===Object.keys(a).length}function date(a){return a instanceof Date}function err(a){return a instanceof Error&&"undefined"!==typeof a.message}function json(a){try{return JSON.parse(a),!0}catch(b){return!1}}function fn(a){return"function"===typeof a}function int(a){return"number"===typeof a&&isFinite(a)&&Number.isInteger(a)}function nll(a){return null==a}function noru(a){return null==a||"undefined"===typeof a}
+function num(a){return"number"===typeof a&&isFinite(a)}function obj(a){return a&&"object"===typeof a&&a.constructor===Object}function prom(a){return!!a&&("object"===typeof a||"function"===typeof a)&&"function"===typeof a.then}function regex(a){return a&&"object"===typeof a&&a.constructor===RegExp}function str(a){return"string"===typeof a||a instanceof String}function sym(a){return"symbol"===typeof a}function undef(a){return void 0===a||"undefined"===typeof a}
+function typa(a,b,d,c){if(noru(a)||noru(b)||noru(d)||noru(c))throw Error("Invalid parameters.");return is[a](b)?d:c}var is={arr:arr,bad:bad,bool:bool,date:date,empty:empty,err:err,fn:fn,int:int,json:json,nll:nll,noru:noru,num:num,obj:obj,prom:prom,regex:regex,str:str,sym:sym,typa:typa,undef:undef};module.exports=is;
 
 /***/ }),
 
@@ -3256,7 +1599,7 @@ function find(name) {
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","stringify-object":"^3.2.2","timeproxy":"^1.2.1","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.0","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.0-beta.8","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.71.0","stylus":"^0.54.5","webpack":"^4.6.0","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","electronWatch":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","add-line-numbers":"^1.0.1","auto-launch":"^5.0.5","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.0","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.0-beta.8","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.7.0","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.71.0","stylus":"^0.54.5","webpack":"^4.6.0","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -3359,6 +1702,17 @@ module.exports = require("lock-system");
 
 /***/ }),
 
+/***/ "lodash.omit":
+/*!******************************!*\
+  !*** external "lodash.omit" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lodash.omit");
+
+/***/ }),
+
 /***/ "lowdb":
 /*!************************!*\
   !*** external "lowdb" ***!
@@ -3400,6 +1754,17 @@ module.exports = require("path");
 /***/ (function(module, exports) {
 
 module.exports = require("rollbar");
+
+/***/ }),
+
+/***/ "timeproxy":
+/*!****************************!*\
+  !*** external "timeproxy" ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("timeproxy");
 
 /***/ }),
 

@@ -1,4 +1,5 @@
 import tp from 'timeproxy'
+import is from 'typa'
 
 appVersion = require('../../package.json').version
 
@@ -8,14 +9,14 @@ recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<?string> = [
   Object.keys(obj).reduce((newObj, propName) ->
     for elem propertyToFilter in propertyFiltersArr:
       if propertyToFilter === propName: return newObj
-    if isObject(obj[propName]):
+    if is.obj(obj[propName]):
       return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
     {...newObj, ...{ [propName]: obj[propName] }}
   , {})
 
 omitInheritedProperties(obj: Object):Object ->
   Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
-    if isObject(obj[propName]):
+    if is.obj(obj[propName]):
       return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
     {...newObj, ...{ [propName]: obj[propName] }}
   , {})
@@ -31,25 +32,21 @@ pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
 curry(f) -> (...a) -> (...b) -> f(...a, ...b)
 curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
+identity(param) -> param
 range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
-isObject(obj):boolean ->
-  obj !== null and typeof obj === 'object' and !Array.isArray(obj) and !isFunction(obj)
-isFunction(value):boolean -> typeof value === 'function'
 tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
-capitalizeFirstLetter(string: string):string -> string.charAt(0).toUpperCase() + string.slice(1)
 
 export {
   omitGawkFromSettings,
   omitInheritedProperties,
   noop,
-  isObject,
   pipe,
   curry,
   curryRight,
   range,
   compose,
+  identity,
   tenYearsFromNow,
-  capitalizeFirstLetter,
   getProperAppVersion,
   recursivelyOmitObjProperties,
 }
