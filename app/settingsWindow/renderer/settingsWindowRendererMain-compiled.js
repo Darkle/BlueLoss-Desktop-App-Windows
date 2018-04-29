@@ -642,13 +642,14 @@ exports.default = function deviceCard({ lookingForDevice, device, actions }) {
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // eslint-disable-line no-unused-vars
+
+
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
 var _logger = __webpack_require__(/*! @hyperapp/logger */ "@hyperapp/logger");
-
-var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/settingsWindow/renderer/utils.lsc");
 
 var _actionsIndex = __webpack_require__(/*! ./actions/actionsIndex.lsc */ "./app/settingsWindow/renderer/actions/actionsIndex.lsc");
 
@@ -660,11 +661,12 @@ var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
 
 var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/types/types.lsc");
 
+var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const logInDev =  true ? _logger.withLogger : undefined; // eslint-disable-line no-unused-vars
-
-const settingsWindowRendererApp = logInDev(_hyperapp.app)((0, _utils.getInitialSettingsFromMainProcess)(), _actionsIndex2.default, _viewsIndex2.default, document.body);
+const logInDev =  true ? _logger.withLogger : undefined;
+const settingsWindowRendererApp = logInDev(_hyperapp.app)(getInitialSettingsFromMainProcess(), _actionsIndex2.default, _viewsIndex2.default, document.body);
 /**
  * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
  * for them.
@@ -675,33 +677,6 @@ _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event,
 _electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
 });
-
-window.onerror = _utils.handleRendererWindowError;
-window.onunhandledrejection = _utils.handleRendererWindowError;
-
-/***/ }),
-
-/***/ "./app/settingsWindow/renderer/utils.lsc":
-/*!***********************************************!*\
-  !*** ./app/settingsWindow/renderer/utils.lsc ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.identity = exports.handleRendererWindowError = exports.getInitialSettingsFromMainProcess = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
-
 /**
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
@@ -720,11 +695,8 @@ function getInitialSettingsFromMainProcess() {
 */
 function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
   _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _utils.omitInheritedProperties)(error) });
-}function identity(param) {
-  return param;
-}exports.getInitialSettingsFromMainProcess = getInitialSettingsFromMainProcess;
-exports.handleRendererWindowError = handleRendererWindowError;
-exports.identity = identity;
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
 
 /***/ }),
 

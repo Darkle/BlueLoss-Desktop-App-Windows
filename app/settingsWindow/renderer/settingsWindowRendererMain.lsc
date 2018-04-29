@@ -1,14 +1,14 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, remote } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
 
-import { getInitialSettingsFromMainProcess as getInitialState, identity, handleRendererWindowError } from './utils.lsc'
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
+import { omitInheritedProperties, identity } from '../../common/utils.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
-settingsWindowRendererApp = logInDev(app)(getInitialState(), appActions, views, document.body)
+settingsWindowRendererApp = logInDev(app)(getInitialSettingsFromMainProcess(), appActions, views, document.body)
 /**
  * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
  * for them.
@@ -19,6 +19,28 @@ ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsT
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
+/**
+* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
+* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
+*/
+getInitialSettingsFromMainProcess() ->
+  ({
+    ...{
+      activeTab: 'statusTab',
+      devicesCanSee: [],
+      userDebug: false,
+    },
+    ...omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
+  })
+
+/**
+* https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+* https://stackoverflow.com/a/43911292/2785644
+*/
+handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error):void ->
+  ipcRenderer.send('settings-renderer:error-sent',
+    { messageOrEvent, source, lineNumber, columnNumber, error: omitInheritedProperties(error) }
+  )
 
 window.onerror = handleRendererWindowError
 window.onunhandledrejection = handleRendererWindowError
