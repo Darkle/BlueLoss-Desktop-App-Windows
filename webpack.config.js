@@ -9,12 +9,13 @@ const mainDir = path.join(appDir, 'main')
 const mainAppEntryPoint = path.join(mainDir, 'appMain.lsc')
 const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer')
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
-const debugWindowRendererDir = path.join(appDir, 'debugWindow', 'renderer')
-const debugWindowRendererEntryPoint = path.join(debugWindowRendererDir, 'debugWindowRendererMain.lsc')
 const bluetoothRendererDir = path.join(appDir, 'bluetooth', 'renderer')
 const bluetoothRendererEntryPoint = path.join(bluetoothRendererDir, 'bluetoothRendererMain.lsc')
 const isDev = process.env.NODE_ENV !== 'production'
 const debugging = isDev && process.env.nodeDebug === 'true'
+
+console.log('process.env.nodeDebug: ', process.env.nodeDebug)
+console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 /*****
 * We dont want webpack to include polyfills or mocks for various node stuff, which we set with
@@ -97,18 +98,6 @@ const electronSettingsRendererWebpackOptions = {
   }
 }
 
-const debugWindowRendererWebpackOptions = {
-  ...commonWebpackOptions,
-  ...{
-    target: 'electron-renderer',
-    entry: debugWindowRendererEntryPoint,
-    output: {
-      filename: 'debugWindowRendererMain-compiled.js',
-      path: debugWindowRendererDir
-    }
-  }
-}
-
 const bluetoothRendererWebpackOptions = {
   ...commonWebpackOptions,
   ...{
@@ -124,6 +113,5 @@ const bluetoothRendererWebpackOptions = {
 module.exports = [
   electronMainWebpackOptions,
   electronSettingsRendererWebpackOptions,
-  debugWindowRendererWebpackOptions,
   bluetoothRendererWebpackOptions,
 ]

@@ -36,6 +36,10 @@ identity(param) -> param
 range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
 tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
+generateLogTimeStamp():String ->
+  today = new Date()
+  `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
+
 export {
   omitGawkFromSettings,
   omitInheritedProperties,
@@ -49,4 +53,5 @@ export {
   tenYearsFromNow,
   getProperAppVersion,
   recursivelyOmitObjProperties,
+  generateLogTimeStamp,
 }

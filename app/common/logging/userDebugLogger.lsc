@@ -1,9 +1,10 @@
 import util from 'util'
 
 import winston from 'winston'
+import isEmpty from 'is-empty'
 
 import { debugWindow } from '../../debugWindow/debugWindow.lsc'
-import { omitInheritedProperties, recursivelyOmitObjProperties } from '../utils.lsc'
+import { omitInheritedProperties, noop, generateLogTimeStamp } from '../utils.lsc'
 
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
@@ -15,14 +16,21 @@ UserDebugLoggerTransport = winston.transports.CustomLogger = (options):void ->
 util.inherits(UserDebugLoggerTransport, winston.Transport)
 
 UserDebugLoggerTransport.prototype.log = (level, msg = '', meta = {}, callback):void ->
-  debugWindow?.webContents?.send?(
-    'mainprocess:debug-info-sent',
-    { level, msg, meta: cleanMetaObj(meta) }
-  )
+  isError = level === 'error'
+  loggerMessage = if isError: 'Error:' else: msg
+  consoleMethod = if isError: 'error' else: 'log'
+
+  debugWindow?.webContents?.executeJavaScript?(
+    `console.${ consoleMethod }(\`${ generateLogTimeStamp() }  ${ loggerMessage }\n\`, ${ createObjectStringForLog(meta) });`
+  ).catch(noop)
+
   callback(null, true)
 
-cleanMetaObj(meta:Object):Object ->
-  recursivelyOmitObjProperties(omitInheritedProperties(meta), ['__stackCleaned__'])
+createObjectStringForLog(meta:Object):Object ->
+  cleanedMetaObj = omitInheritedProperties(meta)
+  if isEmpty(cleanedMetaObj): return ''
+  if cleanedMetaObj.stack: cleanedMetaObj.stack = cleanedMetaObj.stack.split(/\r\n?|\n/)
+  `JSON.stringify(${ JSON.stringify(cleanedMetaObj) }, null, 4)`
 
 
 export {

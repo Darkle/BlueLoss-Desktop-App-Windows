@@ -1,6 +1,6 @@
 import path from 'path'
 import url from 'url'
-import { BrowserWindow, Menu, ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 
 import { logger } from '../common/logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
@@ -12,44 +12,26 @@ debugWindowHTMLpath = url.format({
   slashes: true,
   pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
 })
-debugWindowProperties = {
-  width: 786,
-  height: 616,
-  title: 'BlueLoss Debug Window',
-  autoHideMenuBar: true,
-  resizable: false,
-  fullscreenable: false,
-  fullscreen: false,
-  show: false,
-  webPreferences: {
-    textAreasAreResizable: true,
-    devTools: ISDEV,
-  }
-}
 
-// Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
-debugWindowMenu = if ISDEV: Menu.buildFromTemplate([{role: 'reload'}]) else: null
 let debugWindow = null
 
 showDebugWindow():void ->
-  if debugWindow: return debugWindow.show()
+  if debugWindow:
+    return debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  now debugWindow = new BrowserWindow(debugWindowProperties)
+  now debugWindow = new BrowserWindow({ show: false })
   debugWindow.loadURL(debugWindowHTMLpath)
-  debugWindow.setMenu(debugWindowMenu)
   if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  debugWindow.once('ready-to-show', ():void ->
-    debugWindow.show()
-  )
-  debugWindow.once('close', ():void ->
-    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {userDebug: false})
-  )
   debugWindow.once('closed', ():void ->
     now debugWindow = null
   )
-  debugWindow.webContents.once('dom-ready', ():void ->
+  debugWindow.webContents.once('devtools-opened', ():void ->
     logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
+  )
+  debugWindow.webContents.once('devtools-closed', ():void ->
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {userDebug: false})
+    debugWindow.close()
   )
   debugWindow.webContents.once('crashed', (event):void ->
     logger.error('debugWindow.webContents crashed', event)
@@ -58,9 +40,6 @@ showDebugWindow():void ->
     logger.error('debugWindow unresponsive', event)
   )
 
-closeDebugWindow():void ->
-  debugWindow.close()
-
 ipcMain.on('renderer:user-debug-toggled', (event, userDebug: boolean):void ->
   if userDebug: showDebugWindow()
   else: debugWindow?.close?()
@@ -68,6 +47,4 @@ ipcMain.on('renderer:user-debug-toggled', (event, userDebug: boolean):void ->
 
 export {
   debugWindow,
-  showDebugWindow,
-  closeDebugWindow,
 }

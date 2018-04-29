@@ -9,7 +9,7 @@
     "electronWatch": "cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json",
     "styleWatch": "cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
-    "debug": "cross-env NODE_ENV=development,nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js",
+    "debug": "cross-env NODE_ENV=development nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js",
     "start": "cross-env NODE_ENV=production electron app/main/appMain-compiled.js",
     "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
     "snyk-protect": "snyk protect",

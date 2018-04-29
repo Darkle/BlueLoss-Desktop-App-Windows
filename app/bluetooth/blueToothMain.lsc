@@ -46,7 +46,7 @@ createBluetoothScannerWindow():Promise ->
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scanIn20Seconds()
 
-  logger.debug('====================New Scan Started====================')
+  logger.debug('=======New Scan Started=======')
 
   scannerWindow
     .webContents
