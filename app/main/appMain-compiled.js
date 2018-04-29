@@ -1159,12 +1159,10 @@ function getSettings() {
 }function addNewDeviceToSearchFor(deviceToAdd) {
   const { deviceId } = deviceToAdd;
   if (deviceIsInDevicesToSearchFor(deviceId)) return;
-
   updateSetting('devicesToSearchFor', _extends({}, settings.devicesToSearchFor, { [deviceId]: deviceToAdd }));
 }function removeNewDeviceToSearchFor(deviceToRemove) {
   const { deviceId } = deviceToRemove;
   if (!deviceIsInDevicesToSearchFor(deviceId)) return;
-
   updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
 }function filterDevicesToSearchFor(deviceIdToRemove) {
   return (() => {

@@ -36,7 +36,6 @@ updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
 addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
   { deviceId } = deviceToAdd
   if deviceIsInDevicesToSearchFor(deviceId): return
-
   updateSetting('devicesToSearchFor',
     {...settings.devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
   )
@@ -44,7 +43,6 @@ addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
 removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
   { deviceId } = deviceToRemove
   if !deviceIsInDevicesToSearchFor(deviceId): return
-
   updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
 
 filterDevicesToSearchFor(deviceIdToRemove: string):Object ->

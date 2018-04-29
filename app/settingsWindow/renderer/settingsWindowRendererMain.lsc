@@ -23,7 +23,7 @@ ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, device
 * When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
 * just use an object spread, we need to "sanitize" it with omitInheritedProperties.
 */
-getInitialSettingsFromMainProcess() ->
+getInitialSettingsFromMainProcess():Object ->
   ({
     ...{
       activeTab: 'statusTab',
