@@ -306,7 +306,7 @@ function init() {
 }function createBluetoothScannerWindow() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
-    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
+    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath); // can't sue data uri here as web bluetooth seems to need https
     if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
 
     scannerWindow.webContents.once('dom-ready', resolve);
@@ -822,11 +822,11 @@ const debugWindowDirPath = _path2.default.resolve(__dirname, '..', 'debugWindow'
 const debugWindowHTMLfilePath = _path2.default.join(debugWindowDirPath, 'debugWindow.html');
 const debugWindowJSfilePath = _path2.default.join(debugWindowDirPath, 'debugWindowRendererMain-compiled.js');
 const notificationWindowHTMLfilePath = _path2.default.join(__dirname, '..', 'appUpdates', 'updateNotification.html');
-const bluetoothRendereJSfilePath = _path2.default.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothRendererMain-compiled.js');
+const bluetoothRendererJSfilePath = _path2.default.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothRendererMain-compiled.js');
 
 function setUpDev() {
   if (false) {}
-  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath, notificationWindowHTMLfilePath, bluetoothRendereJSfilePath]);
+  __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath, notificationWindowHTMLfilePath, bluetoothRendererJSfilePath]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
   (0, _settingsWindow.showSettingsWindow)();
@@ -954,14 +954,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.debugWindow = undefined;
 
-var _path = __webpack_require__(/*! path */ "path");
-
-var _path2 = _interopRequireDefault(_path);
-
-var _url = __webpack_require__(/*! url */ "url");
-
-var _url2 = _interopRequireDefault(_url);
-
 var _electron = __webpack_require__(/*! electron */ "electron");
 
 var _logging = __webpack_require__(/*! ../common/logging/logging.lsc */ "./app/common/logging/logging.lsc");
@@ -972,21 +964,13 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 var _utils = __webpack_require__(/*! ../common/utils.lsc */ "./app/common/utils.lsc");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const debugWindowHTMLpath = _url2.default.format({
-  protocol: 'file',
-  slashes: true,
-  pathname: _path2.default.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
-});
-
 let debugWindow = null;
 
 function showDebugWindow() {
   if (debugWindow) {
     return debugWindow.webContents.openDevTools({ mode: 'undocked' });
-  }exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
-  debugWindow.loadURL(debugWindowHTMLpath);
+  }exports.debugWindow = debugWindow = new _electron.BrowserWindow();
+  debugWindow.loadURL('data:text/html');
   if (true) debugWindow.webContents.openDevTools({ mode: 'undocked' });
 
   debugWindow.once('closed', function () {

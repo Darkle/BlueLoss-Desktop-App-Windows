@@ -30,7 +30,7 @@ init():void ->
 createBluetoothScannerWindow():Promise ->
   new Promise((resolve):void ->
     now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
-    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
+    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)  // can't sue data uri here as web bluetooth seems to need https
     if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
     scannerWindow.webContents.once('dom-ready', resolve)

@@ -1,5 +1,3 @@
-import path from 'path'
-import url from 'url'
 import { BrowserWindow, ipcMain } from 'electron'
 
 import { logger } from '../common/logging/logging.lsc'
@@ -7,20 +5,14 @@ import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { omitGawkFromSettings } from '../common/utils.lsc'
 
-debugWindowHTMLpath = url.format({
-  protocol: 'file',
-  slashes: true,
-  pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
-})
-
 let debugWindow = null
 
 showDebugWindow():void ->
   if debugWindow:
     return debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
-  now debugWindow = new BrowserWindow({ show: false })
-  debugWindow.loadURL(debugWindowHTMLpath)
+  now debugWindow = new BrowserWindow()
+  debugWindow.loadURL('data:text/html')
   if ISDEV: debugWindow.webContents.openDevTools({ mode: 'undocked'})
 
   debugWindow.once('closed', ():void ->
