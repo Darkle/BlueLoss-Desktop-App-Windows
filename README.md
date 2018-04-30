@@ -21,9 +21,9 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
 - Device App:
 
-  - For Blueloss to work properly, you also need to install an app on your device. 
-  - Android: 
-  - iOS: 
+  - For Blueloss to work properly, you also need to install an app on your device.
+  - Android:
+  - iOS:
 
 ## Screenshots
 
@@ -65,7 +65,7 @@ The following settings are configurable in the BlueLoss settings window:
 
 BlueLoss searches for devices that are discoverable - this means that the device is currently broadcasting its Bluetooth information. By default most devices don't do this all the time for security reasons.
 
-We get around this with an app on the device that makes it always broadcast its Bluetooth details. Obviously there are security issues with that, so we try to mitigate the risk by only broadcasting when you are in a trusted location (e.g. work/home). Having said that, if you are in need of something that is very secure, Blueloss is probably not for you. 
+We get around this with an app on the device that makes it always broadcast its Bluetooth details. Obviously there are security issues with that, so we try to mitigate the risk by only broadcasting when you are in a trusted location (e.g. work/home). Having said that, if you are in need of something that is very secure, Blueloss is probably not for you.
 
 Also, BlueLoss does not pair with the Bluetooth device, it only matches the Bluetooth MAC address. This means you can fool BlueLoss if you spoof a device's MAC address.
 
@@ -108,3 +108,6 @@ Click the image below if you have a bitcoin app installed, or use it as a QR cod
 - [Hyperapp](https://github.com/hyperapp/hyperapp)
 
 - [Xel Toolkit](https://xel-toolkit.org/)
+
+
+[![Known Vulnerabilities](https://snyk.io/test/github/darkle/blueloss/badge.svg?targetFile=package.json)](https://snyk.io/test/github/darkle/blueloss?targetFile=package.json)
