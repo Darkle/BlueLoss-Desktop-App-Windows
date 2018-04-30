@@ -19,6 +19,12 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
     - then `npm start`
 
+- Device App:
+
+  - For Blueloss to work properly, you also need to install an app on your device. 
+  - Android: 
+  - iOS: 
+
 ## Screenshots
 
 ![BlueLoss Status WIndow](https://github.com/Darkle/BlueLoss/raw/master/resources/readmeMedia/BlueLoss-Settings-Status.png)
@@ -43,27 +49,29 @@ BlueLoss scans for discoverable Bluetooth devices once every 20 seconds. If the 
 
 The following settings are configurable in the BlueLoss settings window:
 
-- **Enable/Disable BlueLoss** (default: enabled): You can enable/disable BlueLoss from either the system tray or the status window (see screenshot above)
+- **Enable/Disable BlueLoss** (default: enabled): You can enable/disable BlueLoss from either the system tray or the status window (see screenshot above).
 
 - **Run On System Startup** (default: true)
 
-- **Tray Icon Color** (default: blue): You can change the system tray (or menu bar) icon color to either white or blue
+- **Tray Icon Color** (default: blue): You can change the system tray (or menu bar) icon color to either white or blue.
 
-- **Time To Lock** (default: 3 minutes): This determins how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost
+- **Time To Lock** (default: 3 minutes): This determines how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost.
 
 - **Report Errors** (default: true): This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
 
-## Limitations (Important, Please Read):
+## Extra Info:
+
+Blueloss searches for devices that are discoverable. This means that the device is currently broadcasting its Bluetooth information. By default most devices don't do this all the time for security reasons.
 
 - Android:
 
-  - A lot of Android devices will temporarily disable WiFi when the device has gone to sleep & does not have it's power cable plugged in & has been asleep for about an hour. I have yet to find a solution to this issue. If you google for <a href="https://www.google.com/search?q=wifi+sleep+android" target="_blank">wifi sleep android</a> you can see that it's a pretty common issue with lots of suggestions, of which I tried a bunch. The only way that I have found to prevent your phone from disabling it's WiFi when asleep is to make sure you have your phone's power cable plugged in, and to have your WiFi advanced settings for "Keep WiFi on during sleep" set to "Always".
+  - On Android, a device will only be discoverable when the Bluetooth settings are open. We get around this with an Android app available here: 
 
 - iOS:
 
-  - iOS seems to do the same and disables the wifi when the device is asleep. It seems if you plug the device in to a power source it should stay connected to WiFi when the device is locked.
+  - iOS.
 
 ## Support
 
