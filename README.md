@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-BlueLoss is a desktop app that locks your computer when a Bluetooth device.
+BlueLoss is a desktop app that locks your computer when a Bluetooth device is no longer present.
 
 ## Installation
 
@@ -13,7 +13,7 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device.
 - Advanced:
 
   - For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
-    - `npm run devTasks` (select `createEnvFile`)
+    - `npm run devTasks` (select `createEnvFile`)
 
     - then `npm install`
 
@@ -27,7 +27,7 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device.
 
 ## How To Use
 
-When you run BlueLoss, it sits in your system tray (or menu bar on MacOS) and searches for devices on your network.
+When you run BlueLoss, it sits in your system tray (or menu bar on MacOS) and searches for discoverable Bluetooth devices.
 
 #### System Tray (Menu Bar) Options:
 
@@ -35,9 +35,9 @@ To open the BlueLoss settings/status window Double clicking on the system tray i
 
 #### Adding A Device:
 
-With the BlueLoss settings/status window open, you can now add a device that BlueLoss is supposed to look for in the scan. Note: the first scan on startup may not immediately show all your devices on the network - it may take till the second scan for them to appear.
+With the BlueLoss settings/status window open, you can now add a device that BlueLoss is supposed to look for in the scan. Note: it may take about 20 seconds for devices to show up.
 
-BlueLoss scans the network once every 30 seconds. If the device you have added to look for is not found, and enough time has passed since it was last seen on the network, it will lock the computer BlueLoss is running on. The amount of time passed that it checks for is configurable in the settings.
+BlueLoss scans for discoverable Bluetooth devices once every 20 seconds. If the device you have added to look for is not found, and enough time has passed since it was last seen on the network, it will lock the computer BlueLoss is running on. The amount of time passed that it checks for is configurable in the settings.
 
 #### Settings:
 
@@ -49,7 +49,7 @@ The following settings are configurable in the BlueLoss settings window:
 
 - **Tray Icon Color** (default: blue): You can change the system tray (or menu bar) icon color to either white or blue
 
-- **Time To Lock** (default: 1 minute): This determins how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost
+- **Time To Lock** (default: 3 minutes): This determins how long BlueLoss should wait before locking the computer after the device it's looking for on the network has been lost
 
 - **Report Errors** (default: true): This will report errors to [Rollbar.com](https://rollbar.com). This helps development of the app.
 

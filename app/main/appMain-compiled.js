@@ -1240,7 +1240,7 @@ const defaultSettings = {
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
-  timeToLock: 1,
+  timeToLock: 3,
   reportErrors: true,
   firstRun: true,
   settingsWindowPosition: null,
