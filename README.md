@@ -61,17 +61,13 @@ The following settings are configurable in the BlueLoss settings window:
 
 - **User Debugger** (default: disabled): Enabling this will show a debug window with information that may help you diagnose any issues.
 
-## Extra Info:
+## Security Info:
 
-Blueloss searches for devices that are discoverable. This means that the device is currently broadcasting its Bluetooth information. By default most devices don't do this all the time for security reasons.
+BlueLoss searches for devices that are discoverable - this means that the device is currently broadcasting its Bluetooth information. By default most devices don't do this all the time for security reasons.
 
-- Android:
+We get around this with an app on the device that makes it always broadcast its Bluetooth details. Obviously there are security issues with that, so we try to mitigate the risk by only broadcasting when you are in a trusted location (e.g. work/home). Having said that, if you are in need of something that is very secure, Blueloss is probably not for you. 
 
-  - On Android, a device will only be discoverable when the Bluetooth settings are open. We get around this with an Android app available here: 
-
-- iOS:
-
-  - iOS.
+Also, BlueLoss does not pair with the Bluetooth device, it only matches the Bluetooth MAC address. This means you can fool BlueLoss if you spoof a device's MAC address.
 
 ## Support
 
