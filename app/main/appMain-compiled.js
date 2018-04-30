@@ -442,9 +442,7 @@ function dedupeDeviceList(deviceList) {
     }return newDeviceList;
   }, []);
 }function betterNamedDevice(existingDevice, newDevice) {
-  var _existingDevice$devic;
-
-  return (existingDevice == null ? void 0 : (_existingDevice$devic = existingDevice.deviceName) == null ? void 0 : _existingDevice$devic.length) === 0 && newDevice.deviceName.length > 0;
+  return existingDevice.deviceName.length === 0 && newDevice.deviceName.length > 0;
 }function updateDeviceSearchingFor(deviceId, timeStamp) {
   (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', timeStamp);
 }exports.handleScanResults = handleScanResults;
