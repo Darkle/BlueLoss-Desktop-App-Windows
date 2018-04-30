@@ -63,7 +63,7 @@ dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
   , [])
 
 betterNamedDevice(existingDevice, newDevice:Object):Boolean ->
-  existingDevice?.deviceName?.length === 0 and newDevice.deviceName.length > 0
+  existingDevice.deviceName.length === 0 and newDevice.deviceName.length > 0
 
 updateDeviceSearchingFor(deviceId:String, timeStamp:Number):void ->
   updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', timeStamp)
