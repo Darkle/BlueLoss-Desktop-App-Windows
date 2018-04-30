@@ -45,7 +45,7 @@ export default ({ actions, state }) ->
         )
       }
       <div id="deviceAddHeader">
-        Devices Available:
+        Devices To Add:
       </div>
       {
         state.devicesCanSee

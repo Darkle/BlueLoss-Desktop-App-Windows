@@ -362,24 +362,17 @@ x-button[toggled] {
   overflow: auto;
 }
 #settingsTabInfoWindow > x-box:nth-child(1) {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 #settingsTabInfoWindow > x-box:nth-child(2) {
-  margin-top: 10px;
-  min-height: 16%;
+  margin-top: 30px;
+  min-height: 13%;
 }
 #settingsTabInfoWindow > x-box:nth-child(3) {
-  min-height: 28%;
+  min-height: 13%;
 }
 #settingsTabInfoWindow > x-box:nth-child(4) {
-  min-height: 11%;
-}
-#settingsTabInfoWindow > x-box:nth-child(6) {
-  min-height: 11%;
-  margin-top: -10px;
-}
-#settingsTabInfoWindow > x-box:last-child {
-  margin-bottom: 20px;
+  min-height: 14%;
 }
 #settingsTabInfoWindow > x-box {
   width: 514px;
