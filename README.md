@@ -10,22 +10,11 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
   - Requires Windows 10
 
-- MacOS:
-
-  - Requires OS X Yosemite or later.
-
-  - Some MacBooks may not work: Check "About this Mac" / "System Report" / "Bluetooth" and verify that Low Energy is supported.
-
-- Linux:
-
-  - See [Linux Support](#linux-support)
-
-
 ## Installation
 
 - Basic:
 
-  - Download [here](https://github.com/Darkle/BlueLoss/releases) and install for your OS.
+  - Download [here](https://github.com/Darkle/BlueLoss/releases) and install. A portable version is also available.
 
 - Advanced:
 
@@ -85,18 +74,6 @@ BlueLoss searches for devices that are discoverable - this means that the device
 We get around this with an app on the device that makes it always broadcast its Bluetooth details. Obviously there are security issues with that, so we try to mitigate the risk by only broadcasting when you are in a trusted location (e.g. work/home). Having said that, if you are in need of something that is very secure, Blueloss is probably not for you.
 
 Also, BlueLoss does not pair with the Bluetooth device, it only matches the Bluetooth MAC address. This means you can fool BlueLoss if you spoof a device's MAC address.
-
-
-
-## Linux Support:
-
-Unfortunately I wasn't able to get BlueLoss to work properly on Linux (tested on Ubuntu 17.10). The BlueLoss desktop app itself runs fine, it's just that it doesn't see any Bluetooth devices. This could possibly be an issue with my machine or my Bluetooth dongle though.
-
-If you would like to try it out on your Linux machine, use the advanced installation method described above and make sure that you have the Linux requirements for Web Bluetooth installed: https://github.com/WebBluetoothCG/web-bluetooth/blob/master/implementation-status.md#notes
-
-If you do get it working on Linux, let me know and I will release an AppImage for easy Linux installation.
-
-
 
 ## Support
 
