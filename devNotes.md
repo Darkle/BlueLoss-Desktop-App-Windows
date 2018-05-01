@@ -6,3 +6,5 @@
 * By default, Android devices are only discoverable by Bluetooth when you open the Android Bluetooth settings on the device.
 * Linux:
   * On Linux, if you are using node via snaps, you may run in to an issue something akin to `The node binary used for scripts is /snap/bin/node but npm is using /snap/node/367/bin/node itself. Use the '--scripts-prepend-node-path' option to include the path for the node binary npm was executed with.`. If that happens, do this: https://github.com/npm/npm/issues/15398#issuecomment-276300141
+* MacOS:
+  * I had some weird issues installing the project packages with npm install (i was using node@8.11.1 and npm@6.0.0). However updating to the latest node seemed to fix things.
