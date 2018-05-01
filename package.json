@@ -35,11 +35,11 @@
     "lowdb": "^1.0.0",
     "ono": "^4.0.5",
     "rollbar": "^2.3.9",
+    "snyk": "^1.76.0",
     "stringify-object": "^3.2.2",
     "timeproxy": "^1.2.1",
     "typa": "^0.1.18",
-    "winston": "^2.4.1",
-    "snyk": "^1.76.0"
+    "winston": "^2.4.1"
   },
   "devDependencies": {
     "@oigroup/babel-preset-lightscript": "^3.1.0-alpha.2",

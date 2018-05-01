@@ -4,6 +4,23 @@
 
 BlueLoss is a desktop app that locks your computer when a Bluetooth device is no longer present.
 
+## Requirements:
+
+- Windows:
+
+  - Requires Windows 10
+
+- MacOS:
+
+  - Requires OS X Yosemite or later.
+
+  - Some MacBooks may not work: Check "About this Mac" / "System Report" / "Bluetooth" and verify that Low Energy is supported.
+
+- Linux:
+
+  - See [Linux Support](#linux-support)
+
+
 ## Installation
 
 - Basic:
