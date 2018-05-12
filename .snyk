@@ -1,0 +1,63 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.11.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'npm:diff:20180305':
+    - fs-jetpack > diff:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+    - fs-jetpack > mocha > diff:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+  'npm:growl:20160721':
+    - fs-jetpack > growl:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+    - fs-jetpack > mocha > growl:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+  'npm:hoek:20180212':
+    - fs-jetpack > boom > hoek:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+    - fs-jetpack > codecov > request > hawk > hoek:
+        reason: None given
+        expires: '2018-05-30T07:25:48.333Z'
+    - fs-jetpack > codecov > request > hawk > boom > hoek:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+    - fs-jetpack > codecov > request > hawk > sntp > hoek:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+    - fs-jetpack > codecov > request > hawk > cryptiles > boom > hoek:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+  'npm:is-my-json-valid:20180214':
+    - fs-jetpack > codecov > request > har-validator > is-my-json-valid:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+  'npm:lodash:20180130':
+    - fs-jetpack > lodash:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+    - fs-jetpack > release-assist > inquirer > lodash:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+  'npm:sshpk:20180409':
+    - fs-jetpack > codecov > request > http-signature > sshpk:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+  'npm:tunnel-agent:20170305':
+    - fs-jetpack > codecov > request > tunnel-agent:
+        reason: None given
+        expires: '2018-05-30T07:25:48.334Z'
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:debug:20170905':
+    - winston-rollbar-transport > rollbar > debug:
+        patched: '2017-10-03T08:53:06.396Z'
+      fs-jetpack > mocha > debug:
+        patched: '2018-04-30T07:23:54.141Z'
+  'npm:ms:20170412':
+    - winston-rollbar-transport > rollbar > debug > ms:
+        patched: '2017-10-03T08:53:06.396Z'

@@ -6,13 +6,9 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
 ## Requirements:
 
-- Linux:
+- Windows:
 
-  - systray thing
-
-  - Check on a new installation on new drive if need everything here: https://github.com/waeco/node-bluez#install or
-
-  mention that can install bluez via snap https://docs.ubuntu.com/core/en/stacks/bluetooth/bluez/docs/install-bluez
+  - Requires Windows 10
 
 ## Installation
 
