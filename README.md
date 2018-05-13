@@ -6,9 +6,7 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
 ## Requirements:
 
-- Windows:
-
-  - Requires Windows 10
+- Windows 10
 
 ## Installation
 

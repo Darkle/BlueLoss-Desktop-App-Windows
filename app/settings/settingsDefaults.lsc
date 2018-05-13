@@ -21,7 +21,7 @@ defaultSettings: {
   firstRun: true,
   settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0.2.3',
+  skipUpdateVersion: '0',
 }
 
 export {
