@@ -113,17 +113,17 @@ function packageWin64(){
     .then(packagingSuccess, packagingError)
 }
 
-function packageLinux64(){
-  return prepareForPackaging()
-    .then(packageApp)
-    .then(packagingSuccess, packagingError)
-}
+// function packageLinux64(){
+//   return prepareForPackaging()
+//     .then(packageApp)
+//     .then(packagingSuccess, packagingError)
+// }
 
-function packageMacOS(){
-  return prepareForPackaging()
-    .then(packageApp)
-    .then(packagingSuccess, packagingError)
-}
+// function packageMacOS(){
+//   return prepareForPackaging()
+//     .then(packageApp)
+//     .then(packagingSuccess, packagingError)
+// }
 
 function packagingSuccess(){
   console.log(chalk.green('Successfully Packaged Electron App!'))
@@ -136,8 +136,8 @@ function packagingError(err){
 
 module.exports = {
   packageWin64,
-  packageLinux64,
-  packageMacOS,
+  // packageLinux64,
+  // packageMacOS,
   createWindowsInstaller,
   buildWebpackAndStylus,
 }
