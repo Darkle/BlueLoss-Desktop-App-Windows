@@ -140,4 +140,5 @@ module.exports = {
   // packageMacOS,
   createWindowsInstaller,
   buildWebpackAndStylus,
+  createWindowsPortable,
 }
