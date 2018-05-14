@@ -51,6 +51,10 @@ ignore:
     - fs-jetpack > codecov > request > tunnel-agent:
         reason: None given
         expires: '2018-06-11T03:21:34.762Z'
+  'npm:stringstream:20180511':
+    - fs-jetpack > codecov > request > stringstream:
+        reason: None given
+        expires: '2018-06-13T22:07:26.847Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:debug:20170905':
