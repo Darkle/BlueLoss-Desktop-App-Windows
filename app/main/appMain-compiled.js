@@ -617,13 +617,13 @@ function dedupeDeviceList(deviceList) {
   return deviceList.reduce(function (newDeviceList, newDevice) {
     const newDeviceId = newDevice.deviceId;
 
-    const deviceAlreadyInNewList = newDeviceList.find(function (device) {
+    const existingDevice = newDeviceList.find(function (device) {
       return device.deviceId === newDeviceId;
     });
 
-    if (!deviceAlreadyInNewList) {
+    if (!existingDevice) {
       return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
-    }if (betterNamedDevice(deviceAlreadyInNewList, newDevice)) {
+    }if (betterNamedDevice(existingDevice, newDevice)) {
       var _ref;
 
       return [...(_ref = newDeviceList.filter(function (device) {

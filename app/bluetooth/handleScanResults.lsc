@@ -51,12 +51,12 @@ dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
   deviceList.reduce((newDeviceList, newDevice) ->
     newDeviceId = newDevice.deviceId
 
-    deviceAlreadyInNewList = newDeviceList.find(device -> device.deviceId === newDeviceId )
+    existingDevice = newDeviceList.find(device -> device.deviceId === newDeviceId )
 
-    if !deviceAlreadyInNewList:
+    if !existingDevice:
       return [...newDeviceList, newDevice]
 
-    if betterNamedDevice(deviceAlreadyInNewList, newDevice):
+    if betterNamedDevice(existingDevice, newDevice):
       return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
 
     newDeviceList
