@@ -16,10 +16,7 @@ const promptOptions = {
   choices: ['major', 'minor', 'patch']
 }
 let newAppVersion = null
-/**
- * We bump the package.json with npm (which also adds a git tag with the version),
- * also updateInfo.json and in settingsDefaults.lsc.
- */
+
 function bumpVersion(){
   return inquirer.prompt([promptOptions])
     .then(({ bumpType }) => {
