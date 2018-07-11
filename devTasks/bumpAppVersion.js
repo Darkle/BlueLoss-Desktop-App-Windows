@@ -1,15 +1,12 @@
 // @ts-nocheck
 const path = require('path')
 
-const jetpack = require('fs-jetpack')
 const exeq = require('exeq')
 const semver = require('semver')
 const inquirer = require('inquirer')
 
 const basePath = path.join(__dirname, '..')
 const currentAppVersion = require(path.join(basePath, 'package.json')).version
-const updateInfoJsonFilePath = path.join(basePath, 'updateInfo.json')
-const settingsDefaultsFilePath = path.join(basePath, 'app', 'settings', 'settingsDefaults.lsc')
 
 const promptOptions = {
   type: 'list',
@@ -30,19 +27,6 @@ function bumpVersion(){
       console.log(`running 'npm version ${ newAppVersion }' and updating version in updateInfo.json and in settingsDefaults.lsc`)
     })
     .then(() => exeq(`npm version ${ newAppVersion }`))
-    .then(() => jetpack.writeAsync(updateInfoJsonFilePath, { latestVersion: newAppVersion }))
-    .then(() => jetpack.readAsync(settingsDefaultsFilePath))
-    .then(result =>
-      result.split(/\r\n?|\n/).map(line => {
-        if(!line.includes('skipUpdateVersion') || line.includes('string')) {
-          return line
-        }
-        return `  skipUpdateVersion: '${ newAppVersion }',`
-      }).join('\n')
-    )
-    .then(newFileData =>
-      jetpack.writeAsync(settingsDefaultsFilePath, newFileData)
-    )
     .then(() => {
       console.log(`Successfully bumped BlueLoss version to ${ newAppVersion }`)
     })

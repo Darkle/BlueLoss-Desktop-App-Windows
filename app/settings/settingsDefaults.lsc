@@ -9,8 +9,6 @@ defaultSettings: {
   reportErrors: boolean,
   firstRun: boolean,
   settingsWindowPosition: SettingsWindowPositionType,
-  dateLastCheckedForAppUpdate: number,
-  skipUpdateVersion: string,
 } = {
   blueLossEnabled: true,
   runOnStartup: true,
@@ -20,8 +18,6 @@ defaultSettings: {
   reportErrors: true,
   firstRun: true,
   settingsWindowPosition: null,
-  dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0',
 }
 
 export {
