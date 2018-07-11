@@ -1,6 +1,6 @@
 {
   "watch": [
-    "/app/main/appMain-compiled.js"
+    "/app/appMain-compiled.js"
   ],
   "execMap": {
     "js": "node_modules/.bin/electron"

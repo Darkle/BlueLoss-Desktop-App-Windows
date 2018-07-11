@@ -6,11 +6,11 @@ const nodeExternals = require('webpack-node-externals')
 
 const projectDir = path.resolve(__dirname)
 const appDir = path.join(projectDir, 'app')
-const mainDir = path.join(appDir, 'main')
-const mainAppEntryPoint = path.join(mainDir, 'appMain.lsc')
-const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer')
+const componentsDir = path.join(appDir, 'app')
+const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
+const settingsWindowRendererDir = path.join(componentsDir, 'settingsWindow', 'renderer')
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
-const bluetoothRendererDir = path.join(appDir, 'bluetooth', 'renderer')
+const bluetoothRendererDir = path.join(componentsDir, 'bluetooth', 'renderer')
 const bluetoothRendererEntryPoint = path.join(bluetoothRendererDir, 'bluetoothRendererMain.lsc')
 const ISDEV = process.env.NODE_ENV !== 'production'
 
@@ -73,7 +73,7 @@ const electronMainWebpackOptions = {
     entry: mainAppEntryPoint,
     output: {
       filename: 'appMain-compiled.js',
-      path: mainDir
+      path: appDir
     }
   }
 }
