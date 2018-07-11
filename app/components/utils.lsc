@@ -1,6 +1,8 @@
 import tp from 'timeproxy'
 import is from 'typa'
 
+import logger from './logging/logging.lsc'
+
 /**
  * If you run Electron by pointing it to a js file that's not in the base parent directory with the
  * package.json it will report the Electron binary version rather than what's in your package.json.
@@ -19,25 +21,30 @@ identity(param) -> param
 range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
 tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
-recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
-  Object.keys(obj).reduce((newObj, propName) ->
-    for elem propertyToFilter in propertyFiltersArr:
-      if propertyToFilter === propName: return newObj
-    if is.obj(obj[propName]):
-      return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
-    {...newObj, ...{ [propName]: obj[propName] }}
-  , {})
+// recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
+//   Object.keys(obj).reduce((newObj, propName) ->
+//     for elem propertyToFilter in propertyFiltersArr:
+//       if propertyToFilter === propName: return newObj
+//     if is.obj(obj[propName]):
+//       return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
+//     {...newObj, ...{ [propName]: obj[propName] }}
+//   , {})
 
-omitInheritedProperties(obj: Object):Object ->
-  Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
-    if is.obj(obj[propName]):
-      return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
-    {...newObj, ...{ [propName]: obj[propName] }}
-  , {})
+// omitInheritedProperties(obj: Object):Object ->
+//   Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
+//     if is.obj(obj[propName]):
+//       return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
+//     {...newObj, ...{ [propName]: obj[propName] }}
+//   , {})
 
 generateLogTimeStamp():String ->
   today = new Date()
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
+
+bailOnFatalError(err):void ->
+  console.error(err)
+  logger?.error?(err)
+  process.exit(1)
 
 export {
   omitGawkFromSettings,
@@ -53,4 +60,5 @@ export {
   getProperAppVersion,
   recursivelyOmitObjProperties,
   generateLogTimeStamp,
+  bailOnFatalError,
 }
