@@ -85,7 +85,6 @@
         "allowForLoopAfterthoughts": true
       }
     ],
-    "no-process-exit": "error",
     "no-shadow": "error",
     "no-spaced-func": "error",
     "no-throw-literal": "error",

@@ -1,3 +1,4 @@
+if !process.env.NODE_ENV: process.env.NODE_ENV = "production"
 import '../../config/env.lsc'
 import { app as electronApp } from 'electron'
 
@@ -34,6 +35,6 @@ electronApp.on('window-all-closed', noop)
 process.on('unhandledRejection', logger.error)
 process.on('uncaughtException', (err):void ->
   logger.error(err)
-  process.exit(1) // eslint-disable-line no-process-exit
+  process.exit(1)
 )
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const path = require('path')
 
 const webpack = require('webpack')
@@ -11,10 +12,9 @@ const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer'
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
 const bluetoothRendererDir = path.join(appDir, 'bluetooth', 'renderer')
 const bluetoothRendererEntryPoint = path.join(bluetoothRendererDir, 'bluetoothRendererMain.lsc')
-const isDev = process.env.NODE_ENV !== 'production'
-const debugging = isDev && process.env.nodeDebug === 'true'
+const ISDEV = process.env.NODE_ENV !== 'production'
 
-console.log('process.env.nodeDebug: ', process.env.nodeDebug)
+console.log('ISDEV: ', ISDEV)
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 /*****
@@ -35,7 +35,7 @@ const commonWebpackOptions = {
     setImmediate: false
   },
   mode: process.env.NODE_ENV,
-  devtool: debugging ? 'eval-source-map' : 'none',
+  devtool: ISDEV ? 'source-map' : 'none',
   context: projectDir,
   module: {
     rules: [
@@ -46,7 +46,7 @@ const commonWebpackOptions = {
         ],
         loader: 'babel-loader',
         options: {
-          sourceMap: debugging
+          sourceMap: ISDEV
         }
       },
     ]
@@ -56,20 +56,12 @@ const commonWebpackOptions = {
   },
   externals: [nodeExternals()],
   optimization: {
-    /**
-    * Not minimizing for better error messages. Also the js is pretty small. Also,
-    * minification could slightly increase the app startup as parsing minified source
-    * is a tiny bit slower.
-    */
     minimize: false
-  },
-  performance: {
-    hints: isDev ? false: 'error'
   },
   plugins: [
     // Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
     new webpack.DefinePlugin({
-      ISDEV: (process.env.NODE_ENV !== 'production')
+      ISDEV
     })
   ]
 }
