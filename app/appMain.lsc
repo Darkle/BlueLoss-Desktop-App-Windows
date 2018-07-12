@@ -21,7 +21,6 @@ electronApp.once('ready', ():void ->
   startBluetoothScanning()
   setUpDev()
   showDebugWindow()
-
   { firstRun } = getSettings()
   if firstRun:
     updateSetting('firstRun', !firstRun)
