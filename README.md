@@ -1,1 +1,1 @@
-See https://blueloss.github.io
+See https://darkle.github.io/BlueLoss/
