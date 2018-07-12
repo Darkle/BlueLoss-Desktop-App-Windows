@@ -2,7 +2,7 @@
 import { ipcMain } from 'electron'
 import winston from 'winston'
 
-import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
+import { CustomRollbarTransport, rollbarLogger, createRollbarLogger } from './customRollbarTransport.lsc'
 import { UserDebugLoggerTransport } from './userDebugLogger.lsc'
 import { getSettings } from '../settings/settings.lsc'
 
@@ -40,6 +40,8 @@ initLogging():void ->
     addRollbarLogging()
 
   logger.add(UserDebugLoggerTransport, userDebugTransportOptions)
+  createRollbarLogger()
+
 /**
 * We also need to enable/disable the rollbar module itself as well,
 * as it is set to report uncaught exceptions as well as logging

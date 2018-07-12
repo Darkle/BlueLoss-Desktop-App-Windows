@@ -33,4 +33,3 @@ electronApp.on('window-all-closed', noop)
 
 process.on('unhandledRejection', bailOnFatalError)
 process.on('uncaughtException', bailOnFatalError)
-

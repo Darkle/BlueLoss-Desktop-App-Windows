@@ -205,7 +205,7 @@ function init() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
-    // if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+    if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
 
     scannerWindow.webContents.once('dom-ready', resolve);
     scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
@@ -668,6 +668,7 @@ function initLogging() {
     });
   } // dont send errors to rollbar in dev && only if enabled.
   if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
+  (0, _customRollbarTransport.createRollbarLogger)();
 } /**
   * We also need to enable/disable the rollbar module itself as well,
   * as it is set to report uncaught exceptions as well as logging
@@ -1358,10 +1359,15 @@ function getProperAppVersion() {
 }function generateLogTimeStamp() {
   const today = new Date();
   return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
-}function bailOnFatalError(err) {
+} /*****
+  * Delay a little bit before exiting to allow the error to be sent to rollbar.
+  */
+function bailOnFatalError(err) {
   console.error(err);
   _logging.logger == null ? void 0 : typeof _logging.logger.error !== 'function' ? void 0 : _logging.logger.error(err);
-  process.exit(1);
+  setTimeout(function () {
+    return process.exit(1);
+  }, _timeproxy2.default.THREE_SECONDS);
 }exports.omitGawkFromSettings = omitGawkFromSettings;
 exports.omitInheritedProperties = omitInheritedProperties;
 exports.noop = noop;
