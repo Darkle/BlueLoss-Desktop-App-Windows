@@ -5,7 +5,6 @@ import { BrowserWindow } from 'electron'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-// import { omitGawkFromSettings } from '../utils.lsc'
 
 debugWindowHTMLpath = url.format({
   protocol: 'file',
@@ -15,9 +14,12 @@ debugWindowHTMLpath = url.format({
 let debugWindow = null
 
 showDebugWindow():void ->
+  if !getSettings().debugMode: return
   if debugWindow:
     return debugWindow.webContents.openDevTools({ mode: 'undocked'})
+  createDebugWindow()
 
+createDebugWindow():void ->
   now debugWindow = new BrowserWindow({ show: false})
   debugWindow.loadURL(debugWindowHTMLpath)
   debugWindow.webContents.openDevTools({ mode: 'undocked'})
@@ -31,9 +33,7 @@ showDebugWindow():void ->
    * printing 'Current BlueLoss settings: (unknown)'
    */
   debugWindow.webContents.once('devtools-opened', ():void ->
-    setTimeout(() => {
-      logger.debug('Current BlueLoss settings:', JSON.stringify(getSettings()))
-    }, 500)
+    logger.debug('Current BlueLoss settings:', getSettings())
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {debugMode: false})

@@ -11,20 +11,20 @@ import { logger} from './logging/logging.lsc'
 appVersion = require('../../package.json').version
 
 getProperAppVersion():string -> appVersion
-// omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
+omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 noop() -> return
-compose(...fns) -> value -> fns.reduceRight((accumulator, current) => current(accumulator), value)
+pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
 identity(param) -> param
 tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
-// recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
-//   Object.keys(obj).reduce((newObj, propName) ->
-//     for elem propertyToFilter in propertyFiltersArr:
-//       if propertyToFilter === propName: return newObj
-//     if is.obj(obj[propName]):
-//       return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
-//     {...newObj, ...{ [propName]: obj[propName] }}
-//   , {})
+recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
+  Object.keys(obj).reduce((newObj, propName) ->
+    for elem propertyToFilter in propertyFiltersArr:
+      if propertyToFilter === propName: return newObj
+    if is.obj(obj[propName]):
+      return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
+    {...newObj, ...{ [propName]: obj[propName] }}
+  , {})
 
 omitInheritedProperties(obj: Object):Object ->
   Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
@@ -43,14 +43,13 @@ bailOnFatalError(err):void ->
   process.exit(1)
 
 export {
-  // omitGawkFromSettings,
+  omitGawkFromSettings,
   omitInheritedProperties,
   noop,
-  compose,
+  pipe,
   identity,
   tenYearsFromNow,
   getProperAppVersion,
-  // recursivelyOmitObjProperties,
   generateLogTimeStamp,
   bailOnFatalError,
 }

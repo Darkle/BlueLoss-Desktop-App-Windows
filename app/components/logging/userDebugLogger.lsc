@@ -4,7 +4,7 @@ import winston from 'winston'
 import isEmpty from 'is-empty'
 
 import { debugWindow } from '../debugWindow/debugWindow.lsc'
-import { omitInheritedProperties, noop, generateLogTimeStamp } from '../utils.lsc'
+import { omitInheritedProperties, noop, generateLogTimeStamp, pipe, omitGawkFromSettings } from '../utils.lsc'
 
 /****
 * This is the loggger for when the user checks the "debug" checkbox in the options
@@ -26,12 +26,13 @@ UserDebugLoggerTransport.prototype.log = (level, msg = '', meta = {}, callback):
 
   callback(null, true)
 
+cleanMetaObject = pipe(omitGawkFromSettings, omitInheritedProperties)
+
 createObjectStringForLog(meta:Object):Object ->
-  cleanedMetaObj = omitInheritedProperties(meta)
+  cleanedMetaObj = cleanMetaObject(meta)
   if isEmpty(cleanedMetaObj): return ''
   if cleanedMetaObj.stack: cleanedMetaObj.stack = cleanedMetaObj.stack.split(/\r\n?|\n/)
   `JSON.stringify(${ JSON.stringify(cleanedMetaObj) }, null, 4)`
-
 
 export {
   UserDebugLoggerTransport,

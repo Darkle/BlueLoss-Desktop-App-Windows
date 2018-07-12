@@ -116,6 +116,8 @@ var _settingsWindow = __webpack_require__(/*! ./components/settingsWindow/settin
 
 var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
 
+var _debugWindow = __webpack_require__(/*! ./components/debugWindow/debugWindow.lsc */ "./app/components/debugWindow/debugWindow.lsc");
+
 if (false) {}
 
 
@@ -127,6 +129,7 @@ _electron.app.once('ready', function () {
   (0, _tray.initTrayMenu)();
   (0, _blueToothMain.init)();
   (0, _setUpDev.setUpDev)();
+  (0, _debugWindow.showDebugWindow)();
 
   const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
@@ -266,7 +269,7 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const processDeviceListAndSendToSettingsWindow = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeDeviceList, sendDevicesCanSeeToSettingsWindow);
+const processDeviceListAndSendToSettingsWindow = (0, _utils.pipe)(dedupeDeviceList, addTimeStampToSeenDevices, sendDevicesCanSeeToSettingsWindow);
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
@@ -367,8 +370,6 @@ var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.l
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import { omitGawkFromSettings } from '../utils.lsc'
-
 const debugWindowHTMLpath = _url2.default.format({
   protocol: 'file',
   slashes: true,
@@ -377,9 +378,12 @@ const debugWindowHTMLpath = _url2.default.format({
 let debugWindow = null;
 
 function showDebugWindow() {
+  if (!(0, _settings.getSettings)().debugMode) return;
   if (debugWindow) {
     return debugWindow.webContents.openDevTools({ mode: 'undocked' });
-  }exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
+  }createDebugWindow();
+}function createDebugWindow() {
+  exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
   debugWindow.loadURL(debugWindowHTMLpath);
   debugWindow.webContents.openDevTools({ mode: 'undocked' });
 
@@ -392,9 +396,7 @@ function showDebugWindow() {
    * printing 'Current BlueLoss settings: (unknown)'
    */
   debugWindow.webContents.once('devtools-opened', function () {
-    setTimeout(() => {
-      return _logging.logger.debug('Current BlueLoss settings:', JSON.stringify((0, _settings.getSettings)()));
-    }, 500);
+    _logging.logger.debug('Current BlueLoss settings:', (0, _settings.getSettings)());
   });
   debugWindow.webContents.once('devtools-closed', function () {
     var _settingsWindow$webCo;
@@ -742,8 +744,10 @@ UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, c
   _debugWindow.debugWindow == null ? void 0 : (_debugWindow$webConte = _debugWindow.debugWindow.webContents) == null ? void 0 : typeof _debugWindow$webConte.executeJavaScript !== 'function' ? void 0 : _debugWindow$webConte.executeJavaScript(`console.${consoleMethod}(\`${(0, _utils.generateLogTimeStamp)()}  ${loggerMessage}\n\`, ${createObjectStringForLog(meta)});`).catch(_utils.noop);
 
   callback(null, true);
-};function createObjectStringForLog(meta) {
-  const cleanedMetaObj = (0, _utils.omitInheritedProperties)(meta);
+};const cleanMetaObject = (0, _utils.pipe)(_utils.omitGawkFromSettings, _utils.omitInheritedProperties);
+
+function createObjectStringForLog(meta) {
+  const cleanedMetaObj = cleanMetaObject(meta);
   if ((0, _isEmpty2.default)(cleanedMetaObj)) return '';
   if (cleanedMetaObj.stack) cleanedMetaObj.stack = cleanedMetaObj.stack.split(/\r\n?|\n/);
   return `JSON.stringify(${JSON.stringify(cleanedMetaObj)}, null, 4)`;
@@ -1115,8 +1119,6 @@ exports.settingsWindow = exports.toggleSettingsWindow = exports.showSettingsWind
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-// import omit from 'lodash.omit'
-
 var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
@@ -1130,8 +1132,6 @@ var _electron = __webpack_require__(/*! electron */ "electron");
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
-
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1194,7 +1194,6 @@ function showSettingsWindow() {
   settingsWindow.once('unresponsive', function (event) {
     _logging.logger.error('settingsWindow unresponsive', event);
   });
-  settingsWindow.show();
 }function getStoredWindowPosition() {
   const { settingsWindowPosition } = (0, _settings.getSettings)();
   if (!settingsWindowPosition) return {};
@@ -1208,17 +1207,7 @@ function showSettingsWindow() {
   } else if (settingsWindow.isVisible()) {
     settingsWindow.close();
   }
-} /**
-   * Some settings are just used internally and never exposed to the user -
-   * e.g. firstRun, settingsWindowPosition, etc.
-   */
-// createSettingsWindowInitialSettings():Object ->
-//   omit(
-//     omitGawkFromSettings(omitInheritedProperties(getSettings())),
-//     ['firstRun', 'settingsWindowPosition', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']
-//   )
-
-exports.showSettingsWindow = showSettingsWindow;
+}exports.showSettingsWindow = showSettingsWindow;
 exports.toggleSettingsWindow = toggleSettingsWindow;
 exports.settingsWindow = settingsWindow;
 
@@ -1312,7 +1301,7 @@ exports.updateTrayMenu = updateTrayMenu;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.bailOnFatalError = exports.generateLogTimeStamp = exports.getProperAppVersion = exports.tenYearsFromNow = exports.identity = exports.compose = exports.noop = exports.omitInheritedProperties = undefined;
+exports.bailOnFatalError = exports.generateLogTimeStamp = exports.getProperAppVersion = exports.tenYearsFromNow = exports.identity = exports.pipe = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -1337,27 +1326,30 @@ const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json
 
 function getProperAppVersion() {
   return appVersion;
-} // omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
-function noop() {
+}function omitGawkFromSettings(settings) {
+  return recursivelyOmitObjProperties(settings, ['__gawk__']);
+}function noop() {
   return;
-}function compose(...fns) {
-  return function (value) {
-    return fns.reduceRight((accumulator, current) => current(accumulator), value);
+}function pipe(...fns) {
+  return function (param) {
+    return fns.reduce(function (result, fn) {
+      return fn(result);
+    }, param);
   };
 }function identity(param) {
   return param;
 }function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-} // recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
-//   Object.keys(obj).reduce((newObj, propName) ->
-//     for elem propertyToFilter in propertyFiltersArr:
-//       if propertyToFilter === propName: return newObj
-//     if is.obj(obj[propName]):
-//       return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
-//     {...newObj, ...{ [propName]: obj[propName] }}
-//   , {})
-
-function omitInheritedProperties(obj) {
+}function recursivelyOmitObjProperties(obj, propertyFiltersArr = []) {
+  return Object.keys(obj).reduce(function (newObj, propName) {
+    for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
+      const propertyToFilter = propertyFiltersArr[_i];
+      if (propertyToFilter === propName) return newObj;
+    }if (_typa2.default.obj(obj[propName])) {
+      return _extends({}, newObj, { [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) });
+    }return _extends({}, newObj, { [propName]: obj[propName] });
+  }, {});
+}function omitInheritedProperties(obj) {
   return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
     if (_typa2.default.obj(obj[propName])) {
       return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
@@ -1370,9 +1362,10 @@ function omitInheritedProperties(obj) {
   console.error(err);
   _logging.logger == null ? void 0 : typeof _logging.logger.error !== 'function' ? void 0 : _logging.logger.error(err);
   process.exit(1);
-}exports.omitInheritedProperties = omitInheritedProperties;
+}exports.omitGawkFromSettings = omitGawkFromSettings;
+exports.omitInheritedProperties = omitInheritedProperties;
 exports.noop = noop;
-exports.compose = compose;
+exports.pipe = pipe;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
 exports.getProperAppVersion = getProperAppVersion;
@@ -1413,7 +1406,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","fs-jetpack":"^2.0.0","gawk":"^4.5.0","got":"^8.3.2","hyperapp":"^1.2.6","inquirer":"^6.0.0","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.88.2","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","node-7z":"^0.4.0","nodemon":"1.17.5","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","fs-jetpack":"^2.0.0","gawk":"^4.5.0","got":"^8.3.2","hyperapp":"^1.2.6","inquirer":"^6.0.0","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.88.2","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","node-7z":"^0.4.0","nodemon":"1.17.5","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 

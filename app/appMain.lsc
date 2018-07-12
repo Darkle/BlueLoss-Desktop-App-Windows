@@ -10,6 +10,7 @@ import { noop, bailOnFatalError } from './components/utils.lsc'
 import { initTrayMenu } from './components/tray/tray.lsc'
 import { showSettingsWindow } from './components/settingsWindow/settingsWindow.lsc'
 import { enableRunOnStartup } from './components/runOnStartup.lsc'
+import { showDebugWindow } from './components/debugWindow/debugWindow.lsc'
 
 if electronApp.makeSingleInstance(noop): electronApp.quit()
 
@@ -19,6 +20,7 @@ electronApp.once('ready', ():void ->
   initTrayMenu()
   startBluetoothScanning()
   setUpDev()
+  showDebugWindow()
 
   { firstRun } = getSettings()
   if firstRun:

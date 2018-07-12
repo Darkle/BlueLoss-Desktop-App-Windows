@@ -29,7 +29,6 @@
     "inquirer": "^6.0.0",
     "is-empty": "^1.2.0",
     "lock-system": "^1.3.0",
-    "lodash.omit": "^4.5.0",
     "lowdb": "^1.0.0",
     "ono": "^4.0.5",
     "rollbar": "^2.3.9",

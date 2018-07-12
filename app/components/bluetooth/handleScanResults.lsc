@@ -5,10 +5,10 @@ import { DeviceType } from '../types/types.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { compose } from '../utils.lsc'
+import { pipe } from '../utils.lsc'
 
-processDeviceListAndSendToSettingsWindow = compose(
-  addTimeStampToSeenDevices, dedupeDeviceList, sendDevicesCanSeeToSettingsWindow
+processDeviceListAndSendToSettingsWindow = pipe(
+  dedupeDeviceList, addTimeStampToSeenDevices, sendDevicesCanSeeToSettingsWindow
 )
 /**
  * Note: handleScanResults doesn't get called from
