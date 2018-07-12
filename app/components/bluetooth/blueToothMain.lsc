@@ -45,17 +45,15 @@ createBluetoothScannerWindow():Promise ->
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scanIn20Seconds()
   logger.debug('=======New Scan Started=======')
-
-  scannerWindow
-    .webContents
+  scannerWindow.webContents
     .executeJavaScript(
       `navigator.bluetooth.requestDevice({acceptAllDevices: true})`,
       invokeUserGesture
     )
     .catch(handleRequestDeviceError)
 
-    lockSystemIfDeviceLost()
-    scanIn20Seconds()
+  lockSystemIfDeviceLost()
+  scanIn20Seconds()
 
 scanIn20Seconds():void ->
   setTimeout(scanforDevices, tp.TWENTY_SECONDS)
