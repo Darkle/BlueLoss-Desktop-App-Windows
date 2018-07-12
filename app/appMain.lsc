@@ -21,14 +21,17 @@ electronApp.once('ready', ():void ->
   startBluetoothScanning()
   setUpDev()
   showDebugWindow()
+  onFirstRun()
+)
+
+electronApp.on('window-all-closed', noop)
+
+onFirstRun():void ->
   { firstRun } = getSettings()
   if firstRun:
     updateSetting('firstRun', !firstRun)
     showSettingsWindow()
     enableRunOnStartup(firstRun)
-)
-
-electronApp.on('window-all-closed', noop)
 
 process.on('unhandledRejection', bailOnFatalError)
 process.on('uncaughtException', bailOnFatalError)
