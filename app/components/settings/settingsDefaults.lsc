@@ -18,7 +18,7 @@ defaultSettings: {
   timeToLock: 3,
   reportErrors: true,
   firstRun: true,
-  settingsWindowPosition: {},
+  settingsWindowPosition: null,
   debugMode: false,
 }
 

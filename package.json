@@ -61,7 +61,7 @@
     "eslint-watch": "^4.0.1",
     "exeq": "^3.0.0",
     "node-7z": "^0.4.0",
-    "nodemon": "^1.18.0",
+    "nodemon": "1.17.5",
     "parallel-webpack": "^2.3.0",
     "semver": "^5.5.0",
     "sleep-ms": "^2.0.1",

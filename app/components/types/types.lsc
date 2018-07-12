@@ -1,7 +1,7 @@
 
 
 type DeviceType = { deviceName: string, deviceId: string, lastSeen: ?number }
-type SettingsWindowPositionType = { x: ?number, y: ?number, width: ?number, height: ?number }
+type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
 type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
 
 

@@ -1,0 +1,15 @@
+import is from 'typa'
+
+identity(param) -> param
+
+omitInheritedProperties(obj: Object):Object ->
+  Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
+    if is.obj(obj[propName]):
+      return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
+    {...newObj, ...{ [propName]: obj[propName] }}
+  , {})
+
+export {
+  omitInheritedProperties,
+  identity,
+}

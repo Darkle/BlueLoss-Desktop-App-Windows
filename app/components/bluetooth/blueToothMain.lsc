@@ -30,7 +30,7 @@ createBluetoothScannerWindow():Promise ->
   new Promise((resolve):void ->
     now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
-    if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+    // if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
     scannerWindow.webContents.once('dom-ready', resolve)
     scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)

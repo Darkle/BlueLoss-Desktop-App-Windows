@@ -100,13 +100,13 @@ __webpack_require__(/*! ../config/env.lsc */ "./config/env.lsc");
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
+var _settings = __webpack_require__(/*! ./components/settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _logging = __webpack_require__(/*! ./components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
 var _setUpDev = __webpack_require__(/*! ./components/setUpDev.lsc */ "./app/components/setUpDev.lsc");
 
-var _components = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module './components/'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
-
 var _blueToothMain = __webpack_require__(/*! ./components/bluetooth/blueToothMain.lsc */ "./app/components/bluetooth/blueToothMain.lsc");
-
-var _settings = __webpack_require__(/*! ./components/settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _utils = __webpack_require__(/*! ./components/utils.lsc */ "./app/components/utils.lsc");
 
@@ -122,13 +122,13 @@ if (false) {}
 if (_electron.app.makeSingleInstance(_utils.noop)) _electron.app.quit();
 
 _electron.app.once('ready', function () {
-  const { firstRun } = (0, _settings.getSettings)();
-
   (0, _settings.initSettings)();
+  (0, _logging.initLogging)();
   (0, _tray.initTrayMenu)();
   (0, _blueToothMain.init)();
   (0, _setUpDev.setUpDev)();
 
+  const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
@@ -202,7 +202,7 @@ function init() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
-    if (true) scannerWindow.webContents.openDevTools({ mode: 'undocked' });
+    // if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
     scannerWindow.webContents.once('dom-ready', resolve);
     scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
@@ -215,9 +215,7 @@ function init() {
   });
 }function scanforDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn20Seconds();
-
   _logging.logger.debug('=======New Scan Started=======');
-
   scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError);
 
   (0, _lockCheck.lockSystemIfDeviceLost)();
@@ -228,8 +226,7 @@ function init() {
    * NotFoundError is the norm.
    */
 function handleRequestDeviceError(err) {
-  if ((err == null ? void 0 : err.name) === 'NotFoundError') return;
-  _logging.logger.error(err);
+  if ((err == null ? void 0 : err.name) !== 'NotFoundError') _logging.logger.error(err);
 }exports.init = init;
 
 /***/ }),
@@ -247,7 +244,7 @@ function handleRequestDeviceError(err) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateDeviceSearchingFor = exports.handleScanResults = undefined;
+exports.handleScanResults = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -269,7 +266,7 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const processDeviceList = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeDeviceList);
+const processDeviceListAndSendToSettingsWindow = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeDeviceList, sendDevicesCanSeeToSettingsWindow);
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
@@ -278,31 +275,31 @@ const processDeviceList = (0, _utils.compose)(addTimeStampToSeenDevices, dedupeD
  * call. That's why we do the lockCheck in scanforDevices.
  */
 function handleScanResults(event, deviceList, callback) {
-  var _settingsWindow$webCo;
-
   event.preventDefault();
   _logging.logger.debug(`Found these Bluetooth devices in scan: `, { deviceList });
-
   const { devicesToSearchFor } = (0, _settings.getSettings)();
-  const timeStampedDeviceList = processDeviceList(deviceList);
-
-  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-bluetooth-devices-can-see', { devicesCanSee: timeStampedDeviceList });
-
+  processDeviceListAndSendToSettingsWindow(deviceList);
   if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
-  /**
-   * If any devices we are looking for showed up in the latest scan,
-   * update the device's lastSeen value to now in devicesToSearchFor.
-   */
+  updateDevicesToSearchFor(devicesToSearchFor, deviceList);
+  callback('');
+} // http://bit.ly/2kZhD74
+
+function sendDevicesCanSeeToSettingsWindow(processedDeviceList) {
+  var _settingsWindow$webCo;
+
+  _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:update-of-bluetooth-devices-can-see', { devicesCanSee: processedDeviceList });
+} /**
+  * If any devices we are looking for showed up in the latest scan,
+  * update the device's lastSeen value to now in devicesToSearchFor.
+  */
+function updateDevicesToSearchFor(devicesToSearchFor, deviceList) {
   for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
     const { deviceId } = deviceList[_i];
     if (devicesToSearchFor[deviceId]) {
-      updateDeviceSearchingFor(deviceId, Date.now());
+      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, Date.now());
     }
-  }callback('');
-} // http://bit.ly/2kZhD74
-
-
-function addTimeStampToSeenDevices(deviceList) {
+  }
+}function addTimeStampToSeenDevices(deviceList) {
   return (() => {
     const _arr = [];for (let _i2 = 0, _len2 = deviceList.length; _i2 < _len2; _i2++) {
       const device = deviceList[_i2];_arr.push(_extends({}, device, { lastSeen: Date.now() }));
@@ -319,14 +316,11 @@ function addTimeStampToSeenDevices(deviceList) {
 function dedupeDeviceList(deviceList) {
   return deviceList.reduce(function (newDeviceList, newDevice) {
     const newDeviceId = newDevice.deviceId;
-
     const existingDevice = newDeviceList.find(function (device) {
       return device.deviceId === newDeviceId;
     });
-
-    if (!existingDevice) {
-      return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
-    }if (betterNamedDevice(existingDevice, newDevice)) {
+    if (!existingDevice) return [...(newDeviceList === void 0 ? [] : newDeviceList), newDevice];
+    if (betterNamedDevice(existingDevice, newDevice)) {
       var _ref;
 
       return [...(_ref = newDeviceList.filter(function (device) {
@@ -336,10 +330,7 @@ function dedupeDeviceList(deviceList) {
   }, []);
 }function betterNamedDevice(existingDevice, newDevice) {
   return existingDevice.deviceName.length === 0 && newDevice.deviceName.length > 0;
-}function updateDeviceSearchingFor(deviceId, timeStamp) {
-  (0, _devices.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', timeStamp);
 }exports.handleScanResults = handleScanResults;
-exports.updateDeviceSearchingFor = updateDeviceSearchingFor;
 
 /***/ }),
 
@@ -356,7 +347,7 @@ exports.updateDeviceSearchingFor = updateDeviceSearchingFor;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.debugWindow = undefined;
+exports.showDebugWindow = exports.debugWindow = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -374,9 +365,9 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
 
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import { omitGawkFromSettings } from '../utils.lsc'
 
 const debugWindowHTMLpath = _url2.default.format({
   protocol: 'file',
@@ -402,7 +393,7 @@ function showDebugWindow() {
    */
   debugWindow.webContents.once('devtools-opened', function () {
     setTimeout(() => {
-      return _logging.logger.debug('Current BlueLoss settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
+      return _logging.logger.debug('Current BlueLoss settings:', JSON.stringify((0, _settings.getSettings)()));
     }, 500);
   });
   debugWindow.webContents.once('devtools-closed', function () {
@@ -418,6 +409,7 @@ function showDebugWindow() {
     _logging.logger.error('debugWindow unresponsive', event);
   });
 }exports.debugWindow = debugWindow;
+exports.showDebugWindow = showDebugWindow;
 
 /***/ }),
 
@@ -446,24 +438,24 @@ var _lockSystem = __webpack_require__(/*! ./lockSystem.lsc */ "./app/components/
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
-var _handleScanResults = __webpack_require__(/*! ../bluetooth/handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
+var _devices = __webpack_require__(/*! ../settings/devices.lsc */ "./app/components/settings/devices.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/**
+  * If a device is lost we lock the computer, however, after that, if
+  * the computer is unlocked without the device coming back, we don't want
+  * to keep locking the computer because the device is still lost. So we
+  * give the device that has just been lost a lastSeen value of 10 years
+  * from now (not using Infinity cause it doesn't JSON.stringify for storage).
+  */
 function lockSystemIfDeviceLost() {
-  const { devicesToSearchFor, timeToLock } = (0, _settings.getSettings)();
-  /**
-   * If a device is lost we lock the computer, however, after that, if
-   * the computer is unlocked without the device coming back, we don't want
-   * to keep locking the computer because the device is still lost. So we
-   * give the device that has just been lost a lastSeen value of 10 years
-   * from now (not using Infinity cause it doesn't JSON.stringify for storage).
-   */
+  const { devicesToSearchFor, timeToLock, blueLossEnabled } = (0, _settings.getSettings)();
   for (let _i = 0, _keys = Object.keys(devicesToSearchFor), _len = _keys.length; _i < _len; _i++) {
     const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
     if (deviceHasBeenLost(lastSeen, timeToLock)) {
-      (0, _lockSystem.lockTheSystem)();
-      (0, _handleScanResults.updateDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
+      (0, _lockSystem.lockTheSystem)(blueLossEnabled);
+      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
     }
   }
 }function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
@@ -493,12 +485,10 @@ var _lockSystem2 = _interopRequireDefault(_lockSystem);
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
-var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function lockTheSystem() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return;
+function lockTheSystem(blueLossEnabled) {
+  if (!blueLossEnabled) return;
   // lockSystem throws on error, so use try/catch
   try {
     (0, _lockSystem2.default)();
@@ -522,7 +512,7 @@ function lockTheSystem() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rollbarLogger = exports.CustomRollbarTransport = undefined;
+exports.createRollbarLogger = exports.rollbarLogger = exports.CustomRollbarTransport = undefined;
 
 var _util = __webpack_require__(/*! util */ "util");
 
@@ -540,29 +530,29 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const rollbarConfig = {
-  accessToken: process.env.rollbarAccessToken,
-  enabled: false,
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  environment: "development",
-  reportLevel: 'error',
-  payload: {
-    mainOrRenderer: 'main',
-    platform: process.platform,
-    processVersions: process.versions,
-    arch: process.arch,
-    BlueLossVersion: (0, _utils.getProperAppVersion)()
-  },
-  // Ignore the server stuff cause that includes info about the host pc name.
-  transform(payload) {
-    return payload.server = {};
-  }
-};
+let rollbarLogger = null;
 
-const rollbarLogger = new _rollbar2.default(rollbarConfig);
-
-const CustomRollbarTransport = _winston2.default.transports.CustomLogger = function (options) {
+function createRollbarLogger() {
+  exports.rollbarLogger = rollbarLogger = new _rollbar2.default({
+    accessToken: process.env.rollbarAccessToken,
+    enabled: false,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: "development",
+    reportLevel: 'error',
+    payload: {
+      mainOrRenderer: 'main',
+      platform: process.platform,
+      processVersions: process.versions,
+      arch: process.arch,
+      BlueLossVersion: (0, _utils.getProperAppVersion)()
+    },
+    // Ignore the server stuff cause that includes info about the host pc name.
+    transform(payload) {
+      return payload.server = {};
+    }
+  });
+}const CustomRollbarTransport = _winston2.default.transports.CustomLogger = function (options) {
   Object.assign(this, options);
 };_util2.default.inherits(CustomRollbarTransport, _winston2.default.Transport);
 
@@ -573,6 +563,7 @@ CustomRollbarTransport.prototype.log = function (level, msg = '', error, callbac
   callback(null, true);
 };exports.CustomRollbarTransport = CustomRollbarTransport;
 exports.rollbarLogger = rollbarLogger;
+exports.createRollbarLogger = createRollbarLogger;
 
 /***/ }),
 
@@ -823,8 +814,6 @@ var _path2 = _interopRequireDefault(_path);
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _settingsWindow = __webpack_require__(/*! ./settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const devtronPath = _path2.default.resolve(__dirname, '..', 'node_modules', 'devtron');
@@ -843,7 +832,7 @@ function setUpDev() {
   __webpack_require__(/*! electron-reload */ "electron-reload")([settingsWindowHTMLfilePath, settingsWindowCSSfilePath, settingsWindowJSfilePath, settingsWindowIconFiles, debugWindowHTMLfilePath, debugWindowJSfilePath, bluetoothRendererJSfilePath]);
   _electron.BrowserWindow.addDevToolsExtension(devtronPath);
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
-  (0, _settingsWindow.showSettingsWindow)();
+  __webpack_require__(/*! ./settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc").showSettingsWindow();
 }exports.setUpDev = setUpDev;
 
 /***/ }),
@@ -861,7 +850,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateLastSeenForDevicesLookingForOnStartup = exports.updateDeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+exports.updateLastSeenForDevicesLookingForOnStartup = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -890,9 +879,10 @@ function addNewDeviceToSearchFor(deviceToAdd) {
 
 function deviceIsInDevicesToSearchFor(deviceId) {
   return (0, _settings.getSettings)().devicesToSearchFor[deviceId];
-}function updateDeviceInDevicesToSearchFor(deviceId, propName, propValue) {
-  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, (0, _settings.getSettings)().devicesToSearchFor, {
-    [deviceId]: _extends({}, (0, _settings.getSettings)().devicesToSearchFor[deviceId], { [propName]: propValue })
+}function updateLastSeenForDeviceSearchingFor(deviceId, time) {
+  const { devicesToSearchFor } = (0, _settings.getSettings)();
+  const deviceToUpdate = devicesToSearchFor[deviceId];
+  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, { [deviceId]: _extends({}, deviceToUpdate, { lastSeen: time })
   }));
 } /**
    * When a user starts up BlueLoss after previously exiting, the
@@ -906,11 +896,10 @@ function deviceIsInDevicesToSearchFor(deviceId) {
 function updateLastSeenForDevicesLookingForOnStartup() {
   for (let _obj3 = (0, _settings.getSettings)().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
     const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
+    updateLastSeenForDeviceSearchingFor(deviceId, (0, _utils.tenYearsFromNow)());
   }
 }exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
-exports.updateDeviceInDevicesToSearchFor = updateDeviceInDevicesToSearchFor;
 exports.updateLastSeenForDevicesLookingForOnStartup = updateLastSeenForDevicesLookingForOnStartup;
 
 /***/ }),
@@ -1012,7 +1001,7 @@ const defaultSettings = {
   timeToLock: 3,
   reportErrors: true,
   firstRun: true,
-  settingsWindowPosition: {},
+  settingsWindowPosition: null,
   debugMode: false
 };
 
@@ -1142,9 +1131,9 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
-// import { omitInheritedProperties, omitGawkFromSettings } from '../common/utils.lsc'
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const settingsWindowRendererDirPath = _path2.default.join(__dirname, 'components', 'settingsWindow', 'renderer');
 const iconsDir = _path2.default.join(settingsWindowRendererDirPath, 'assets', 'icons');
@@ -1163,29 +1152,28 @@ const settingsWindowProperties = _extends({
   fullscreen: false,
   frame: false,
   show: false,
-  icon: getIconPath(),
   webPreferences: {
     textAreasAreResizable: false,
     devTools: true
   }
-}, getStoredWindowPosition());
-/****
-* Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
-* Reload is for dev so we can easily reload the browserwindow with Ctrl+R.
-*/
-const settingsWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
+});
+
 let settingsWindow = null;
 
 function showSettingsWindow() {
   if (settingsWindow) return settingsWindow.show();
 
   _electron.ipcMain.on('renderer:intitial-settings-request', function (event) {
-    return event.sender.send('mainprocess:intitial-settings-sent', (0, _settings.getSettings)());
+    return event.returnValue = (0, _settings.getSettings)();
   });
 
   exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition(), { icon: getIconPath() }));
   settingsWindow.loadURL(settingsHTMLpath);
-  settingsWindow.setMenu(settingsWindowMenu);
+  /****
+  * Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+  * Reload is for dev so we can easily reload the browserwindow with Ctrl+R.
+  */
+  settingsWindow.setMenu( true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined);
   if (true) settingsWindow.webContents.openDevTools({ mode: 'undocked' });
 
   settingsWindow.once('close', function () {
@@ -1206,9 +1194,11 @@ function showSettingsWindow() {
   settingsWindow.once('unresponsive', function (event) {
     _logging.logger.error('settingsWindow unresponsive', event);
   });
+  settingsWindow.show();
 }function getStoredWindowPosition() {
-  const { x, y } = (0, _settings.getSettings)().settingsWindowPosition;
-  return { x, y };
+  const { settingsWindowPosition } = (0, _settings.getSettings)();
+  if (!settingsWindowPosition) return {};
+  return { x: settingsWindowPosition.x, y: settingsWindowPosition.y };
 }function getIconPath() {
   const iconFileName = `BlueLoss-${(0, _settings.getSettings)().trayIconColor}-512x512.png`;
   return _path2.default.join(iconsDir, iconFileName);
@@ -1423,7 +1413,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","fs-jetpack":"^2.0.0","gawk":"^4.5.0","got":"^8.3.2","hyperapp":"^1.2.6","inquirer":"^6.0.0","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.88.2","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","node-7z":"^0.4.0","nodemon":"^1.18.0","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","fs-jetpack":"^2.0.0","gawk":"^4.5.0","got":"^8.3.2","hyperapp":"^1.2.6","inquirer":"^6.0.0","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.88.2","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","node-7z":"^0.4.0","nodemon":"1.17.5","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 

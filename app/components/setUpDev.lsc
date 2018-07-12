@@ -2,8 +2,6 @@ import path from 'path'
 
 import { BrowserWindow } from 'electron'
 
-import { showSettingsWindow } from './settingsWindow/settingsWindow.lsc'
-
 devtronPath = path.resolve(__dirname, '..', 'node_modules', 'devtron')
 settingsWindowDirPath = path.resolve(__dirname, 'components', 'settingsWindow', 'renderer')
 settingsWindowHTMLfilePath = path.join(settingsWindowDirPath, 'settingsWindow.html')
@@ -28,7 +26,7 @@ setUpDev():void ->
   ])
   BrowserWindow.addDevToolsExtension(devtronPath)
   // auto open the settings window in dev so dont have to manually open it each time electron restarts
-  showSettingsWindow()
+  require('./settingsWindow/settingsWindow.lsc').showSettingsWindow()
 
 export {
   setUpDev

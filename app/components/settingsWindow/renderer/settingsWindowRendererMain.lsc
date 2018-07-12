@@ -5,7 +5,7 @@ import { withLogger } from '@hyperapp/logger'
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
-import { omitInheritedProperties, identity } from '../../utils.lsc'
+import { omitInheritedProperties, identity } from './frontEndUtils.lsc'
 
 settingsWindowRendererApp = (if ISDEV: withLogger else: identity)(app)(
   {
