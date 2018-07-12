@@ -1166,7 +1166,12 @@ var _utils = __webpack_require__(/*! ../../utils.lsc */ "./app/components/utils.
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const logInDev =  true ? _logger.withLogger : undefined;
-const settingsWindowRendererApp = logInDev(_hyperapp.app)(getInitialSettingsFromMainProcess(), _actionsIndex2.default, _viewsIndex2.default, document.body);
+
+const settingsWindowRendererApp = logInDev(_hyperapp.app)(_extends({
+  activeTab: 'statusTab',
+  devicesCanSee: [],
+  debugMode: false
+}, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request')), _actionsIndex2.default, _viewsIndex2.default, document.body);
 
 _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
@@ -1174,14 +1179,6 @@ _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event,
 _electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
 });
-
-function getInitialSettingsFromMainProcess() {
-  return _extends({
-    activeTab: 'statusTab',
-    devicesCanSee: [],
-    debugMode: false
-  }, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request'));
-}
 
 /**
 * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror

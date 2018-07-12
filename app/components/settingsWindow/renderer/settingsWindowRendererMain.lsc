@@ -8,8 +8,20 @@ import { DeviceType, SettingsTypes } from '../../types/types.lsc'
 import { omitInheritedProperties, identity } from '../../utils.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
-settingsWindowRendererApp = logInDev(app)(getInitialSettingsFromMainProcess(), appActions, views, document.body)
 
+settingsWindowRendererApp = logInDev(app)(
+  {
+    ...{
+      activeTab: 'statusTab',
+      devicesCanSee: [],
+      debugMode: false,
+    },
+    ...ipcRenderer.sendSync('renderer:intitial-settings-request')
+  },
+  appActions,
+  views,
+  document.body
+)
 
 ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsTypes):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(setting)
@@ -17,16 +29,6 @@ ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsT
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
-
-getInitialSettingsFromMainProcess():Object ->
-  ({
-    ...{
-      activeTab: 'statusTab',
-      devicesCanSee: [],
-      debugMode: false,
-    },
-    ...ipcRenderer.sendSync('renderer:intitial-settings-request')
-  })
 
 /**
 * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
