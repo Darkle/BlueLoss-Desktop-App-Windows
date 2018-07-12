@@ -3,7 +3,7 @@ import isEmpty from 'is-empty'
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { updateDeviceInDevicesToSearchFor } from '../settings/devices.lsc'
+import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { compose } from '../utils.lsc'
 
@@ -28,16 +28,17 @@ handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   )
 
   if isEmpty(devicesToSearchFor): return
-  /**
-   * If any devices we are looking for showed up in the latest scan,
-   * update the device's lastSeen value to now in devicesToSearchFor.
-   */
-  for elem { deviceId } in deviceList:
-    if devicesToSearchFor[deviceId]:
-      updateDeviceSearchingFor(deviceId, Date.now())
-
+  updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   callback('')  // http://bit.ly/2kZhD74
 
+/**
+* If any devices we are looking for showed up in the latest scan,
+* update the device's lastSeen value to now in devicesToSearchFor.
+*/
+updateDevicesToSearchFor(devicesToSearchFor:Object, deviceList:Array<DeviceType>):void ->
+  for elem { deviceId } in deviceList:
+    if devicesToSearchFor[deviceId]:
+      updateLastSeenForDeviceSearchingFor(deviceId, Date.now())
 
 addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
   [ ...for elem device in deviceList: [{...device, lastSeen: Date.now()}] ]
@@ -61,13 +62,9 @@ dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
     newDeviceList
   , [])
 
-betterNamedDevice(existingDevice, newDevice:Object):Boolean ->
+betterNamedDevice(existingDevice:Object, newDevice:Object):Boolean ->
   existingDevice.deviceName.length === 0 and newDevice.deviceName.length > 0
-
-updateDeviceSearchingFor(deviceId:String, timeStamp:Number):void ->
-  updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', timeStamp)
 
 export {
   handleScanResults,
-  updateDeviceSearchingFor,
 }

@@ -23,15 +23,13 @@ filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
 deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
   getSettings().devicesToSearchFor[deviceId]
 
-updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
+updateLastSeenForDeviceSearchingFor(deviceId: String, time: Number):Object ->
+  { devicesToSearchFor } = getSettings()
+  deviceToUpdate = devicesToSearchFor[deviceId]
   updateSetting('devicesToSearchFor',
     {
-      ...getSettings().devicesToSearchFor,
-      ...{
-        [ deviceId ]: {
-          ...getSettings().devicesToSearchFor[deviceId],
-          ...{ [ propName ]: propValue }
-        }
+      ...devicesToSearchFor,
+      ...{ [ deviceId ]: {...deviceToUpdate, ...{ lastSeen: time } }
       }
     }
   )
@@ -47,12 +45,11 @@ updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: 
  */
 updateLastSeenForDevicesLookingForOnStartup():void ->
   for val { deviceId } in getSettings().devicesToSearchFor:
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
+    updateLastSeenForDeviceSearchingFor(deviceId, tenYearsFromNow())
 
 
 export {
   addNewDeviceToSearchFor,
   removeNewDeviceToSearchFor,
-  updateDeviceInDevicesToSearchFor,
   updateLastSeenForDevicesLookingForOnStartup,
 }
