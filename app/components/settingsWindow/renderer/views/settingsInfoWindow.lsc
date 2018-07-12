@@ -88,7 +88,7 @@ export default ({ actions, state }) ->
     <x-box>
       <x-switch
         id="userDebugSwitch"
-        toggled={ state.userDebug }
+        toggled={ state.debugMode }
         onchange={ actions.toggleDebugWindow }
       ></x-switch>
       <x-label for="userDebugSwitch" id="userDebugSwitchLabel">

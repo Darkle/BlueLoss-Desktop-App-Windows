@@ -2,10 +2,10 @@ import path from 'path'
 import url from 'url'
 import { BrowserWindow, ipcMain } from 'electron'
 
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { omitGawkFromSettings } from '../common/utils.lsc'
+import { omitGawkFromSettings } from '../utils.lsc'
 
 debugWindowHTMLpath = url.format({
   protocol: 'file',
@@ -36,7 +36,7 @@ showDebugWindow():void ->
     }, 500)
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
-    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {userDebug: false})
+    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {debugMode: false})
     debugWindow.close()
   )
   debugWindow.webContents.once('crashed', (event):void ->
@@ -45,11 +45,6 @@ showDebugWindow():void ->
   debugWindow.once('unresponsive', (event):void ->
     logger.error('debugWindow unresponsive', event)
   )
-
-ipcMain.on('renderer:user-debug-toggled', (event, userDebug: boolean):void ->
-  if userDebug: showDebugWindow()
-  else: debugWindow?.close?()
-)
 
 export {
   debugWindow,

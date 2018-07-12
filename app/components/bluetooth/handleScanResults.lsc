@@ -1,10 +1,10 @@
 import isEmpty from 'is-empty'
 
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { compose } from '../common/utils.lsc'
+import { compose } from '../utils.lsc'
 
 processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
 /**

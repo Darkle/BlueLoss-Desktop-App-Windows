@@ -2,5 +2,5 @@ import { ipcRenderer } from 'electron'
 
 export default toggleDebugWindow(element) ->
   toggled = element.currentTarget.toggled
-  ipcRenderer.send('renderer:user-debug-toggled', toggled)
-  { userDebug: toggled }
+  ipcRenderer.send('renderer:setting-updated-in-ui', 'debugMode', toggled)
+  { debugMode: toggled }

@@ -4,102 +4,38 @@ import { app as electronApp } from 'electron'
 import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
-import is from 'typa'
 
-import { tenYearsFromNow, omitGawkFromSettings } from '../common/utils.lsc'
-import { DeviceType, SettingsTypes } from '../types/types.lsc'
+import { SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
-import { logger } from '../common/logging/logging.lsc'
+import { updateLastSeenForDevicesLookingForOnStartup } from './devices.lsc'
+import { logSettingsUpdateForDebugMode } from '../logging/logSettingsUpdates.lsc'
 
-let devicesLastSeenHasBeenUpdatedOnStartup = false
 settingsDBpath = path.join(electronApp.getPath('userData'), 'blueloss-settings.json')
-adapter = new FileSync(settingsDBpath)
-db = low(adapter)
 
-db.defaults(defaultSettings).write()
+let db = null
+let settings = null
 
-settings = gawk(db.getState())
-
-initSettingsObservers(settings)
-initSettingsIPClisteners()
-updateLastSeenForDevicesLookingForOnStartup()
+initSettings():void ->
+  adapter = new FileSync(settingsDBpath)
+  now db = low(adapter)
+  db.defaults(defaultSettings).write()
+  now settings = gawk(db.getState())
+  initSettingsObservers(settings)
+  initSettingsIPClisteners()
+  updateLastSeenForDevicesLookingForOnStartup()
 
 getSettings() -> settings
 
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
-  logSettingsUpdate(newSettingKey, newSettingValue)
+  logSettingsUpdateForDebugMode(newSettingKey, newSettingValue)
 
-addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
-  { deviceId } = deviceToAdd
-  if deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor',
-    {...settings.devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
-  )
-
-removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
-  { deviceId } = deviceToRemove
-  if !deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
-
-filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
-  {
-    ...for key deviceId, val device in settings.devicesToSearchFor:
-      if deviceId != deviceIdToRemove: { [ deviceId ]: device }
-  }
-
-deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
-  settings.devicesToSearchFor[deviceId]
-
-updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
-  updateSetting('devicesToSearchFor',
-    {
-      ...settings.devicesToSearchFor,
-      ...{
-        [ deviceId ]: {
-          ...settings.devicesToSearchFor[deviceId],
-          ...{ [ propName ]: propValue }
-        }
-      }
-    }
-  )
-
-/**
- * When a user starts up BlueLoss after previously exiting, the
- * lastSeen value will be out of date for the devices in
- * devicesToSearchFor. This would cause BlueLoss to lock the
- * system straight away because the lastSeen value + timeToLock
- *  will be less than Date.now(). So to prevent this, we give all
- * devices in devicesToSearchFor a lastSeen of 10 years from now.
- * (when a device is seen again during a scan, lastSeen is updated.)
- */
-updateLastSeenForDevicesLookingForOnStartup():void ->
-  for val { deviceId } in settings.devicesToSearchFor:
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
-  now devicesLastSeenHasBeenUpdatedOnStartup = true
-
-logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  /**
-   * There's a circular dependancy issue with logging stuff on app startup,
-   * so using a variable to keep track.
-   * (updateLastSeenForDevicesLookingForOnStartup is called on startup,
-   * which changes the devicesToSearchFor setting value, which in turn
-   * causes logSettingsUpdate to be called, which relies on the logger, which isnt ready yet).
-   */
-  if !devicesLastSeenHasBeenUpdatedOnStartup: return
-  debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
-  if is.obj(newSettingValue):
-    logger.debug(debugMessage, { [newSettingKey]: omitGawkFromSettings(newSettingValue) })
-  else:
-    logger.debug(`${ debugMessage } ${ newSettingValue }`)
 
 export {
+  initSettings,
   updateSetting,
   getSettings,
-  addNewDeviceToSearchFor,
-  removeNewDeviceToSearchFor,
-  updateDeviceInDevicesToSearchFor,
 }

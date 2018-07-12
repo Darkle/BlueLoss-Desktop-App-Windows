@@ -1,9 +1,9 @@
 import tp from 'timeproxy'
 
-import { tenYearsFromNow } from '../common/utils.lsc'
-import { lockTheSystem } from '../common/lockSystem.lsc'
+import { tenYearsFromNow } from '../utils.lsc'
+import { lockTheSystem } from './lockSystem.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { updateDeviceSearchingFor } from './handleScanResults.lsc'
+import { updateDeviceSearchingFor } from '../bluetooth/handleScanResults.lsc'
 
 lockSystemIfDeviceLost():void ->
   { devicesToSearchFor, timeToLock } = getSettings()

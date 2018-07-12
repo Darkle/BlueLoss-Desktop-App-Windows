@@ -1,10 +1,10 @@
 if !process.env.NODE_ENV: process.env.NODE_ENV = "production"
-import '../../config/env.lsc'
+import '../config/env.lsc'
 import { app as electronApp } from 'electron'
 
 import { setUpDev } from './components/setUpDev.lsc'
 import { init as startBluetoothScanning } from './components/bluetooth/blueToothMain.lsc'
-import { getSettings, updateSetting } from './components/settings/settings.lsc'
+import { getSettings, updateSetting, initSettings } from './components/settings/settings.lsc'
 import { noop, bailOnFatalError } from './components/utils.lsc'
 import { initTrayMenu } from './components/tray/tray.lsc'
 import { showSettingsWindow } from './components/settingsWindow/settingsWindow.lsc'
@@ -15,6 +15,7 @@ if electronApp.makeSingleInstance(noop): electronApp.quit()
 electronApp.once('ready', ():void ->
   { firstRun } = getSettings()
 
+  initSettings()
   initTrayMenu()
   startBluetoothScanning()
   setUpDev()

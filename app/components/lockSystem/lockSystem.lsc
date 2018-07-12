@@ -1,6 +1,6 @@
 import lockSystem from 'lock-system'
 
-import { logger } from './logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 
 lockTheSystem():void ->

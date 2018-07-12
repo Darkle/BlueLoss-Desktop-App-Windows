@@ -9,6 +9,7 @@ defaultSettings: {
   reportErrors: boolean,
   firstRun: boolean,
   settingsWindowPosition: SettingsWindowPositionType,
+  debugMode: boolean,
 } = {
   blueLossEnabled: true,
   runOnStartup: true,
@@ -17,7 +18,8 @@ defaultSettings: {
   timeToLock: 3,
   reportErrors: true,
   firstRun: true,
-  settingsWindowPosition: null,
+  settingsWindowPosition: {},
+  debugMode: false,
 }
 
 export {

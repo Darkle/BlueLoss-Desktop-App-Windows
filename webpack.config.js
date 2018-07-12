@@ -6,7 +6,7 @@ const nodeExternals = require('webpack-node-externals')
 
 const projectDir = path.resolve(__dirname)
 const appDir = path.join(projectDir, 'app')
-const componentsDir = path.join(appDir, 'app')
+const componentsDir = path.join(appDir, 'components')
 const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
 const settingsWindowRendererDir = path.join(componentsDir, 'settingsWindow', 'renderer')
 const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')

@@ -36,17 +36,32 @@
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
 /******/ 		}
 /******/ 	};
 /******/
 /******/ 	// define __esModule on exports
 /******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
 /******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -66,15 +81,15 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./app/settingsWindow/renderer/settingsWindowRendererMain.lsc");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/common/utils.lsc":
-/*!******************************!*\
-  !*** ./app/common/utils.lsc ***!
-  \******************************/
+/***/ "./app/components/debugWindow/debugWindow.lsc":
+/*!****************************************************!*\
+  !*** ./app/components/debugWindow/debugWindow.lsc ***!
+  \****************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -84,102 +99,501 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.generateLogTimeStamp = exports.recursivelyOmitObjProperties = exports.getProperAppVersion = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.omitInheritedProperties = exports.omitGawkFromSettings = undefined;
+exports.debugWindow = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _path = __webpack_require__(/*! path */ "path");
 
-var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
+var _path2 = _interopRequireDefault(_path);
 
-var _timeproxy2 = _interopRequireDefault(_timeproxy);
+var _url = __webpack_require__(/*! url */ "url");
+
+var _url2 = _interopRequireDefault(_url);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const debugWindowHTMLpath = _url2.default.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: _path2.default.resolve(__dirname, 'components', 'debugWindow', 'renderer', 'debugWindow.html')
+});
+let debugWindow = null;
+
+function showDebugWindow() {
+  if (debugWindow) {
+    return debugWindow.webContents.openDevTools({ mode: 'undocked' });
+  }exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
+  debugWindow.loadURL(debugWindowHTMLpath);
+  debugWindow.webContents.openDevTools({ mode: 'undocked' });
+
+  debugWindow.once('closed', function () {
+    exports.debugWindow = debugWindow = null;
+  });
+  /**
+   * Without a delay, the console has trouble showing the VM:line to the right of
+   * what you just logged, instead it shows (unknown) which kinda looks like we're
+   * printing 'Current BlueLoss settings: (unknown)'
+   */
+  debugWindow.webContents.once('devtools-opened', function () {
+    setTimeout(() => {
+      return _logging.logger.debug('Current BlueLoss settings:', (0, _utils.omitGawkFromSettings)((0, _settings.getSettings)()));
+    }, 500);
+  });
+  debugWindow.webContents.once('devtools-closed', function () {
+    var _settingsWindow$webCo;
+
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { debugMode: false });
+    debugWindow.close();
+  });
+  debugWindow.webContents.once('crashed', function (event) {
+    _logging.logger.error('debugWindow.webContents crashed', event);
+  });
+  debugWindow.once('unresponsive', function (event) {
+    _logging.logger.error('debugWindow unresponsive', event);
+  });
+}exports.debugWindow = debugWindow;
+
+/***/ }),
+
+/***/ "./app/components/logging/customRollbarTransport.lsc":
+/*!***********************************************************!*\
+  !*** ./app/components/logging/customRollbarTransport.lsc ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.rollbarLogger = exports.CustomRollbarTransport = undefined;
+
+var _util = __webpack_require__(/*! util */ "util");
+
+var _util2 = _interopRequireDefault(_util);
+
+var _winston = __webpack_require__(/*! winston */ "winston");
+
+var _winston2 = _interopRequireDefault(_winston);
+
+var _rollbar = __webpack_require__(/*! rollbar */ "rollbar");
+
+var _rollbar2 = _interopRequireDefault(_rollbar);
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const rollbarConfig = {
+  accessToken: process.env.rollbarAccessToken,
+  enabled: false,
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  environment: "development",
+  reportLevel: 'error',
+  payload: {
+    mainOrRenderer: 'main',
+    platform: process.platform,
+    processVersions: process.versions,
+    arch: process.arch,
+    BlueLossVersion: (0, _utils.getProperAppVersion)()
+  },
+  // Ignore the server stuff cause that includes info about the host pc name.
+  transform(payload) {
+    return payload.server = {};
+  }
+};
+
+const rollbarLogger = new _rollbar2.default(rollbarConfig);
+
+const CustomRollbarTransport = _winston2.default.transports.CustomLogger = function (options) {
+  Object.assign(this, options);
+};_util2.default.inherits(CustomRollbarTransport, _winston2.default.Transport);
+
+CustomRollbarTransport.prototype.log = function (level, msg = '', error, callback) {
+  // Only log errors.
+  if (level !== 'error') return;
+  rollbarLogger.error(msg, error);
+  callback(null, true);
+};exports.CustomRollbarTransport = CustomRollbarTransport;
+exports.rollbarLogger = rollbarLogger;
+
+/***/ }),
+
+/***/ "./app/components/logging/logSettingsUpdates.lsc":
+/*!*******************************************************!*\
+  !*** ./app/components/logging/logSettingsUpdates.lsc ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logSettingsUpdateForDebugMode = undefined;
 
 var _typa = __webpack_require__(/*! typa */ "typa");
 
 var _typa2 = _interopRequireDefault(_typa);
 
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/logging/logging.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * If you run Electron by pointing it to a js file that's not in the base parent directory with the
- * package.json it will report the Electron binary version rather than what's in your package.json.
- * https://github.com/electron/electron/issues/7085
- */
-const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json").version;
-
-function getProperAppVersion() {
-  return appVersion;
-}function omitGawkFromSettings(settings) {
-  return recursivelyOmitObjProperties(settings, ['__gawk__']);
-}function noop() {
-  return;
-}function pipe(...fns) {
-  return function (param) {
-    return fns.reduce(function (result, fn) {
-      return fn(result);
-    }, param);
-  };
-}function compose(...fns) {
-  return function (value) {
-    return fns.reduceRight((accumulator, current) => current(accumulator), value);
-  };
-}function curry(f) {
-  return function (...a) {
-    return function (...b) {
-      return f(...(a === void 0 ? [] : a), ...(b === void 0 ? [] : b));
-    };
-  };
-}function curryRight(f) {
-  return function (...a) {
-    return function (...b) {
-      return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
-    };
-  };
-}function identity(param) {
-  return param;
-}function range(start, end) {
-  return Array.from({ length: end - start + 1 }, function (v, k) {
-    return k + start;
-  });
-} //includes end number
-function tenYearsFromNow() {
-  return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}function recursivelyOmitObjProperties(obj, propertyFiltersArr = []) {
-  return Object.keys(obj).reduce(function (newObj, propName) {
-    for (let _i = 0, _len = propertyFiltersArr.length; _i < _len; _i++) {
-      const propertyToFilter = propertyFiltersArr[_i];
-      if (propertyToFilter === propName) return newObj;
-    }if (_typa2.default.obj(obj[propName])) {
-      return _extends({}, newObj, { [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) });
-    }return _extends({}, newObj, { [propName]: obj[propName] });
-  }, {});
-}function omitInheritedProperties(obj) {
-  return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
-    if (_typa2.default.obj(obj[propName])) {
-      return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
-    }return _extends({}, newObj, { [propName]: obj[propName] });
-  }, {});
-}function generateLogTimeStamp() {
-  const today = new Date();
-  return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
-}exports.omitGawkFromSettings = omitGawkFromSettings;
-exports.omitInheritedProperties = omitInheritedProperties;
-exports.noop = noop;
-exports.pipe = pipe;
-exports.curry = curry;
-exports.curryRight = curryRight;
-exports.range = range;
-exports.compose = compose;
-exports.identity = identity;
-exports.tenYearsFromNow = tenYearsFromNow;
-exports.getProperAppVersion = getProperAppVersion;
-exports.recursivelyOmitObjProperties = recursivelyOmitObjProperties;
-exports.generateLogTimeStamp = generateLogTimeStamp;
+function logSettingsUpdateForDebugMode(newSettingKey, newSettingValue) {
+  if (false) {}
+  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
+  if (_typa2.default.obj(newSettingValue)) {
+    _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
+  } else {
+    _logging.logger.debug(`${debugMessage} ${newSettingValue}`);
+  }
+}exports.logSettingsUpdateForDebugMode = logSettingsUpdateForDebugMode;
 
 /***/ }),
 
-/***/ "./app/settings/settingsDefaults.lsc":
-/*!*******************************************!*\
-  !*** ./app/settings/settingsDefaults.lsc ***!
-  \*******************************************/
+/***/ "./app/components/logging/logging.lsc":
+/*!********************************************!*\
+  !*** ./app/components/logging/logging.lsc ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _winston = __webpack_require__(/*! winston */ "winston");
+
+var _winston2 = _interopRequireDefault(_winston);
+
+var _customRollbarTransport = __webpack_require__(/*! ./customRollbarTransport.lsc */ "./app/components/logging/customRollbarTransport.lsc");
+
+var _userDebugLogger = __webpack_require__(/*! ./userDebugLogger.lsc */ "./app/components/logging/userDebugLogger.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const rollbarTransportOptions = {
+  name: 'rollbarTransport',
+  level: 'error',
+  handleExceptions: true,
+  humanReadableUnhandledException: true
+};
+const userDebugTransportOptions = {
+  name: 'userDebugTransport',
+  level: 'debug',
+  handleExceptions: true,
+  humanReadableUnhandledException: true
+
+  // https://github.com/winstonjs/winston/tree/2.4.0
+};const logger = new _winston2.default.Logger({
+  level: 'debug',
+  exitOnError: false
+});
+
+if (true) {
+  logger.add(_winston2.default.transports.Console, {
+    handleExceptions: true,
+    humanReadableUnhandledException: true
+    // json: true
+  });
+} // dont send errors to rollbar in dev && only if enabled.
+if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
+/**
+* We also need to enable/disable the rollbar module itself as well,
+* as it is set to report uncaught exceptions as well as logging
+* caught errors.
+*/
+function addRollbarLogging() {
+  _customRollbarTransport.rollbarLogger.configure({ enabled: true });
+  logger.add(_customRollbarTransport.CustomRollbarTransport, rollbarTransportOptions);
+}function removeRollbarLogging() {
+  _customRollbarTransport.rollbarLogger.configure({ enabled: false });
+  logger.remove('rollbarTransport');
+}_electron.ipcMain.on('settings-renderer:error-sent', function (event, error) {
+  logger.error('settings-renderer:error-sent', error);
+});
+_electron.ipcMain.on('bluetooth-scan-window-renderer:error-sent', function (event, error) {
+  logger.error('bluetooth-scan-window-renderer:error-sent', error);
+});
+
+exports.logger = logger;
+exports.addRollbarLogging = addRollbarLogging;
+exports.removeRollbarLogging = removeRollbarLogging;
+
+/***/ }),
+
+/***/ "./app/components/logging/userDebugLogger.lsc":
+/*!****************************************************!*\
+  !*** ./app/components/logging/userDebugLogger.lsc ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UserDebugLoggerTransport = undefined;
+
+var _util = __webpack_require__(/*! util */ "util");
+
+var _util2 = _interopRequireDefault(_util);
+
+var _winston = __webpack_require__(/*! winston */ "winston");
+
+var _winston2 = _interopRequireDefault(_winston);
+
+var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
+
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
+
+var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/components/debugWindow/debugWindow.lsc");
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/****
+* This is the loggger for when the user checks the "debug" checkbox in the options
+* window. The log data is sent to the debug window renderer devtools console.
+*/
+const UserDebugLoggerTransport = _winston2.default.transports.CustomLogger = function (options) {
+  Object.assign(this, options);
+};_util2.default.inherits(UserDebugLoggerTransport, _winston2.default.Transport);
+
+UserDebugLoggerTransport.prototype.log = function (level, msg = '', meta = {}, callback) {
+  var _debugWindow$webConte;
+
+  const isError = level === 'error';
+  const loggerMessage = isError ? 'Error:' : msg;
+  const consoleMethod = isError ? 'error' : 'log';
+
+  _debugWindow.debugWindow == null ? void 0 : (_debugWindow$webConte = _debugWindow.debugWindow.webContents) == null ? void 0 : typeof _debugWindow$webConte.executeJavaScript !== 'function' ? void 0 : _debugWindow$webConte.executeJavaScript(`console.${consoleMethod}(\`${(0, _utils.generateLogTimeStamp)()}  ${loggerMessage}\n\`, ${createObjectStringForLog(meta)});`).catch(_utils.noop);
+
+  callback(null, true);
+};function createObjectStringForLog(meta) {
+  const cleanedMetaObj = (0, _utils.omitInheritedProperties)(meta);
+  if ((0, _isEmpty2.default)(cleanedMetaObj)) return '';
+  if (cleanedMetaObj.stack) cleanedMetaObj.stack = cleanedMetaObj.stack.split(/\r\n?|\n/);
+  return `JSON.stringify(${JSON.stringify(cleanedMetaObj)}, null, 4)`;
+}exports.UserDebugLoggerTransport = UserDebugLoggerTransport;
+
+/***/ }),
+
+/***/ "./app/components/runOnStartup.lsc":
+/*!*****************************************!*\
+  !*** ./app/components/runOnStartup.lsc ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.disableRunOnStartup = exports.enableRunOnStartup = undefined;
+
+var _autoLaunch = __webpack_require__(/*! auto-launch */ "auto-launch");
+
+var _autoLaunch2 = _interopRequireDefault(_autoLaunch);
+
+var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const blueLossAutoLauncher = new _autoLaunch2.default({
+  name: 'BlueLoss',
+  isHidden: true
+});
+
+function enableRunOnStartup(firstRun) {
+  if (firstRun && true) return;
+  blueLossAutoLauncher.enable().catch(function (err) {
+    _logging.logger.error('enableRunOnStartup error: ', err);
+  });
+}function disableRunOnStartup() {
+  blueLossAutoLauncher.disable().catch(function (err) {
+    _logging.logger.error('disableRunOnStartup error: ', err);
+  });
+}exports.enableRunOnStartup = enableRunOnStartup;
+exports.disableRunOnStartup = disableRunOnStartup;
+
+/***/ }),
+
+/***/ "./app/components/settings/devices.lsc":
+/*!*********************************************!*\
+  !*** ./app/components/settings/devices.lsc ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.updateLastSeenForDevicesLookingForOnStartup = exports.updateDeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
+
+function addNewDeviceToSearchFor(deviceToAdd) {
+  const { deviceId } = deviceToAdd;
+  if (deviceIsInDevicesToSearchFor(deviceId)) return;
+  (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, (0, _settings.getSettings)().devicesToSearchFor, { [deviceId]: deviceToAdd }));
+}function removeNewDeviceToSearchFor(deviceToRemove) {
+  const { deviceId } = deviceToRemove;
+  if (!deviceIsInDevicesToSearchFor(deviceId)) return;
+  (0, _settings.updateSetting)('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
+}function filterDevicesToSearchFor(deviceIdToRemove) {
+  return (() => {
+    const _obj = {};for (let _obj2 = (0, _settings.getSettings)().devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+      const deviceId = _keys[_i];const device = _obj2[deviceId];
+      if (deviceId !== deviceIdToRemove) _obj[deviceId] = device;
+    }return _obj;
+  })();
+}
+
+function deviceIsInDevicesToSearchFor(deviceId) {
+  return (0, _settings.getSettings)().devicesToSearchFor[deviceId];
+}function updateDeviceInDevicesToSearchFor(deviceId, propName, propValue) {
+  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, (0, _settings.getSettings)().devicesToSearchFor, {
+    [deviceId]: _extends({}, (0, _settings.getSettings)().devicesToSearchFor[deviceId], { [propName]: propValue })
+  }));
+} /**
+   * When a user starts up BlueLoss after previously exiting, the
+   * lastSeen value will be out of date for the devices in
+   * devicesToSearchFor. This would cause BlueLoss to lock the
+   * system straight away because the lastSeen value + timeToLock
+   *  will be less than Date.now(). So to prevent this, we give all
+   * devices in devicesToSearchFor a lastSeen of 10 years from now.
+   * (when a device is seen again during a scan, lastSeen is updated.)
+   */
+function updateLastSeenForDevicesLookingForOnStartup() {
+  for (let _obj3 = (0, _settings.getSettings)().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
+    const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
+    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
+  }
+}exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
+exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
+exports.updateDeviceInDevicesToSearchFor = updateDeviceInDevicesToSearchFor;
+exports.updateLastSeenForDevicesLookingForOnStartup = updateLastSeenForDevicesLookingForOnStartup;
+
+/***/ }),
+
+/***/ "./app/components/settings/settings.lsc":
+/*!**********************************************!*\
+  !*** ./app/components/settings/settings.lsc ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getSettings = exports.updateSetting = exports.initSettings = undefined;
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _gawk = __webpack_require__(/*! gawk */ "gawk");
+
+var _gawk2 = _interopRequireDefault(_gawk);
+
+var _lowdb = __webpack_require__(/*! lowdb */ "lowdb");
+
+var _lowdb2 = _interopRequireDefault(_lowdb);
+
+var _FileSync = __webpack_require__(/*! lowdb/adapters/FileSync */ "lowdb/adapters/FileSync");
+
+var _FileSync2 = _interopRequireDefault(_FileSync);
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _settingsDefaults = __webpack_require__(/*! ./settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
+
+var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./app/components/settings/settingsObservers.lsc");
+
+var _settingsIPClisteners = __webpack_require__(/*! ./settingsIPClisteners.lsc */ "./app/components/settings/settingsIPClisteners.lsc");
+
+var _devices = __webpack_require__(/*! ./devices.lsc */ "./app/components/settings/devices.lsc");
+
+var _logSettingsUpdates = __webpack_require__(/*! ../logging/logSettingsUpdates.lsc */ "./app/components/logging/logSettingsUpdates.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const settingsDBpath = _path2.default.join(_electron.app.getPath('userData'), 'blueloss-settings.json');
+
+let db = null;
+let settings = null;
+
+function initSettings() {
+  const adapter = new _FileSync2.default(settingsDBpath);
+  db = (0, _lowdb2.default)(adapter);
+  db.defaults(_settingsDefaults.defaultSettings).write();
+  settings = (0, _gawk2.default)(db.getState());
+  (0, _settingsObservers.initSettingsObservers)(settings);
+  (0, _settingsIPClisteners.initSettingsIPClisteners)();
+  (0, _devices.updateLastSeenForDevicesLookingForOnStartup)();
+}function getSettings() {
+  return settings;
+}function updateSetting(newSettingKey, newSettingValue) {
+  settings[newSettingKey] = newSettingValue;
+  db.set(newSettingKey, newSettingValue).write();
+  (0, _logSettingsUpdates.logSettingsUpdateForDebugMode)(newSettingKey, newSettingValue);
+}exports.initSettings = initSettings;
+exports.updateSetting = updateSetting;
+exports.getSettings = getSettings;
+
+/***/ }),
+
+/***/ "./app/components/settings/settingsDefaults.lsc":
+/*!******************************************************!*\
+  !*** ./app/components/settings/settingsDefaults.lsc ***!
+  \******************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -191,7 +605,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.defaultSettings = undefined;
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/types/types.lsc");
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 const defaultSettings = {
   blueLossEnabled: true,
@@ -201,19 +615,105 @@ const defaultSettings = {
   timeToLock: 3,
   reportErrors: true,
   firstRun: true,
-  settingsWindowPosition: null,
-  dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0'
+  settingsWindowPosition: {},
+  debugMode: false
 };
 
 exports.defaultSettings = defaultSettings;
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/actionsIndex.lsc":
-/*!**************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/actionsIndex.lsc ***!
-  \**************************************************************/
+/***/ "./app/components/settings/settingsIPClisteners.lsc":
+/*!**********************************************************!*\
+  !*** ./app/components/settings/settingsIPClisteners.lsc ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initSettingsIPClisteners = undefined;
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
+
+function initSettingsIPClisteners() {
+  _electron.ipcMain.on('renderer:setting-updated-in-ui', function (event, settingName, settingValue) {
+    (0, _settings.updateSetting)(settingName, settingValue);
+  });
+  _electron.ipcMain.on('renderer:device-added-in-ui', function (event, deviceToAdd) {
+    (0, _settings.addNewDeviceToSearchFor)(deviceToAdd);
+  });
+  _electron.ipcMain.on('renderer:device-removed-in-ui', function (event, deviceToRemove) {
+    (0, _settings.removeNewDeviceToSearchFor)(deviceToRemove);
+  });
+}exports.initSettingsIPClisteners = initSettingsIPClisteners;
+
+/***/ }),
+
+/***/ "./app/components/settings/settingsObservers.lsc":
+/*!*******************************************************!*\
+  !*** ./app/components/settings/settingsObservers.lsc ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initSettingsObservers = undefined;
+
+var _gawk = __webpack_require__(/*! gawk */ "gawk");
+
+var _gawk2 = _interopRequireDefault(_gawk);
+
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _tray = __webpack_require__(/*! ../tray/tray.lsc */ "./app/components/tray/tray.lsc");
+
+var _runOnStartup = __webpack_require__(/*! ../runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
+
+var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/components/debugWindow/debugWindow.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function initSettingsObservers(settings) {
+  _gawk2.default.watch(settings, ['blueLossEnabled'], function (enabled) {
+    var _settingsWindow$webCo;
+
+    _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { blueLossEnabled: enabled });
+    (0, _tray.updateTrayMenu)();
+  });
+  _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
+    if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
+  });
+  _gawk2.default.watch(settings, ['runOnStartup'], function (enabled) {
+    if (enabled) (0, _runOnStartup.enableRunOnStartup)();else (0, _runOnStartup.disableRunOnStartup)();
+  });
+  _gawk2.default.watch(settings, ['debugMode'], function (enabled) {
+    if (enabled) (0, _debugWindow.showDebugWindow)();else _debugWindow.debugWindow == null ? void 0 : typeof _debugWindow.debugWindow.close !== 'function' ? void 0 : _debugWindow.debugWindow.close();
+  });
+  _gawk2.default.watch(settings, ['trayIconColor'], _tray.changeTrayIcon);
+}exports.initSettingsObservers = initSettingsObservers;
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/actionsIndex.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/actionsIndex.lsc ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -224,41 +724,41 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _windowButtons = __webpack_require__(/*! ./windowButtons.lsc */ "./app/settingsWindow/renderer/actions/windowButtons.lsc");
+var _windowButtons = __webpack_require__(/*! ./windowButtons.lsc */ "./app/components/settingsWindow/renderer/actions/windowButtons.lsc");
 
-var _toggleTab = __webpack_require__(/*! ./toggleTab.lsc */ "./app/settingsWindow/renderer/actions/toggleTab.lsc");
+var _toggleTab = __webpack_require__(/*! ./toggleTab.lsc */ "./app/components/settingsWindow/renderer/actions/toggleTab.lsc");
 
 var _toggleTab2 = _interopRequireDefault(_toggleTab);
 
-var _openLink = __webpack_require__(/*! ./openLink.lsc */ "./app/settingsWindow/renderer/actions/openLink.lsc");
+var _openLink = __webpack_require__(/*! ./openLink.lsc */ "./app/components/settingsWindow/renderer/actions/openLink.lsc");
 
 var _openLink2 = _interopRequireDefault(_openLink);
 
-var _animateDots = __webpack_require__(/*! ./animateDots.lsc */ "./app/settingsWindow/renderer/actions/animateDots.lsc");
+var _animateDots = __webpack_require__(/*! ./animateDots.lsc */ "./app/components/settingsWindow/renderer/actions/animateDots.lsc");
 
 var _animateDots2 = _interopRequireDefault(_animateDots);
 
-var _updateSetting = __webpack_require__(/*! ./updateSetting.lsc */ "./app/settingsWindow/renderer/actions/updateSetting.lsc");
+var _updateSetting = __webpack_require__(/*! ./updateSetting.lsc */ "./app/components/settingsWindow/renderer/actions/updateSetting.lsc");
 
 var _updateSetting2 = _interopRequireDefault(_updateSetting);
 
-var _updateStateOnIpcMessage = __webpack_require__(/*! ./updateStateOnIpcMessage.lsc */ "./app/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc");
+var _updateStateOnIpcMessage = __webpack_require__(/*! ./updateStateOnIpcMessage.lsc */ "./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc");
 
 var _updateStateOnIpcMessage2 = _interopRequireDefault(_updateStateOnIpcMessage);
 
-var _changeTrayIconColor = __webpack_require__(/*! ./changeTrayIconColor.lsc */ "./app/settingsWindow/renderer/actions/changeTrayIconColor.lsc");
+var _changeTrayIconColor = __webpack_require__(/*! ./changeTrayIconColor.lsc */ "./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc");
 
 var _changeTrayIconColor2 = _interopRequireDefault(_changeTrayIconColor);
 
-var _removeDevice = __webpack_require__(/*! ./removeDevice.lsc */ "./app/settingsWindow/renderer/actions/removeDevice.lsc");
+var _removeDevice = __webpack_require__(/*! ./removeDevice.lsc */ "./app/components/settingsWindow/renderer/actions/removeDevice.lsc");
 
 var _removeDevice2 = _interopRequireDefault(_removeDevice);
 
-var _addNewDevice = __webpack_require__(/*! ./addNewDevice.lsc */ "./app/settingsWindow/renderer/actions/addNewDevice.lsc");
+var _addNewDevice = __webpack_require__(/*! ./addNewDevice.lsc */ "./app/components/settingsWindow/renderer/actions/addNewDevice.lsc");
 
 var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
 
-var _toggleDebugWindow = __webpack_require__(/*! ./toggleDebugWindow.lsc */ "./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc");
+var _toggleDebugWindow = __webpack_require__(/*! ./toggleDebugWindow.lsc */ "./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc");
 
 var _toggleDebugWindow2 = _interopRequireDefault(_toggleDebugWindow);
 
@@ -280,10 +780,10 @@ exports.default = {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/addNewDevice.lsc":
-/*!**************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/addNewDevice.lsc ***!
-  \**************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/addNewDevice.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/addNewDevice.lsc ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -298,7 +798,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -319,10 +819,10 @@ exports.default = function addNewDevice(newDevice) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/animateDots.lsc":
-/*!*************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/animateDots.lsc ***!
-  \*************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/animateDots.lsc":
+/*!************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/animateDots.lsc ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -345,10 +845,10 @@ exports.default = function animateDots(element) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/changeTrayIconColor.lsc":
-/*!*********************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/changeTrayIconColor.lsc ***!
-  \*********************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc":
+/*!********************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc ***!
+  \********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -368,10 +868,10 @@ exports.default = function changeTrayIconColor(newTrayIconColor) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/openLink.lsc":
-/*!**********************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/openLink.lsc ***!
-  \**********************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/openLink.lsc":
+/*!*********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/openLink.lsc ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -391,10 +891,10 @@ exports.default = function openLink(event) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/removeDevice.lsc":
-/*!**************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/removeDevice.lsc ***!
-  \**************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/removeDevice.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/removeDevice.lsc ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -407,7 +907,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/types/types.lsc");
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -432,10 +932,10 @@ exports.default = function removeDevice(deviceToRemove) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc":
-/*!*******************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/toggleDebugWindow.lsc ***!
-  \*******************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc":
+/*!******************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc ***!
+  \******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -450,16 +950,16 @@ var _electron = __webpack_require__(/*! electron */ "electron");
 
 exports.default = function toggleDebugWindow(element) {
   const toggled = element.currentTarget.toggled;
-  _electron.ipcRenderer.send('renderer:user-debug-toggled', toggled);
-  return { userDebug: toggled };
+  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', 'debugMode', toggled);
+  return { debugMode: toggled };
 };
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/toggleTab.lsc":
-/*!***********************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/toggleTab.lsc ***!
-  \***********************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/toggleTab.lsc":
+/*!**********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/toggleTab.lsc ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -477,10 +977,10 @@ exports.default = function toggleTab(event) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/updateSetting.lsc":
-/*!***************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/updateSetting.lsc ***!
-  \***************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/updateSetting.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/updateSetting.lsc ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -500,10 +1000,10 @@ exports.default = function updateSetting({ settingName, settingValue }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc":
-/*!*************************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc ***!
-  \*************************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc":
+/*!************************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc ***!
+  \************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -520,10 +1020,10 @@ exports.default = function updateStateOnIpcMessage(newStateObjToMerge) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/actions/windowButtons.lsc":
-/*!***************************************************************!*\
-  !*** ./app/settingsWindow/renderer/actions/windowButtons.lsc ***!
-  \***************************************************************/
+/***/ "./app/components/settingsWindow/renderer/actions/windowButtons.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/windowButtons.lsc ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -548,10 +1048,10 @@ exports.closeSettingsWindow = closeSettingsWindow;
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/components/deviceCard.lsc":
-/*!***************************************************************!*\
-  !*** ./app/settingsWindow/renderer/components/deviceCard.lsc ***!
-  \***************************************************************/
+/***/ "./app/components/settingsWindow/renderer/components/deviceCard.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/components/deviceCard.lsc ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -632,10 +1132,10 @@ exports.default = function deviceCard({ lookingForDevice, device, actions }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/settingsWindowRendererMain.lsc":
-/*!********************************************************************!*\
-  !*** ./app/settingsWindow/renderer/settingsWindowRendererMain.lsc ***!
-  \********************************************************************/
+/***/ "./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc":
+/*!*******************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc ***!
+  \*******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -651,42 +1151,36 @@ var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
 var _logger = __webpack_require__(/*! @hyperapp/logger */ "@hyperapp/logger");
 
-var _actionsIndex = __webpack_require__(/*! ./actions/actionsIndex.lsc */ "./app/settingsWindow/renderer/actions/actionsIndex.lsc");
+var _actionsIndex = __webpack_require__(/*! ./actions/actionsIndex.lsc */ "./app/components/settingsWindow/renderer/actions/actionsIndex.lsc");
 
 var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
 
-var _viewsIndex = __webpack_require__(/*! ./views/viewsIndex.lsc */ "./app/settingsWindow/renderer/views/viewsIndex.lsc");
+var _viewsIndex = __webpack_require__(/*! ./views/viewsIndex.lsc */ "./app/components/settingsWindow/renderer/views/viewsIndex.lsc");
 
 var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
 
-var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/types/types.lsc");
+var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/components/types/types.lsc");
 
-var _utils = __webpack_require__(/*! ../../common/utils.lsc */ "./app/common/utils.lsc");
+var _utils = __webpack_require__(/*! ../../utils.lsc */ "./app/components/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const logInDev =  true ? _logger.withLogger : undefined;
 const settingsWindowRendererApp = logInDev(_hyperapp.app)(getInitialSettingsFromMainProcess(), _actionsIndex2.default, _viewsIndex2.default, document.body);
-/**
- * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
- * for them.
- */
+
 _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
 });
 _electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
   settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
 });
-/**
-* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
-* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
-*/
+
 function getInitialSettingsFromMainProcess() {
   return _extends({
     activeTab: 'statusTab',
     devicesCanSee: [],
-    userDebug: false
-  }, (0, _utils.omitInheritedProperties)(_electron.remote.getGlobal('settingsWindowRendererInitialSettings')));
+    debugMode: false
+  }, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request'));
 }
 
 /**
@@ -700,10 +1194,10 @@ window.onunhandledrejection = handleRendererWindowError;
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/aboutInfoWindow.lsc":
-/*!***************************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/aboutInfoWindow.lsc ***!
-  \***************************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -820,10 +1314,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/aboutTab.lsc":
-/*!********************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/aboutTab.lsc ***!
-  \********************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/aboutTab.lsc":
+/*!*******************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/aboutTab.lsc ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -871,10 +1365,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/header.lsc":
-/*!******************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/header.lsc ***!
-  \******************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/header.lsc":
+/*!*****************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/header.lsc ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -916,10 +1410,10 @@ exports.default = function ({ actions }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/helpTab.lsc":
-/*!*******************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/helpTab.lsc ***!
-  \*******************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/helpTab.lsc":
+/*!******************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/helpTab.lsc ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -962,10 +1456,10 @@ exports.default = function ({ actions }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/settingsInfoWindow.lsc":
-/*!******************************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/settingsInfoWindow.lsc ***!
-  \******************************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc":
+/*!*****************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -978,7 +1472,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _settingsDefaults = __webpack_require__(/*! ../../../settings/settingsDefaults.lsc */ "./app/settings/settingsDefaults.lsc");
+var _settingsDefaults = __webpack_require__(/*! ../../../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
 
@@ -1139,7 +1633,7 @@ exports.default = function ({ actions, state }) {
       null,
       (0, _hyperapp.h)('x-switch', {
         id: 'userDebugSwitch',
-        toggled: state.userDebug,
+        toggled: state.debugMode,
         onchange: actions.toggleDebugWindow
       }),
       (0, _hyperapp.h)(
@@ -1166,10 +1660,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/settingsTab.lsc":
-/*!***********************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/settingsTab.lsc ***!
-  \***********************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/settingsTab.lsc":
+/*!**********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/settingsTab.lsc ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1217,10 +1711,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/statusInfoWindow.lsc":
-/*!****************************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/statusInfoWindow.lsc ***!
-  \****************************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc":
+/*!***************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1233,7 +1727,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _deviceCard = __webpack_require__(/*! ../components/deviceCard.lsc */ "./app/settingsWindow/renderer/components/deviceCard.lsc");
+var _deviceCard = __webpack_require__(/*! ../components/deviceCard.lsc */ "./app/components/settingsWindow/renderer/components/deviceCard.lsc");
 
 var _deviceCard2 = _interopRequireDefault(_deviceCard);
 
@@ -1320,10 +1814,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/statusTab.lsc":
-/*!*********************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/statusTab.lsc ***!
-  \*********************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/statusTab.lsc":
+/*!********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/statusTab.lsc ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1376,10 +1870,10 @@ exports.default = function ({ actions, state }) {
 
 /***/ }),
 
-/***/ "./app/settingsWindow/renderer/views/viewsIndex.lsc":
-/*!**********************************************************!*\
-  !*** ./app/settingsWindow/renderer/views/viewsIndex.lsc ***!
-  \**********************************************************/
+/***/ "./app/components/settingsWindow/renderer/views/viewsIndex.lsc":
+/*!*********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/viewsIndex.lsc ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1392,35 +1886,35 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _header = __webpack_require__(/*! ../views/header.lsc */ "./app/settingsWindow/renderer/views/header.lsc");
+var _header = __webpack_require__(/*! ../views/header.lsc */ "./app/components/settingsWindow/renderer/views/header.lsc");
 
 var _header2 = _interopRequireDefault(_header);
 
-var _aboutTab = __webpack_require__(/*! ../views/aboutTab.lsc */ "./app/settingsWindow/renderer/views/aboutTab.lsc");
+var _aboutTab = __webpack_require__(/*! ../views/aboutTab.lsc */ "./app/components/settingsWindow/renderer/views/aboutTab.lsc");
 
 var _aboutTab2 = _interopRequireDefault(_aboutTab);
 
-var _helpTab = __webpack_require__(/*! ../views/helpTab.lsc */ "./app/settingsWindow/renderer/views/helpTab.lsc");
+var _helpTab = __webpack_require__(/*! ../views/helpTab.lsc */ "./app/components/settingsWindow/renderer/views/helpTab.lsc");
 
 var _helpTab2 = _interopRequireDefault(_helpTab);
 
-var _settingsTab = __webpack_require__(/*! ../views/settingsTab.lsc */ "./app/settingsWindow/renderer/views/settingsTab.lsc");
+var _settingsTab = __webpack_require__(/*! ../views/settingsTab.lsc */ "./app/components/settingsWindow/renderer/views/settingsTab.lsc");
 
 var _settingsTab2 = _interopRequireDefault(_settingsTab);
 
-var _statusTab = __webpack_require__(/*! ../views/statusTab.lsc */ "./app/settingsWindow/renderer/views/statusTab.lsc");
+var _statusTab = __webpack_require__(/*! ../views/statusTab.lsc */ "./app/components/settingsWindow/renderer/views/statusTab.lsc");
 
 var _statusTab2 = _interopRequireDefault(_statusTab);
 
-var _statusInfoWindow = __webpack_require__(/*! ../views/statusInfoWindow.lsc */ "./app/settingsWindow/renderer/views/statusInfoWindow.lsc");
+var _statusInfoWindow = __webpack_require__(/*! ../views/statusInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc");
 
 var _statusInfoWindow2 = _interopRequireDefault(_statusInfoWindow);
 
-var _settingsInfoWindow = __webpack_require__(/*! ../views/settingsInfoWindow.lsc */ "./app/settingsWindow/renderer/views/settingsInfoWindow.lsc");
+var _settingsInfoWindow = __webpack_require__(/*! ../views/settingsInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc");
 
 var _settingsInfoWindow2 = _interopRequireDefault(_settingsInfoWindow);
 
-var _aboutInfoWindow = __webpack_require__(/*! ../views/aboutInfoWindow.lsc */ "./app/settingsWindow/renderer/views/aboutInfoWindow.lsc");
+var _aboutInfoWindow = __webpack_require__(/*! ../views/aboutInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc");
 
 var _aboutInfoWindow2 = _interopRequireDefault(_aboutInfoWindow);
 
@@ -1467,15 +1961,285 @@ exports.default = function (state, actions) {
 
 /***/ }),
 
-/***/ "./app/types/types.lsc":
-/*!*****************************!*\
-  !*** ./app/types/types.lsc ***!
-  \*****************************/
+/***/ "./app/components/settingsWindow/settingsWindow.lsc":
+/*!**********************************************************!*\
+  !*** ./app/components/settingsWindow/settingsWindow.lsc ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.settingsWindow = exports.toggleSettingsWindow = exports.showSettingsWindow = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+// import omit from 'lodash.omit'
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _url = __webpack_require__(/*! url */ "url");
+
+var _url2 = _interopRequireDefault(_url);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import { omitInheritedProperties, omitGawkFromSettings } from '../common/utils.lsc'
+
+const settingsWindowRendererDirPath = _path2.default.join(__dirname, 'components', 'settingsWindow', 'renderer');
+const iconsDir = _path2.default.join(settingsWindowRendererDirPath, 'assets', 'icons');
+const settingsHTMLpath = _url2.default.format({
+  protocol: 'file',
+  slashes: true,
+  pathname: _path2.default.resolve(settingsWindowRendererDirPath, 'settingsWindow.html')
+});
+const settingsWindowProperties = _extends({
+  width: 786,
+  height: 616,
+  title: 'BlueLoss',
+  autoHideMenuBar: true,
+  resizable: false,
+  fullscreenable: false,
+  fullscreen: false,
+  frame: false,
+  show: false,
+  icon: getIconPath(),
+  webPreferences: {
+    textAreasAreResizable: false,
+    devTools: true
+  }
+}, getStoredWindowPosition());
+/****
+* Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+* Reload is for dev so we can easily reload the browserwindow with Ctrl+R.
+*/
+const settingsWindowMenu =  true ? _electron.Menu.buildFromTemplate([{ role: 'reload' }]) : undefined;
+let settingsWindow = null;
+
+function showSettingsWindow() {
+  if (settingsWindow) return settingsWindow.show();
+
+  _electron.ipcMain.on('renderer:intitial-settings-request', function (event) {
+    return event.sender.send('mainprocess:intitial-settings-sent', (0, _settings.getSettings)());
+  });
+
+  exports.settingsWindow = settingsWindow = new _electron.BrowserWindow(_extends({}, settingsWindowProperties, getStoredWindowPosition(), { icon: getIconPath() }));
+  settingsWindow.loadURL(settingsHTMLpath);
+  settingsWindow.setMenu(settingsWindowMenu);
+  if (true) settingsWindow.webContents.openDevTools({ mode: 'undocked' });
+
+  settingsWindow.once('close', function () {
+    (0, _settings.updateSetting)('settingsWindowPosition', settingsWindow.getBounds());
+  });
+  settingsWindow.once('ready-to-show', function () {
+    settingsWindow.show();
+  });
+  settingsWindow.once('closed', function () {
+    var _electronApp$dock;
+
+    exports.settingsWindow = settingsWindow = null;
+    (_electronApp$dock = _electron.app.dock) == null ? void 0 : _electronApp$dock.hide();
+  });
+  settingsWindow.webContents.once('crashed', function (event) {
+    _logging.logger.error('settingsWindow.webContents crashed', event);
+  });
+  settingsWindow.once('unresponsive', function (event) {
+    _logging.logger.error('settingsWindow unresponsive', event);
+  });
+}function getStoredWindowPosition() {
+  const { x, y } = (0, _settings.getSettings)().settingsWindowPosition;
+  return { x, y };
+}function getIconPath() {
+  const iconFileName = `BlueLoss-${(0, _settings.getSettings)().trayIconColor}-512x512.png`;
+  return _path2.default.join(iconsDir, iconFileName);
+}function toggleSettingsWindow() {
+  if (!settingsWindow) {
+    showSettingsWindow();
+  } else if (settingsWindow.isVisible()) {
+    settingsWindow.close();
+  }
+} /**
+   * Some settings are just used internally and never exposed to the user -
+   * e.g. firstRun, settingsWindowPosition, etc.
+   */
+// createSettingsWindowInitialSettings():Object ->
+//   omit(
+//     omitGawkFromSettings(omitInheritedProperties(getSettings())),
+//     ['firstRun', 'settingsWindowPosition', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']
+//   )
+
+exports.showSettingsWindow = showSettingsWindow;
+exports.toggleSettingsWindow = toggleSettingsWindow;
+exports.settingsWindow = settingsWindow;
+
+/***/ }),
+
+/***/ "./app/components/tray/tray.lsc":
+/*!**************************************!*\
+  !*** ./app/components/tray/tray.lsc ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.updateTrayMenu = exports.createContextMenu = exports.changeTrayIcon = exports.initTrayMenu = undefined;
+
+var _path = __webpack_require__(/*! path */ "path");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let tray = null;
+const trayIconsFolder = _path2.default.resolve(__dirname, 'components', 'tray', 'icons');
+
+function initTrayMenu() {
+  tray = new _electron.Tray(getNewTrayIconPath((0, _settings.getSettings)().trayIconColor));
+  tray.setContextMenu(createContextMenu());
+  tray.setToolTip('BlueLoss');
+  tray.on('double-click', _settingsWindow.toggleSettingsWindow);
+}function createContextMenu() {
+  return _electron.Menu.buildFromTemplate([{
+    label: 'Open BlueLoss Settings',
+    click: _settingsWindow.showSettingsWindow
+  }, {
+    label: generateEnabledDisabledLabel(),
+    click: toggleEnabledFromTray
+  }, {
+    label: 'Quit BlueLoss',
+    click: _electron.app.quit
+  }]);
+}function getNewTrayIconPath(trayIconColor) {
+  return _path2.default.join(trayIconsFolder, `BlueLoss-${trayIconColor}-128x128.png`);
+}function generateEnabledDisabledLabel() {
+  return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
+}function changeTrayIcon(newTrayIconColor) {
+  tray.setImage(getNewTrayIconPath(newTrayIconColor));
+}function updateTrayMenu() {
+  tray.setContextMenu(createContextMenu());
+}function toggleEnabledFromTray() {
+  (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
+}exports.initTrayMenu = initTrayMenu;
+exports.changeTrayIcon = changeTrayIcon;
+exports.createContextMenu = createContextMenu;
+exports.updateTrayMenu = updateTrayMenu;
+
+/***/ }),
+
+/***/ "./app/components/types/types.lsc":
+/*!****************************************!*\
+  !*** ./app/components/types/types.lsc ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/***/ }),
+
+/***/ "./app/components/utils.lsc":
+/*!**********************************!*\
+  !*** ./app/components/utils.lsc ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.bailOnFatalError = exports.generateLogTimeStamp = exports.getProperAppVersion = exports.tenYearsFromNow = exports.identity = exports.compose = exports.noop = exports.omitInheritedProperties = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
+
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
+
+var _typa = __webpack_require__(/*! typa */ "typa");
+
+var _typa2 = _interopRequireDefault(_typa);
+
+var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * If you run Electron by pointing it to a js file that's not in the base parent directory with the
+ * package.json it will report the Electron binary version rather than what's in your package.json.
+ * https://github.com/electron/electron/issues/7085
+ */
+const appVersion = __webpack_require__(/*! ../../package.json */ "./package.json").version;
+
+function getProperAppVersion() {
+  return appVersion;
+} // omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
+function noop() {
+  return;
+}function compose(...fns) {
+  return function (value) {
+    return fns.reduceRight((accumulator, current) => current(accumulator), value);
+  };
+}function identity(param) {
+  return param;
+}function tenYearsFromNow() {
+  return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
+} // recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
+//   Object.keys(obj).reduce((newObj, propName) ->
+//     for elem propertyToFilter in propertyFiltersArr:
+//       if propertyToFilter === propName: return newObj
+//     if is.obj(obj[propName]):
+//       return {...newObj, ...{ [propName]: recursivelyOmitObjProperties(obj[propName], propertyFiltersArr) }}
+//     {...newObj, ...{ [propName]: obj[propName] }}
+//   , {})
+
+function omitInheritedProperties(obj) {
+  return Object.getOwnPropertyNames(obj).reduce(function (newObj, propName) {
+    if (_typa2.default.obj(obj[propName])) {
+      return _extends({}, newObj, { [propName]: omitInheritedProperties(obj[propName]) });
+    }return _extends({}, newObj, { [propName]: obj[propName] });
+  }, {});
+}function generateLogTimeStamp() {
+  const today = new Date();
+  return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
+}function bailOnFatalError(err) {
+  console.error(err);
+  _logging.logger == null ? void 0 : typeof _logging.logger.error !== 'function' ? void 0 : _logging.logger.error(err);
+  process.exit(1);
+}exports.omitInheritedProperties = omitInheritedProperties;
+exports.noop = noop;
+exports.compose = compose;
+exports.identity = identity;
+exports.tenYearsFromNow = tenYearsFromNow;
+exports.getProperAppVersion = getProperAppVersion;
+exports.generateLogTimeStamp = generateLogTimeStamp;
+exports.bailOnFatalError = bailOnFatalError;
 
 /***/ }),
 
@@ -1486,7 +2250,7 @@ exports.default = function (state, actions) {
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.2.3","description":"A desktop app that locks your computer when a device is lost","main":"app/main/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js --config nodemon.json","styleWatch":"cross-env NODE_ENV=development stylus -w app/settingsWindow/renderer/assets/styles/stylus/index.styl -o app/settingsWindow/renderer/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && sleepms 3000 && electron --inspect-brk app/main/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/main/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test","snyk-protect":"snyk protect","prepare":"npm run snyk-protect"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","electron-positioner":"^3.0.0","formbase":"^6.0.4","fs-jetpack":"^1.3.0","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.76.0","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.0-alpha.2","@oigroup/lightscript-eslint":"^3.1.0-alpha.2","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.4","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.1","electron-packager":"^12.0.1","electron-reload":"^1.2.2","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.4","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.3","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","stylus":"^0.54.5","webpack":"^4.8.3","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","fs-jetpack":"^2.0.0","gawk":"^4.5.0","got":"^8.3.2","hyperapp":"^1.2.6","inquirer":"^6.0.0","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","rollbar":"^2.3.9","snyk":"^1.88.2","stringify-object":"^3.2.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","node-7z":"^0.4.0","nodemon":"^1.18.0","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1501,6 +2265,17 @@ module.exports = require("@hyperapp/logger");
 
 /***/ }),
 
+/***/ "auto-launch":
+/*!******************************!*\
+  !*** external "auto-launch" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("auto-launch");
+
+/***/ }),
+
 /***/ "electron":
 /*!***************************!*\
   !*** external "electron" ***!
@@ -1512,6 +2287,17 @@ module.exports = require("electron");
 
 /***/ }),
 
+/***/ "gawk":
+/*!***********************!*\
+  !*** external "gawk" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("gawk");
+
+/***/ }),
+
 /***/ "hyperapp":
 /*!***************************!*\
   !*** external "hyperapp" ***!
@@ -1520,6 +2306,61 @@ module.exports = require("electron");
 /***/ (function(module, exports) {
 
 module.exports = require("hyperapp");
+
+/***/ }),
+
+/***/ "is-empty":
+/*!***************************!*\
+  !*** external "is-empty" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("is-empty");
+
+/***/ }),
+
+/***/ "lowdb":
+/*!************************!*\
+  !*** external "lowdb" ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lowdb");
+
+/***/ }),
+
+/***/ "lowdb/adapters/FileSync":
+/*!******************************************!*\
+  !*** external "lowdb/adapters/FileSync" ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lowdb/adapters/FileSync");
+
+/***/ }),
+
+/***/ "path":
+/*!***********************!*\
+  !*** external "path" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+
+/***/ "rollbar":
+/*!**************************!*\
+  !*** external "rollbar" ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("rollbar");
 
 /***/ }),
 
@@ -1543,6 +2384,40 @@ module.exports = require("timeproxy");
 
 module.exports = require("typa");
 
+/***/ }),
+
+/***/ "url":
+/*!**********************!*\
+  !*** external "url" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("url");
+
+/***/ }),
+
+/***/ "util":
+/*!***********************!*\
+  !*** external "util" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("util");
+
+/***/ }),
+
+/***/ "winston":
+/*!**************************!*\
+  !*** external "winston" ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("winston");
+
 /***/ })
 
 /******/ });
+//# sourceMappingURL=settingsWindowRendererMain-compiled.js.map

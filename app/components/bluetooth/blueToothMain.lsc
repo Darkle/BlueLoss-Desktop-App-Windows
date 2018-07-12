@@ -5,9 +5,9 @@ import { BrowserWindow } from 'electron'
 import tp from 'timeproxy'
 
 import { handleScanResults } from './handleScanResults.lsc'
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { lockSystemIfDeviceLost } from './lockCheck.lsc'
+import { lockSystemIfDeviceLost } from '../lockSystem/lockCheck.lsc'
 
 bluetoothHiddenWindowHTMLpath = url.format({
   protocol: 'file',

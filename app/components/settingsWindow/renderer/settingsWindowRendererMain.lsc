@@ -1,36 +1,31 @@
-import { ipcRenderer, remote } from 'electron'
+import { ipcRenderer } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
 
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
-import { omitInheritedProperties, identity } from '../../common/utils.lsc'
+import { omitInheritedProperties, identity } from '../../utils.lsc'
 
 logInDev = if ISDEV: withLogger else: identity
 settingsWindowRendererApp = logInDev(app)(getInitialSettingsFromMainProcess(), appActions, views, document.body)
-/**
- * Some settings (such as 'blueLossEnabled') can be changed from the main process, so listen
- * for them.
- */
+
+
 ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsTypes):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(setting)
 )
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
-/**
-* When we get the remote.getGlobal, it has inherited stuff on it like getters and setters, so we cant
-* just use an object spread, we need to "sanitize" it with omitInheritedProperties.
-*/
+
 getInitialSettingsFromMainProcess():Object ->
   ({
     ...{
       activeTab: 'statusTab',
       devicesCanSee: [],
-      userDebug: false,
+      debugMode: false,
     },
-    ...omitInheritedProperties(remote.getGlobal('settingsWindowRendererInitialSettings'))
+    ...ipcRenderer.sendSync('renderer:intitial-settings-request')
   })
 
 /**

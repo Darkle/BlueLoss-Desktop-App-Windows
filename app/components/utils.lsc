@@ -26,12 +26,12 @@ tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 //     {...newObj, ...{ [propName]: obj[propName] }}
 //   , {})
 
-// omitInheritedProperties(obj: Object):Object ->
-//   Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
-//     if is.obj(obj[propName]):
-//       return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
-//     {...newObj, ...{ [propName]: obj[propName] }}
-//   , {})
+omitInheritedProperties(obj: Object):Object ->
+  Object.getOwnPropertyNames(obj).reduce((newObj, propName) ->
+    if is.obj(obj[propName]):
+      return {...newObj, ...{ [propName]: omitInheritedProperties(obj[propName]) }}
+    {...newObj, ...{ [propName]: obj[propName] }}
+  , {})
 
 generateLogTimeStamp():String ->
   today = new Date()
@@ -43,14 +43,14 @@ bailOnFatalError(err):void ->
   process.exit(1)
 
 export {
-  omitGawkFromSettings,
+  // omitGawkFromSettings,
   omitInheritedProperties,
   noop,
   compose,
   identity,
   tenYearsFromNow,
   getProperAppVersion,
-  recursivelyOmitObjProperties,
+  // recursivelyOmitObjProperties,
   generateLogTimeStamp,
   bailOnFatalError,
 }

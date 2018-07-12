@@ -2,9 +2,10 @@
 import gawk from 'gawk'
 
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
+import { addRollbarLogging, removeRollbarLogging } from '../logging/logging.lsc'
 import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
-import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
+import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
+import { showDebugWindow, debugWindow } from '../debugWindow/debugWindow.lsc'
 
 initSettingsObservers(settings):void ->
   gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
@@ -18,6 +19,10 @@ initSettingsObservers(settings):void ->
   gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
     if enabled: enableRunOnStartup()
     else: disableRunOnStartup()
+  )
+  gawk.watch(settings, ['debugMode'], (enabled: boolean):void ->
+    if enabled: showDebugWindow()
+    else: debugWindow?.close?()
   )
   gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 

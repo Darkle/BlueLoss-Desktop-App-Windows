@@ -1,0 +1,58 @@
+import { tenYearsFromNow } from '../utils.lsc'
+import { DeviceType } from '../types/types.lsc'
+import { updateSetting, getSettings } from './settings.lsc'
+
+addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
+  { deviceId } = deviceToAdd
+  if deviceIsInDevicesToSearchFor(deviceId): return
+  updateSetting('devicesToSearchFor',
+    {...getSettings().devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
+  )
+
+removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
+  { deviceId } = deviceToRemove
+  if !deviceIsInDevicesToSearchFor(deviceId): return
+  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
+
+filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
+  {
+    ...for key deviceId, val device in getSettings().devicesToSearchFor:
+      if deviceId != deviceIdToRemove: { [ deviceId ]: device }
+  }
+
+deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
+  getSettings().devicesToSearchFor[deviceId]
+
+updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
+  updateSetting('devicesToSearchFor',
+    {
+      ...getSettings().devicesToSearchFor,
+      ...{
+        [ deviceId ]: {
+          ...getSettings().devicesToSearchFor[deviceId],
+          ...{ [ propName ]: propValue }
+        }
+      }
+    }
+  )
+
+/**
+ * When a user starts up BlueLoss after previously exiting, the
+ * lastSeen value will be out of date for the devices in
+ * devicesToSearchFor. This would cause BlueLoss to lock the
+ * system straight away because the lastSeen value + timeToLock
+ *  will be less than Date.now(). So to prevent this, we give all
+ * devices in devicesToSearchFor a lastSeen of 10 years from now.
+ * (when a device is seen again during a scan, lastSeen is updated.)
+ */
+updateLastSeenForDevicesLookingForOnStartup():void ->
+  for val { deviceId } in getSettings().devicesToSearchFor:
+    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
+
+
+export {
+  addNewDeviceToSearchFor,
+  removeNewDeviceToSearchFor,
+  updateDeviceInDevicesToSearchFor,
+  updateLastSeenForDevicesLookingForOnStartup,
+}
