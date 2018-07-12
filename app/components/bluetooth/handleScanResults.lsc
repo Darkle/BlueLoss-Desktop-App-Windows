@@ -7,7 +7,9 @@ import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { compose } from '../utils.lsc'
 
-processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
+processDeviceListAndSendToSettingsWindow = compose(
+  addTimeStampToSeenDevices, dedupeDeviceList, sendDevicesCanSeeToSettingsWindow
+)
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
@@ -19,8 +21,7 @@ handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
   logger.debug(`Found these Bluetooth devices in scan: `, { deviceList })
   { devicesToSearchFor } = getSettings()
-  timeStampedDeviceList = processDeviceList(deviceList)
-  sendDevicesCanSeeToSettingsWindow(timeStampedDeviceList)
+  processDeviceListAndSendToSettingsWindow(deviceList)
   if isEmpty(devicesToSearchFor): return
   updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   callback('')  // http://bit.ly/2kZhD74
