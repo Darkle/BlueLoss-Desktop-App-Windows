@@ -130,12 +130,13 @@ _electron.app.once('ready', function () {
   (0, _blueToothMain.init)();
   (0, _setUpDev.setUpDev)();
   (0, _debugWindow.showDebugWindow)();
-  onFirstRun((0, _settings.getSettings)().firstRun);
+  onFirstRun();
 });
 
 _electron.app.on('window-all-closed', _utils.noop);
 
-function onFirstRun(firstRun) {
+function onFirstRun() {
+  const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
