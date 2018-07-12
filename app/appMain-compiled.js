@@ -130,19 +130,18 @@ _electron.app.once('ready', function () {
   (0, _blueToothMain.init)();
   (0, _setUpDev.setUpDev)();
   (0, _debugWindow.showDebugWindow)();
-  onFirstRun();
-});
 
-_electron.app.on('window-all-closed', _utils.noop);
-
-function onFirstRun() {
   const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     (0, _settingsWindow.showSettingsWindow)();
     (0, _runOnStartup.enableRunOnStartup)(firstRun);
   }
-}process.on('unhandledRejection', _utils.bailOnFatalError);
+});
+
+_electron.app.on('window-all-closed', _utils.noop);
+
+process.on('unhandledRejection', _utils.bailOnFatalError);
 process.on('uncaughtException', _utils.bailOnFatalError);
 
 /***/ }),
