@@ -21,13 +21,12 @@ electronApp.once('ready', ():void ->
   startBluetoothScanning()
   setUpDev()
   showDebugWindow()
-  onFirstRun()
+  onFirstRun(getSettings().firstRun)
 )
 
 electronApp.on('window-all-closed', noop)
 
-onFirstRun():void ->
-  { firstRun } = getSettings()
+onFirstRun(firstRun):void ->
   if firstRun:
     updateSetting('firstRun', !firstRun)
     showSettingsWindow()
