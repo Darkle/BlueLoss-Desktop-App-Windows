@@ -33,7 +33,6 @@ updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   db.set(newSettingKey, newSettingValue).write()
   logSettingsUpdateForDebugMode(newSettingKey, newSettingValue)
 
-
 export {
   initSettings,
   updateSetting,

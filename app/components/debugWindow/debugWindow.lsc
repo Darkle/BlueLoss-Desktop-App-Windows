@@ -1,11 +1,11 @@
 import path from 'path'
 import url from 'url'
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow } from 'electron'
 
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { omitGawkFromSettings } from '../utils.lsc'
+// import { omitGawkFromSettings } from '../utils.lsc'
 
 debugWindowHTMLpath = url.format({
   protocol: 'file',
@@ -32,7 +32,7 @@ showDebugWindow():void ->
    */
   debugWindow.webContents.once('devtools-opened', ():void ->
     setTimeout(() => {
-      logger.debug('Current BlueLoss settings:', omitGawkFromSettings(getSettings()))
+      logger.debug('Current BlueLoss settings:', JSON.stringify(getSettings()))
     }, 500)
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
@@ -48,4 +48,5 @@ showDebugWindow():void ->
 
 export {
   debugWindow,
+  showDebugWindow,
 }

@@ -304,7 +304,7 @@ function logSettingsUpdateForDebugMode(newSettingKey, newSettingValue) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
+exports.removeRollbarLogging = exports.addRollbarLogging = exports.initLogging = exports.logger = undefined;
 
 var _electron = __webpack_require__(/*! electron */ "electron");
 
@@ -320,6 +320,7 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+let logger = null;
 const rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
@@ -331,26 +332,30 @@ const userDebugTransportOptions = {
   level: 'debug',
   handleExceptions: true,
   humanReadableUnhandledException: true
+};
 
-  // https://github.com/winstonjs/winston/tree/2.4.0
-};const logger = new _winston2.default.Logger({
-  level: 'debug',
-  exitOnError: false
-});
-
-if (true) {
-  logger.add(_winston2.default.transports.Console, {
-    handleExceptions: true,
-    humanReadableUnhandledException: true
-    // json: true
+function initLogging() {
+  /*****
+  * Note: we're using the old Winston 2.4 branch: https://github.com/winstonjs/winston/tree/2.4.0
+  */
+  exports.logger = logger = new _winston2.default.Logger({
+    level: 'debug',
+    exitOnError: false
   });
-} // dont send errors to rollbar in dev && only if enabled.
-if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
-/**
-* We also need to enable/disable the rollbar module itself as well,
-* as it is set to report uncaught exceptions as well as logging
-* caught errors.
-*/
+
+  if (true) {
+    logger.add(_winston2.default.transports.Console, {
+      handleExceptions: true,
+      humanReadableUnhandledException: true
+      // json: true
+    });
+  } // dont send errors to rollbar in dev && only if enabled.
+  if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
+} /**
+  * We also need to enable/disable the rollbar module itself as well,
+  * as it is set to report uncaught exceptions as well as logging
+  * caught errors.
+  */
 function addRollbarLogging() {
   _customRollbarTransport.rollbarLogger.configure({ enabled: true });
   logger.add(_customRollbarTransport.CustomRollbarTransport, rollbarTransportOptions);
@@ -365,6 +370,7 @@ _electron.ipcMain.on('bluetooth-scan-window-renderer:error-sent', function (even
 });
 
 exports.logger = logger;
+exports.initLogging = initLogging;
 exports.addRollbarLogging = addRollbarLogging;
 exports.removeRollbarLogging = removeRollbarLogging;
 
@@ -665,15 +671,17 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/typ
 
 var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
 
+var _devices = __webpack_require__(/*! ./devices.lsc */ "./app/components/settings/devices.lsc");
+
 function initSettingsIPClisteners() {
   _electron.ipcMain.on('renderer:setting-updated-in-ui', function (event, settingName, settingValue) {
     (0, _settings.updateSetting)(settingName, settingValue);
   });
   _electron.ipcMain.on('renderer:device-added-in-ui', function (event, deviceToAdd) {
-    (0, _settings.addNewDeviceToSearchFor)(deviceToAdd);
+    (0, _devices.addNewDeviceToSearchFor)(deviceToAdd);
   });
   _electron.ipcMain.on('renderer:device-removed-in-ui', function (event, deviceToRemove) {
-    (0, _settings.removeNewDeviceToSearchFor)(deviceToRemove);
+    (0, _devices.removeNewDeviceToSearchFor)(deviceToRemove);
   });
 }exports.initSettingsIPClisteners = initSettingsIPClisteners;
 

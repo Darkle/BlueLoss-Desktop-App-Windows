@@ -1,10 +1,9 @@
 import lockSystem from 'lock-system'
 
 import { logger } from '../logging/logging.lsc'
-import { getSettings } from '../settings/settings.lsc'
 
-lockTheSystem():void ->
-  if !getSettings().blueLossEnabled: return
+lockTheSystem(blueLossEnabled: Boolean):void ->
+  if !blueLossEnabled: return
   // lockSystem throws on error, so use try/catch
   try:
     lockSystem()

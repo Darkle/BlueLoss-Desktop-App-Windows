@@ -1,7 +1,8 @@
 import { ipcMain } from 'electron'
 
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
-import { updateSetting, addNewDeviceToSearchFor, removeNewDeviceToSearchFor } from './settings.lsc'
+import { updateSetting } from './settings.lsc'
+import { addNewDeviceToSearchFor, removeNewDeviceToSearchFor } from './devices.lsc'
 
 initSettingsIPClisteners():void ->
   ipcMain.on('renderer:setting-updated-in-ui', (event, settingName: string, settingValue: SettingsTypes):void ->

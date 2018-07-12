@@ -14,5 +14,5 @@ export default removeDevice(deviceToRemove: DeviceType) -> state ->
     devicesToSearchFor: {
     ...for key deviceId, val device in state.devicesToSearchFor:
       if deviceId != deviceToRemove.deviceId: { [ deviceId ]: device }
-  }
+    }
   })

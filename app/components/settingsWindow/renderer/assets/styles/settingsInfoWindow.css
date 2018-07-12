@@ -92,7 +92,7 @@
 }
 
 #hostsScanRangeLabel .extraInfo abbr img {
-  height 19px;
+  height: 19px;
   margin-bottom: -6px;
   margin-left: 4px;
 }
@@ -100,7 +100,6 @@
 #hostsScanRangeLabel > x-box > x-label:last-child {
   margin-top: 5px;
 }
-
 
 #iconColorDropdownContainer {
   align-items: flex-start;

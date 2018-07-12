@@ -5,27 +5,28 @@ import Rollbar from 'rollbar'
 
 import { getProperAppVersion } from '../utils.lsc'
 
-rollbarConfig = {
-  accessToken: process.env.rollbarAccessToken,
-  enabled: false,
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  environment: process.env.NODE_ENV,
-  reportLevel: 'error',
-  payload: {
-      mainOrRenderer: 'main',
-      platform: process.platform,
-      processVersions: process.versions,
-      arch: process.arch,
-      BlueLossVersion: getProperAppVersion()
-    },
-    // Ignore the server stuff cause that includes info about the host pc name.
-    transform(payload){
-      payload.server = {}
-    },
-}
+let rollbarLogger = null
 
-rollbarLogger = new Rollbar(rollbarConfig)
+createRollbarLogger():void ->
+  now rollbarLogger = new Rollbar({
+    accessToken: process.env.rollbarAccessToken,
+    enabled: false,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: process.env.NODE_ENV,
+    reportLevel: 'error',
+    payload: {
+        mainOrRenderer: 'main',
+        platform: process.platform,
+        processVersions: process.versions,
+        arch: process.arch,
+        BlueLossVersion: getProperAppVersion()
+      },
+      // Ignore the server stuff cause that includes info about the host pc name.
+      transform(payload){
+        payload.server = {}
+      },
+  })
 
 CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
   Object.assign(this, options)
@@ -40,6 +41,7 @@ CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void -
 
 
 export {
-  CustomRollbarTransport
-  rollbarLogger
+  CustomRollbarTransport,
+  rollbarLogger,
+  createRollbarLogger,
 }

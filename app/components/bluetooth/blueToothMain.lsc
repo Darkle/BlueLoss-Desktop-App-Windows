@@ -44,7 +44,6 @@ createBluetoothScannerWindow():Promise ->
 
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scanIn20Seconds()
-
   logger.debug('=======New Scan Started=======')
 
   scannerWindow
@@ -65,9 +64,7 @@ scanIn20Seconds():void ->
  * NotFoundError is the norm.
  */
 handleRequestDeviceError(err):void ->
-  if err?.name === 'NotFoundError': return
-  logger.error(err)
-
+  if err?.name !== 'NotFoundError': logger.error(err)
 
 export {
   init,

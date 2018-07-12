@@ -13,7 +13,6 @@ export default deviceCard({lookingForDevice, device, actions}) ->
       </x-box>
       <x-box class="addRemoveButton">
         {
-          // if expressions: http://bit.ly/2kNbt9R
           if lookingForDevice:
             <x-button onclick={():void -> actions.removeDevice(device)}>
               <x-box><x-label>Remove</x-label></x-box>

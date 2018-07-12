@@ -2,7 +2,8 @@ import isEmpty from 'is-empty'
 
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
-import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import { updateDeviceInDevicesToSearchFor } from '../settings/devices.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { compose } from '../utils.lsc'
 

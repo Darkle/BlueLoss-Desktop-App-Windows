@@ -3,6 +3,7 @@ import '../config/env.lsc'
 import { app as electronApp } from 'electron'
 
 import { setUpDev } from './components/setUpDev.lsc'
+import { initLogging } from './components/logging/logging.lsc'
 import { init as startBluetoothScanning } from './components/bluetooth/blueToothMain.lsc'
 import { getSettings, updateSetting, initSettings } from './components/settings/settings.lsc'
 import { noop, bailOnFatalError } from './components/utils.lsc'
@@ -16,6 +17,7 @@ electronApp.once('ready', ():void ->
   { firstRun } = getSettings()
 
   initSettings()
+  initLogging()
   initTrayMenu()
   startBluetoothScanning()
   setUpDev()

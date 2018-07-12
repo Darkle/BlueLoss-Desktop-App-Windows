@@ -7,7 +7,6 @@ minTimeToLock = defaultSettings.timeToLock
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'settingsTab': 'flex' else: 'none'
   iconColorIsWhite = state.trayIconColor === 'white'
-  isMac = process.platform === 'darwin'
 
   <div id="settingsTabInfoWindow" style={ { display: infoWindowDisplay } }>
     <x-box id="timeToLockSetting">
@@ -28,7 +27,7 @@ export default ({ actions, state }) ->
           <x-label>
             <strong>Time To Lock</strong>
           </x-label>
-          <x-label>Once a device has been lost, BlueLoss will wait this many minutes before locking the computer.</x-label>
+          <x-label>Once a device has been lost, BlueLoss will wait this many minutes before locking the computer. If a device is found before the time to lock elapses, the computer is not locked.</x-label>
         </x-box>
       </x-label>
     </x-box>
@@ -47,7 +46,7 @@ export default ({ actions, state }) ->
       <x-label for="iconColorDropdown" id="iconColorDropdownLabel">
         <x-box vertical>
           <x-label>
-            <strong>{ if isMac: 'Menu Bar' else: 'Tray' } Icon Color</strong>
+            <strong>Tray Icon Color</strong>
           </x-label>
         </x-box>
       </x-label>
