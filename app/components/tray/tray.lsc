@@ -5,7 +5,7 @@ import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/sett
 import { updateSetting, getSettings } from '../settings/settings.lsc'
 
 let tray = null
-trayIconsFolder = path.resolve(__dirname, '..', 'tray', 'icons')
+trayIconsFolder = path.resolve(__dirname, 'components', 'tray', 'icons')
 
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))

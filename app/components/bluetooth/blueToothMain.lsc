@@ -12,7 +12,7 @@ import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 bluetoothHiddenWindowHTMLpath = url.format({
   protocol: 'file',
   slashes: true,
-  pathname: path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
+  pathname: path.resolve(__dirname, 'components', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
 })
 bluetoothHiddenWindowProperties = {
   show: false,

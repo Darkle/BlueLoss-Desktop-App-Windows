@@ -2,7 +2,7 @@ import path from 'path'
 
 import { BrowserWindow } from 'electron'
 
-import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import { showSettingsWindow } from './settingsWindow/settingsWindow.lsc'
 
 devtronPath = path.resolve(__dirname, '..', 'node_modules', 'devtron')
 settingsWindowDirPath = path.resolve(__dirname, 'components', 'settingsWindow', 'renderer')

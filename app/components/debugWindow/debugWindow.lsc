@@ -10,7 +10,7 @@ import { omitGawkFromSettings } from '../common/utils.lsc'
 debugWindowHTMLpath = url.format({
   protocol: 'file',
   slashes: true,
-  pathname: path.resolve(__dirname, '..', 'debugWindow', 'renderer', 'debugWindow.html')
+  pathname: path.resolve(__dirname, 'components', 'debugWindow', 'renderer', 'debugWindow.html')
 })
 let debugWindow = null
 

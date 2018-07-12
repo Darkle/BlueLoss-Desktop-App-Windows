@@ -1,7 +1,7 @@
 import tp from 'timeproxy'
 import is from 'typa'
 
-import logger from './logging/logging.lsc'
+import { logger} from './logging/logging.lsc'
 
 /**
  * If you run Electron by pointing it to a js file that's not in the base parent directory with the
