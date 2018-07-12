@@ -22,15 +22,17 @@ handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = processDeviceList(deviceList)
 
-  settingsWindow?.webContents?.send(
-    'mainprocess:update-of-bluetooth-devices-can-see',
-    { devicesCanSee: timeStampedDeviceList }
-  )
+  sendDevicesCanSeeToSettingsWindow(timeStampedDeviceList)
 
   if isEmpty(devicesToSearchFor): return
   updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   callback('')  // http://bit.ly/2kZhD74
 
+sendDevicesCanSeeToSettingsWindow(timeStampedDeviceList:Array<DeviceType>):void ->
+  settingsWindow?.webContents?.send(
+    'mainprocess:update-of-bluetooth-devices-can-see',
+    { devicesCanSee: timeStampedDeviceList }
+  )
 /**
 * If any devices we are looking for showed up in the latest scan,
 * update the device's lastSeen value to now in devicesToSearchFor.
