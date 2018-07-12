@@ -1,3 +1,4 @@
 /app/components/settingsWindow/renderer/assets/vendor/xel/xel.min.js
 /app/appMain-compiled.js
 /app/components/settingsWindow/renderer/settingsWindowRendererMain-compiled.js
+/app/components/bluetooth/renderer/bluetoothRendererMain-compiled.js
