@@ -51,11 +51,9 @@ addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
 dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
   deviceList.reduce((newDeviceList, newDevice) ->
     newDeviceId = newDevice.deviceId
-
     existingDevice = newDeviceList.find(device -> device.deviceId === newDeviceId )
 
-    if !existingDevice:
-      return [...newDeviceList, newDevice]
+    if !existingDevice: return [...newDeviceList, newDevice]
 
     if betterNamedDevice(existingDevice, newDevice):
       return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
