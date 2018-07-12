@@ -65,7 +65,6 @@
     "parallel-webpack": "^2.3.0",
     "semver": "^5.5.0",
     "sleep-ms": "^2.0.1",
-    "stylus": "^0.54.5",
     "webpack": "^4.15.1",
     "webpack-node-externals": "^1.7.2"
   },
