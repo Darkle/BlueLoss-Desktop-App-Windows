@@ -9,11 +9,9 @@ import { omitInheritedProperties, identity } from './frontEndUtils.lsc'
 
 settingsWindowRendererApp = (ISDEV? withLogger: identity)(app)(
   {
-    ...{
-      activeTab: 'statusTab',
-      devicesCanSee: [],
-      debugMode: false,
-    },
+    activeTab: 'statusTab',
+    devicesCanSee: [],
+    debugMode: false,
     ...ipcRenderer.sendSync('renderer:intitial-settings-request')
   },
   appActions,
