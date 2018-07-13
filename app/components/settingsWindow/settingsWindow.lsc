@@ -44,7 +44,7 @@ showSettingsWindow():void ->
   })
   settingsWindow.loadURL(settingsHTMLpath)
   /****
-  * Remove the menu in alt menu bar in prod, so they dont accidentally exit the app.
+  * Remove the menu bar in prod, so they dont accidentally exit the app.
   * Reload is for dev so we can easily reload the browserwindow with Ctrl+R.
   */
   settingsWindow.setMenu(
