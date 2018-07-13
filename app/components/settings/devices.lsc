@@ -19,8 +19,8 @@ filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
       if deviceId != deviceIdToRemove: { [ deviceId ]: device }
   }
 
-deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
-  getSettings().devicesToSearchFor[deviceId]
+deviceIsInDevicesToSearchFor(deviceId: string):Boolean ->
+  !!getSettings().devicesToSearchFor[deviceId]
 
 updateTimeStampForSingleDeviceSearchingFor(deviceId: String, newTimeStamp: Number):Object ->
   { devicesToSearchFor } = getSettings()

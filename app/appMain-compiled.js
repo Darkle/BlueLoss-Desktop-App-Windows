@@ -877,7 +877,7 @@ function addNewDeviceToSearchFor(deviceToAdd) {
 }
 
 function deviceIsInDevicesToSearchFor(deviceId) {
-  return (0, _settings.getSettings)().devicesToSearchFor[deviceId];
+  return !!(0, _settings.getSettings)().devicesToSearchFor[deviceId];
 }function updateTimeStampForSingleDeviceSearchingFor(deviceId, newTimeStamp) {
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const deviceToUpdate = devicesToSearchFor[deviceId];
