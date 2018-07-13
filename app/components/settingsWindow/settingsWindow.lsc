@@ -60,7 +60,6 @@ showSettingsWindow():void ->
   )
   settingsWindow.once('closed', ():void ->
     now settingsWindow = null
-    electronApp.dock?.hide()
   )
   settingsWindow.webContents.once('crashed', (event):void ->
     logger.error('settingsWindow.webContents crashed', event)
