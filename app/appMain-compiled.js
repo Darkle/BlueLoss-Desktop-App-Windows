@@ -590,7 +590,11 @@ var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/loggin
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function logSettingsUpdateForDebugMode(newSettingKey, newSettingValue) {
-  if (!(0, _settings.getSettings)().debugMode) return;
+  /*****
+  * Check if the logger is instantiated first as logSettingsUpdateForDebugMode gets
+  * called early on startup.
+  */
+  if (!(0, _settings.getSettings)().debugMode || !(_logging.logger == null ? void 0 : _logging.logger.debug)) return;
   const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
   if (_typa2.default.obj(newSettingValue)) {
     _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
