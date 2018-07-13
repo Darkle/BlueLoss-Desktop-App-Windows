@@ -50,11 +50,11 @@ const commonWebpackOptions = {
         exclude: [
           /(node_modules)/
         ],
-        enforce: "pre",
+        enforce: 'pre',
         loader: StringReplacePlugin.replace({
           replacements: [
             {
-              pattern: /import.*from.*\/types\/types\.lsc'/ig,
+              pattern: /import +\{.*\} +from.*\/types\/types\.lsc'/ig,
               replacement: () => ''
             }
           ]
