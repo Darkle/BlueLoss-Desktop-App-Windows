@@ -957,14 +957,14 @@ function initSettings() {
   (0, _settingsObservers.initSettingsObservers)(settings);
   (0, _settingsIPClisteners.initSettingsIPClisteners)();
   /**
-   * When a user starts up BlueLoss after previously exiting, the
-   * lastSeen value will be out of date for the devices in
-   * devicesToSearchFor. This would cause BlueLoss to lock the
-   * system straight away because the lastSeen value + timeToLock
-   *  will be less than Date.now(). So to prevent this, we give all
-   * devices in devicesToSearchFor a lastSeen of 10 years from now.
-   * (when a device is seen again during a scan, lastSeen is updated.)
-   */
+  * When a user starts up BlueLoss after previously exiting, the
+  * lastSeen value will be out of date for the devices in
+  * devicesToSearchFor. This would cause BlueLoss to lock the
+  * system straight away because the lastSeen value + timeToLock
+  *  will be less than Date.now(). So to prevent this, we give all
+  * devices in devicesToSearchFor a lastSeen of 10 years from now.
+  * (when a device is seen again during a scan, lastSeen is updated.)
+  */
   (0, _devices.updateTimeStampForAllDevicesSearchingFor)((0, _utils.tenYearsFromNow)());
 }function getSettings() {
   return settings;
