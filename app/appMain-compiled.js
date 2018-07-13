@@ -116,8 +116,6 @@ var _settingsWindow = __webpack_require__(/*! ./components/settingsWindow/settin
 
 var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
 
-var _debugWindow = __webpack_require__(/*! ./components/debugWindow/debugWindow.lsc */ "./app/components/debugWindow/debugWindow.lsc");
-
 if (false) {}
 
 
@@ -129,7 +127,6 @@ _electron.app.once('ready', function () {
   (0, _tray.initTrayMenu)();
   (0, _blueToothMain.init)();
   (0, _setUpDev.setUpDev)();
-  (0, _debugWindow.showDebugWindow)();
 
   const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
@@ -140,6 +137,9 @@ _electron.app.once('ready', function () {
 });
 
 _electron.app.on('window-all-closed', _utils.noop);
+_electron.app.on('before-quit', function () {
+  return (0, _settings.updateSetting)('debugMode', false);
+});
 
 process.on('unhandledRejection', _utils.bailOnFatalError);
 process.on('uncaughtException', _utils.bailOnFatalError);
@@ -597,7 +597,7 @@ var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/loggin
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function logSettingsUpdateForDebugMode(newSettingKey, newSettingValue) {
-  if (false) {}
+  if (!(0, _settings.getSettings)().debugMode) return;
   const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
   if (_typa2.default.obj(newSettingValue)) {
     _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
@@ -856,7 +856,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateLastSeenForDevicesLookingForOnStartup = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+exports.updateLastSeenForDeviceSearchingFor = exports.updateLastSeenForDevicesLookingForOnStartup = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -907,6 +907,7 @@ function updateLastSeenForDevicesLookingForOnStartup() {
 }exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
 exports.updateLastSeenForDevicesLookingForOnStartup = updateLastSeenForDevicesLookingForOnStartup;
+exports.updateLastSeenForDeviceSearchingFor = updateLastSeenForDeviceSearchingFor;
 
 /***/ }),
 

@@ -5,7 +5,7 @@ import { getSettings } from '../settings/settings.lsc'
 import { logger } from './logging.lsc'
 
 logSettingsUpdateForDebugMode(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if !ISDEV && !getSettings().debugMode: return
+  if !getSettings().debugMode: return
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
     logger.debug(debugMessage, { [newSettingKey]: newSettingValue })

@@ -81,36 +81,469 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports) {
+/******/ ({
 
-module.exports = require("hyperapp");
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = require("electron");
-
-/***/ }),
-/* 2 */
+/***/ "./app/components/settings/settingsDefaults.lsc":
+/*!******************************************************!*\
+  !*** ./app/components/settings/settingsDefaults.lsc ***!
+  \******************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultSettings = undefined;
 
-module.exports = require("typa");
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+const defaultSettings = {
+  blueLossEnabled: true,
+  runOnStartup: true,
+  trayIconColor: 'blue',
+  devicesToSearchFor: {},
+  timeToLock: 3,
+  reportErrors: true,
+  firstRun: true,
+  settingsWindowPosition: null,
+  debugMode: false
+};
+
+exports.defaultSettings = defaultSettings;
 
 /***/ }),
-/* 4 */
+
+/***/ "./app/components/settingsWindow/renderer/actions/actionsIndex.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/actionsIndex.lsc ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _windowButtons = __webpack_require__(/*! ./windowButtons.lsc */ "./app/components/settingsWindow/renderer/actions/windowButtons.lsc");
+
+var _toggleTab = __webpack_require__(/*! ./toggleTab.lsc */ "./app/components/settingsWindow/renderer/actions/toggleTab.lsc");
+
+var _toggleTab2 = _interopRequireDefault(_toggleTab);
+
+var _openLink = __webpack_require__(/*! ./openLink.lsc */ "./app/components/settingsWindow/renderer/actions/openLink.lsc");
+
+var _openLink2 = _interopRequireDefault(_openLink);
+
+var _animateDots = __webpack_require__(/*! ./animateDots.lsc */ "./app/components/settingsWindow/renderer/actions/animateDots.lsc");
+
+var _animateDots2 = _interopRequireDefault(_animateDots);
+
+var _updateSetting = __webpack_require__(/*! ./updateSetting.lsc */ "./app/components/settingsWindow/renderer/actions/updateSetting.lsc");
+
+var _updateSetting2 = _interopRequireDefault(_updateSetting);
+
+var _updateStateOnIpcMessage = __webpack_require__(/*! ./updateStateOnIpcMessage.lsc */ "./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc");
+
+var _updateStateOnIpcMessage2 = _interopRequireDefault(_updateStateOnIpcMessage);
+
+var _changeTrayIconColor = __webpack_require__(/*! ./changeTrayIconColor.lsc */ "./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc");
+
+var _changeTrayIconColor2 = _interopRequireDefault(_changeTrayIconColor);
+
+var _removeDevice = __webpack_require__(/*! ./removeDevice.lsc */ "./app/components/settingsWindow/renderer/actions/removeDevice.lsc");
+
+var _removeDevice2 = _interopRequireDefault(_removeDevice);
+
+var _addNewDevice = __webpack_require__(/*! ./addNewDevice.lsc */ "./app/components/settingsWindow/renderer/actions/addNewDevice.lsc");
+
+var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
+
+var _toggleDebugWindow = __webpack_require__(/*! ./toggleDebugWindow.lsc */ "./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc");
+
+var _toggleDebugWindow2 = _interopRequireDefault(_toggleDebugWindow);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  minimizeSettingsWindow: _windowButtons.minimizeSettingsWindow,
+  closeSettingsWindow: _windowButtons.closeSettingsWindow,
+  toggleTab: _toggleTab2.default,
+  openLink: _openLink2.default,
+  animateDots: _animateDots2.default,
+  updateSetting: _updateSetting2.default,
+  updateStateOnIpcMessage: _updateStateOnIpcMessage2.default,
+  changeTrayIconColor: _changeTrayIconColor2.default,
+  removeDevice: _removeDevice2.default,
+  addNewDevice: _addNewDevice2.default,
+  toggleDebugWindow: _toggleDebugWindow2.default
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/addNewDevice.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/addNewDevice.lsc ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
+
+/**
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
+* https://github.com/hyperapp/hyperapp#actions
+*/
+exports.default = function addNewDevice(newDevice) {
+  return function (state) {
+    if (state.devicesToSearchFor[newDevice.deviceId]) return {};
+    _electron.ipcRenderer.send('renderer:device-added-in-ui', newDevice);
+    return {
+      devicesToSearchFor: _extends({}, state.devicesToSearchFor, {
+        [newDevice.deviceId]: newDevice
+      })
+    };
+  };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/animateDots.lsc":
+/*!************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/animateDots.lsc ***!
+  \************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
+exports.default = function animateDots(element) {
+  function animateStatusDots(interval = 0) {
+    setTimeout(function () {
+      element.classList.toggle('play');
+      animateStatusDots(!element.classList.contains('play') ? 285 : 4200);
+    }, interval);
+  }animateStatusDots();
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc":
+/*!********************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/changeTrayIconColor.lsc ***!
+  \********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+exports.default = function changeTrayIconColor(newTrayIconColor) {
+  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', 'trayIconColor', newTrayIconColor);
+  return { trayIconColor: newTrayIconColor };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/openLink.lsc":
+/*!*********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/openLink.lsc ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+exports.default = function openLink(event) {
+  event.preventDefault();
+  _electron.shell.openExternal(event.currentTarget.dataset.externalLink);
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/removeDevice.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/removeDevice.lsc ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
+
+/**
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
+* https://github.com/hyperapp/hyperapp#actions
+*/
+exports.default = function removeDevice(deviceToRemove) {
+  return function (state) {
+    if (!state.devicesToSearchFor[deviceToRemove.deviceId]) return {};
+    _electron.ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove);
+    return {
+      devicesToSearchFor: (() => {
+        const _obj = {};
+        for (let _obj2 = state.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+          const deviceId = _keys[_i];const device = _obj2[deviceId];
+          if (deviceId !== deviceToRemove.deviceId) _obj[deviceId] = device;
+        }return _obj;
+      })()
+    };
+  };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc":
+/*!******************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/toggleDebugWindow.lsc ***!
+  \******************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+exports.default = function toggleDebugWindow(element) {
+  const toggled = element.currentTarget.toggled;
+  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', 'debugMode', toggled);
+  return { debugMode: toggled };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/toggleTab.lsc":
+/*!**********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/toggleTab.lsc ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
+exports.default = function toggleTab(event) {
+  return { activeTab: event.currentTarget.id };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/updateSetting.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/updateSetting.lsc ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+exports.default = function updateSetting({ settingName, settingValue }) {
+  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', settingName, settingValue);
+  return { [settingName]: settingValue };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc":
+/*!************************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/updateStateOnIpcMessage.lsc ***!
+  \************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function updateStateOnIpcMessage(newStateObjToMerge) {
+  return newStateObjToMerge;
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/actions/windowButtons.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/actions/windowButtons.lsc ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.closeSettingsWindow = exports.minimizeSettingsWindow = undefined;
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+const currentWindow = _electron.remote.getCurrentWindow();
+
+function minimizeSettingsWindow() {
+  currentWindow.minimize();
+}function closeSettingsWindow() {
+  currentWindow.close();
+}exports.minimizeSettingsWindow = minimizeSettingsWindow;
+exports.closeSettingsWindow = closeSettingsWindow;
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/components/deviceCard.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/components/deviceCard.lsc ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
+
+exports.default = function deviceCard({ lookingForDevice, device, actions }) {
+  const { deviceName, deviceId } = device;
+  return (0, _hyperapp.h)(
+    "x-card",
+    { "class": "deviceCard" },
+    (0, _hyperapp.h)(
+      "x-box",
+      null,
+      (0, _hyperapp.h)(
+        "x-box",
+        { "class": "cardDeviceIcon" },
+        (0, _hyperapp.h)("img", { src: `assets/icons/devicesIconForCards-${lookingForDevice ? 'blue' : 'grey'}.svg` })
+      ),
+      (0, _hyperapp.h)(
+        "x-box",
+        { vertical: true, "class": "deviceDetails" },
+        (0, _hyperapp.h)(
+          "strong",
+          { "class": "vendorName" },
+          deviceName
+        ),
+        (0, _hyperapp.h)(
+          "p",
+          { "class": "deviceMacAddress" },
+          deviceId
+        )
+      ),
+      (0, _hyperapp.h)(
+        "x-box",
+        { "class": "addRemoveButton" },
+        lookingForDevice ? (0, _hyperapp.h)(
+          "x-button",
+          { onclick: function () {
+              actions.removeDevice(device);
+            } },
+          (0, _hyperapp.h)(
+            "x-box",
+            null,
+            (0, _hyperapp.h)(
+              "x-label",
+              null,
+              "Remove"
+            )
+          )
+        ) : (0, _hyperapp.h)(
+          "x-button",
+          { onclick: function () {
+              actions.addNewDevice(device);
+            } },
+          (0, _hyperapp.h)(
+            "x-box",
+            null,
+            (0, _hyperapp.h)(
+              "x-label",
+              null,
+              "Add"
+            )
+          )
+        )
+      )
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/frontEndUtils.lsc":
+/*!******************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/frontEndUtils.lsc ***!
+  \******************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -123,7 +556,7 @@ exports.identity = exports.omitInheritedProperties = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _typa = __webpack_require__(3);
+var _typa = __webpack_require__(/*! typa */ "typa");
 
 var _typa2 = _interopRequireDefault(_typa);
 
@@ -141,7 +574,69 @@ function identity(param) {
 exports.identity = identity;
 
 /***/ }),
-/* 5 */
+
+/***/ "./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc":
+/*!*******************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/settingsWindowRendererMain.lsc ***!
+  \*******************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // eslint-disable-line no-unused-vars
+
+
+var _electron = __webpack_require__(/*! electron */ "electron");
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
+
+var _logger = __webpack_require__(/*! @hyperapp/logger */ "@hyperapp/logger");
+
+var _actionsIndex = __webpack_require__(/*! ./actions/actionsIndex.lsc */ "./app/components/settingsWindow/renderer/actions/actionsIndex.lsc");
+
+var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
+
+var _viewsIndex = __webpack_require__(/*! ./views/viewsIndex.lsc */ "./app/components/settingsWindow/renderer/views/viewsIndex.lsc");
+
+var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
+
+var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _frontEndUtils = __webpack_require__(/*! ./frontEndUtils.lsc */ "./app/components/settingsWindow/renderer/frontEndUtils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const settingsWindowRendererApp = ( true ? _logger.withLogger : undefined)(_hyperapp.app)(_extends({
+  activeTab: 'statusTab',
+  devicesCanSee: [],
+  debugMode: false
+}, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request')), _actionsIndex2.default, _viewsIndex2.default, document.body);
+
+_electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
+  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
+});
+_electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
+  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
+});
+
+/**
+* https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+* https://stackoverflow.com/a/43911292/2785644
+*/
+function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _frontEndUtils.omitInheritedProperties)(error) });
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc":
+/*!**************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc ***!
+  \**************************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -151,9 +646,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _electron = __webpack_require__(1);
+var _electron = __webpack_require__(/*! electron */ "electron");
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
 exports.default = function ({ actions, state }) {
   const infoWindowDisplay = state.activeTab === 'aboutTab' ? 'flex' : 'none';
@@ -256,7 +751,12 @@ exports.default = function ({ actions, state }) {
 };
 
 /***/ }),
-/* 6 */
+
+/***/ "./app/components/settingsWindow/renderer/views/aboutTab.lsc":
+/*!*******************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/aboutTab.lsc ***!
+  \*******************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -265,26 +765,49 @@ exports.default = function ({ actions, state }) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.defaultSettings = undefined;
 
-var _types = __webpack_require__(2);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-const defaultSettings = {
-  blueLossEnabled: true,
-  runOnStartup: true,
-  trayIconColor: 'blue',
-  devicesToSearchFor: {},
-  timeToLock: 3,
-  reportErrors: true,
-  firstRun: true,
-  settingsWindowPosition: null,
-  debugMode: false
+exports.default = function ({ actions, state }) {
+  const activeTabClass = state.activeTab === 'aboutTab' ? 'activeTab' : '';
+  return (0, _hyperapp.h)(
+    'div',
+    {
+      'class': `tab ${activeTabClass}`,
+      id: 'aboutTab',
+      onclick: actions.toggleTab
+    },
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabIcon' },
+      (0, _hyperapp.h)(
+        'svg',
+        { height: '24', viewbox: '0 0 24 24', width: '24', xmlns: 'http://www.w3.org/2000/svg' },
+        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
+        (0, _hyperapp.h)('path', { d: 'M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z' })
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabText' },
+      'About'
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabLip' },
+      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
+      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
+    )
+  );
 };
 
-exports.defaultSettings = defaultSettings;
-
 /***/ }),
-/* 7 */
+
+/***/ "./app/components/settingsWindow/renderer/views/header.lsc":
+/*!*****************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/header.lsc ***!
+  \*****************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -294,9 +817,100 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _settingsDefaults = __webpack_require__(6);
+exports.default = function ({ actions }) {
+  return (0, _hyperapp.h)(
+    "div",
+    { id: "header" },
+    (0, _hyperapp.h)(
+      "div",
+      { id: "logo" },
+      (0, _hyperapp.h)(
+        "div",
+        { id: "headerIcon" },
+        (0, _hyperapp.h)("img", { src: "assets/icons/BlueLossIcon.svg" })
+      ),
+      (0, _hyperapp.h)(
+        "div",
+        { id: "headerText" },
+        "BlueLoss"
+      )
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { id: "headerButtons" },
+      (0, _hyperapp.h)("img", { id: "windowControlClose", src: "assets/icons/closeIcon.svg", onclick: actions.closeSettingsWindow }),
+      (0, _hyperapp.h)("img", { id: "windowControlMinimize", src: "assets/icons/minimizeIcon.svg", onclick: actions.minimizeSettingsWindow })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/views/helpTab.lsc":
+/*!******************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/helpTab.lsc ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
+
+exports.default = function ({ actions }) {
+  return (0, _hyperapp.h)(
+    "div",
+    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://darkle.github.io/BlueLoss/" },
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabIcon" },
+      (0, _hyperapp.h)(
+        "svg",
+        { height: "24", viewbox: "0 0 24 24", width: "24", xmlns: "http://www.w3.org/2000/svg" },
+        (0, _hyperapp.h)("path", { d: "M0 0h24v24H0z", fill: "none" }),
+        (0, _hyperapp.h)("path", { d: "M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" })
+      )
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabText" },
+      "Help"
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabLip" },
+      (0, _hyperapp.h)("div", { "class": "tabArrow" }),
+      (0, _hyperapp.h)("div", { "class": "tabLine" })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc":
+/*!*****************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
+
+var _settingsDefaults = __webpack_require__(/*! ../../../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
 
@@ -481,7 +1095,12 @@ exports.default = function ({ actions, state }) {
 };
 
 /***/ }),
-/* 8 */
+
+/***/ "./app/components/settingsWindow/renderer/views/settingsTab.lsc":
+/*!**********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/settingsTab.lsc ***!
+  \**********************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -491,74 +1110,48 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-exports.default = function deviceCard({ lookingForDevice, device, actions }) {
-  const { deviceName, deviceId } = device;
+exports.default = function ({ actions, state }) {
+  const activeTabClass = state.activeTab === 'settingsTab' ? 'activeTab' : '';
   return (0, _hyperapp.h)(
-    "x-card",
-    { "class": "deviceCard" },
+    'div',
+    {
+      'class': `tab ${activeTabClass}`,
+      id: 'settingsTab',
+      onclick: actions.toggleTab
+    },
     (0, _hyperapp.h)(
-      "x-box",
-      null,
+      'div',
+      { 'class': 'tabIcon' },
       (0, _hyperapp.h)(
-        "x-box",
-        { "class": "cardDeviceIcon" },
-        (0, _hyperapp.h)("img", { src: `assets/icons/devicesIconForCards-${lookingForDevice ? 'blue' : 'grey'}.svg` })
-      ),
-      (0, _hyperapp.h)(
-        "x-box",
-        { vertical: true, "class": "deviceDetails" },
-        (0, _hyperapp.h)(
-          "strong",
-          { "class": "vendorName" },
-          deviceName
-        ),
-        (0, _hyperapp.h)(
-          "p",
-          { "class": "deviceMacAddress" },
-          deviceId
-        )
-      ),
-      (0, _hyperapp.h)(
-        "x-box",
-        { "class": "addRemoveButton" },
-        lookingForDevice ? (0, _hyperapp.h)(
-          "x-button",
-          { onclick: function () {
-              actions.removeDevice(device);
-            } },
-          (0, _hyperapp.h)(
-            "x-box",
-            null,
-            (0, _hyperapp.h)(
-              "x-label",
-              null,
-              "Remove"
-            )
-          )
-        ) : (0, _hyperapp.h)(
-          "x-button",
-          { onclick: function () {
-              actions.addNewDevice(device);
-            } },
-          (0, _hyperapp.h)(
-            "x-box",
-            null,
-            (0, _hyperapp.h)(
-              "x-label",
-              null,
-              "Add"
-            )
-          )
-        )
+        'svg',
+        { height: '24', viewbox: '0 0 24 24', width: '24', xmlns: 'http://www.w3.org/2000/svg' },
+        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
+        (0, _hyperapp.h)('path', { d: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z' })
       )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabText' },
+      'Settings'
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabLip' },
+      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
+      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
     )
   );
 };
 
 /***/ }),
-/* 9 */
+
+/***/ "./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc":
+/*!***************************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc ***!
+  \***************************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -568,9 +1161,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-var _deviceCard = __webpack_require__(8);
+var _deviceCard = __webpack_require__(/*! ../components/deviceCard.lsc */ "./app/components/settingsWindow/renderer/components/deviceCard.lsc");
 
 var _deviceCard2 = _interopRequireDefault(_deviceCard);
 
@@ -656,7 +1249,12 @@ exports.default = function ({ actions, state }) {
 };
 
 /***/ }),
-/* 10 */
+
+/***/ "./app/components/settingsWindow/renderer/views/statusTab.lsc":
+/*!********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/statusTab.lsc ***!
+  \********************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -666,7 +1264,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
 exports.default = function ({ actions, state }) {
   const activeTabClass = state.activeTab === 'statusTab' ? 'activeTab' : '';
@@ -707,7 +1305,12 @@ exports.default = function ({ actions, state }) {
 };
 
 /***/ }),
-/* 11 */
+
+/***/ "./app/components/settingsWindow/renderer/views/viewsIndex.lsc":
+/*!*********************************************************************!*\
+  !*** ./app/components/settingsWindow/renderer/views/viewsIndex.lsc ***!
+  \*********************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -717,210 +1320,37 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _hyperapp = __webpack_require__(0);
+var _hyperapp = __webpack_require__(/*! hyperapp */ "hyperapp");
 
-exports.default = function ({ actions, state }) {
-  const activeTabClass = state.activeTab === 'settingsTab' ? 'activeTab' : '';
-  return (0, _hyperapp.h)(
-    'div',
-    {
-      'class': `tab ${activeTabClass}`,
-      id: 'settingsTab',
-      onclick: actions.toggleTab
-    },
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabIcon' },
-      (0, _hyperapp.h)(
-        'svg',
-        { height: '24', viewbox: '0 0 24 24', width: '24', xmlns: 'http://www.w3.org/2000/svg' },
-        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
-        (0, _hyperapp.h)('path', { d: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z' })
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabText' },
-      'Settings'
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabLip' },
-      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
-      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
-    )
-  );
-};
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions }) {
-  return (0, _hyperapp.h)(
-    "div",
-    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://darkle.github.io/BlueLoss/" },
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabIcon" },
-      (0, _hyperapp.h)(
-        "svg",
-        { height: "24", viewbox: "0 0 24 24", width: "24", xmlns: "http://www.w3.org/2000/svg" },
-        (0, _hyperapp.h)("path", { d: "M0 0h24v24H0z", fill: "none" }),
-        (0, _hyperapp.h)("path", { d: "M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" })
-      )
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabText" },
-      "Help"
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabLip" },
-      (0, _hyperapp.h)("div", { "class": "tabArrow" }),
-      (0, _hyperapp.h)("div", { "class": "tabLine" })
-    )
-  );
-};
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions, state }) {
-  const activeTabClass = state.activeTab === 'aboutTab' ? 'activeTab' : '';
-  return (0, _hyperapp.h)(
-    'div',
-    {
-      'class': `tab ${activeTabClass}`,
-      id: 'aboutTab',
-      onclick: actions.toggleTab
-    },
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabIcon' },
-      (0, _hyperapp.h)(
-        'svg',
-        { height: '24', viewbox: '0 0 24 24', width: '24', xmlns: 'http://www.w3.org/2000/svg' },
-        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
-        (0, _hyperapp.h)('path', { d: 'M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z' })
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabText' },
-      'About'
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabLip' },
-      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
-      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
-    )
-  );
-};
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions }) {
-  return (0, _hyperapp.h)(
-    "div",
-    { id: "header" },
-    (0, _hyperapp.h)(
-      "div",
-      { id: "logo" },
-      (0, _hyperapp.h)(
-        "div",
-        { id: "headerIcon" },
-        (0, _hyperapp.h)("img", { src: "assets/icons/BlueLossIcon.svg" })
-      ),
-      (0, _hyperapp.h)(
-        "div",
-        { id: "headerText" },
-        "BlueLoss"
-      )
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { id: "headerButtons" },
-      (0, _hyperapp.h)("img", { id: "windowControlClose", src: "assets/icons/closeIcon.svg", onclick: actions.closeSettingsWindow }),
-      (0, _hyperapp.h)("img", { id: "windowControlMinimize", src: "assets/icons/minimizeIcon.svg", onclick: actions.minimizeSettingsWindow })
-    )
-  );
-};
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-var _header = __webpack_require__(14);
+var _header = __webpack_require__(/*! ../views/header.lsc */ "./app/components/settingsWindow/renderer/views/header.lsc");
 
 var _header2 = _interopRequireDefault(_header);
 
-var _aboutTab = __webpack_require__(13);
+var _aboutTab = __webpack_require__(/*! ../views/aboutTab.lsc */ "./app/components/settingsWindow/renderer/views/aboutTab.lsc");
 
 var _aboutTab2 = _interopRequireDefault(_aboutTab);
 
-var _helpTab = __webpack_require__(12);
+var _helpTab = __webpack_require__(/*! ../views/helpTab.lsc */ "./app/components/settingsWindow/renderer/views/helpTab.lsc");
 
 var _helpTab2 = _interopRequireDefault(_helpTab);
 
-var _settingsTab = __webpack_require__(11);
+var _settingsTab = __webpack_require__(/*! ../views/settingsTab.lsc */ "./app/components/settingsWindow/renderer/views/settingsTab.lsc");
 
 var _settingsTab2 = _interopRequireDefault(_settingsTab);
 
-var _statusTab = __webpack_require__(10);
+var _statusTab = __webpack_require__(/*! ../views/statusTab.lsc */ "./app/components/settingsWindow/renderer/views/statusTab.lsc");
 
 var _statusTab2 = _interopRequireDefault(_statusTab);
 
-var _statusInfoWindow = __webpack_require__(9);
+var _statusInfoWindow = __webpack_require__(/*! ../views/statusInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/statusInfoWindow.lsc");
 
 var _statusInfoWindow2 = _interopRequireDefault(_statusInfoWindow);
 
-var _settingsInfoWindow = __webpack_require__(7);
+var _settingsInfoWindow = __webpack_require__(/*! ../views/settingsInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/settingsInfoWindow.lsc");
 
 var _settingsInfoWindow2 = _interopRequireDefault(_settingsInfoWindow);
 
-var _aboutInfoWindow = __webpack_require__(5);
+var _aboutInfoWindow = __webpack_require__(/*! ../views/aboutInfoWindow.lsc */ "./app/components/settingsWindow/renderer/views/aboutInfoWindow.lsc");
 
 var _aboutInfoWindow2 = _interopRequireDefault(_aboutInfoWindow);
 
@@ -966,345 +1396,62 @@ exports.default = function (state, actions) {
 };
 
 /***/ }),
-/* 16 */
+
+/***/ "./app/components/types/types.lsc":
+/*!****************************************!*\
+  !*** ./app/components/types/types.lsc ***!
+  \****************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _electron = __webpack_require__(1);
-
-exports.default = function toggleDebugWindow(element) {
-  const toggled = element.currentTarget.toggled;
-  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', 'debugMode', toggled);
-  return { debugMode: toggled };
-};
-
 /***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _electron = __webpack_require__(1);
-
-var _types = __webpack_require__(2);
-
-/**
-* HyperApp - if you need to use the state & actions and return data, you need
-* to use `(value) => (state, actions) =>`
-* https://github.com/hyperapp/hyperapp#actions
-*/
-exports.default = function addNewDevice(newDevice) {
-  return function (state) {
-    if (state.devicesToSearchFor[newDevice.deviceId]) return {};
-    _electron.ipcRenderer.send('renderer:device-added-in-ui', newDevice);
-    return {
-      devicesToSearchFor: _extends({}, state.devicesToSearchFor, {
-        [newDevice.deviceId]: newDevice
-      })
-    };
-  };
-};
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _electron = __webpack_require__(1);
-
-var _types = __webpack_require__(2);
-
-/**
-* HyperApp - if you need to use the state & actions and return data, you need
-* to use `(value) => (state, actions) =>`
-* https://github.com/hyperapp/hyperapp#actions
-*/
-exports.default = function removeDevice(deviceToRemove) {
-  return function (state) {
-    if (!state.devicesToSearchFor[deviceToRemove.deviceId]) return {};
-    _electron.ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove);
-    return {
-      devicesToSearchFor: (() => {
-        const _obj = {};
-        for (let _obj2 = state.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
-          const deviceId = _keys[_i];const device = _obj2[deviceId];
-          if (deviceId !== deviceToRemove.deviceId) _obj[deviceId] = device;
-        }return _obj;
-      })()
-    };
-  };
-};
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _electron = __webpack_require__(1);
-
-exports.default = function changeTrayIconColor(newTrayIconColor) {
-  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', 'trayIconColor', newTrayIconColor);
-  return { trayIconColor: newTrayIconColor };
-};
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function updateStateOnIpcMessage(newStateObjToMerge) {
-  return newStateObjToMerge;
-};
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _electron = __webpack_require__(1);
-
-exports.default = function updateSetting({ settingName, settingValue }) {
-  _electron.ipcRenderer.send('renderer:setting-updated-in-ui', settingName, settingValue);
-  return { [settingName]: settingValue };
-};
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
-exports.default = function animateDots(element) {
-  function animateStatusDots(interval = 0) {
-    setTimeout(function () {
-      element.classList.toggle('play');
-      animateStatusDots(!element.classList.contains('play') ? 285 : 4200);
-    }, interval);
-  }animateStatusDots();
-};
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _electron = __webpack_require__(1);
-
-exports.default = function openLink(event) {
-  event.preventDefault();
-  _electron.shell.openExternal(event.currentTarget.dataset.externalLink);
-};
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
-exports.default = function toggleTab(event) {
-  return { activeTab: event.currentTarget.id };
-};
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.closeSettingsWindow = exports.minimizeSettingsWindow = undefined;
-
-var _electron = __webpack_require__(1);
-
-const currentWindow = _electron.remote.getCurrentWindow();
-
-function minimizeSettingsWindow() {
-  currentWindow.minimize();
-}function closeSettingsWindow() {
-  currentWindow.close();
-}exports.minimizeSettingsWindow = minimizeSettingsWindow;
-exports.closeSettingsWindow = closeSettingsWindow;
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _windowButtons = __webpack_require__(25);
-
-var _toggleTab = __webpack_require__(24);
-
-var _toggleTab2 = _interopRequireDefault(_toggleTab);
-
-var _openLink = __webpack_require__(23);
-
-var _openLink2 = _interopRequireDefault(_openLink);
-
-var _animateDots = __webpack_require__(22);
-
-var _animateDots2 = _interopRequireDefault(_animateDots);
-
-var _updateSetting = __webpack_require__(21);
-
-var _updateSetting2 = _interopRequireDefault(_updateSetting);
-
-var _updateStateOnIpcMessage = __webpack_require__(20);
-
-var _updateStateOnIpcMessage2 = _interopRequireDefault(_updateStateOnIpcMessage);
-
-var _changeTrayIconColor = __webpack_require__(19);
-
-var _changeTrayIconColor2 = _interopRequireDefault(_changeTrayIconColor);
-
-var _removeDevice = __webpack_require__(18);
-
-var _removeDevice2 = _interopRequireDefault(_removeDevice);
-
-var _addNewDevice = __webpack_require__(17);
-
-var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
-
-var _toggleDebugWindow = __webpack_require__(16);
-
-var _toggleDebugWindow2 = _interopRequireDefault(_toggleDebugWindow);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  minimizeSettingsWindow: _windowButtons.minimizeSettingsWindow,
-  closeSettingsWindow: _windowButtons.closeSettingsWindow,
-  toggleTab: _toggleTab2.default,
-  openLink: _openLink2.default,
-  animateDots: _animateDots2.default,
-  updateSetting: _updateSetting2.default,
-  updateStateOnIpcMessage: _updateStateOnIpcMessage2.default,
-  changeTrayIconColor: _changeTrayIconColor2.default,
-  removeDevice: _removeDevice2.default,
-  addNewDevice: _addNewDevice2.default,
-  toggleDebugWindow: _toggleDebugWindow2.default
-};
-
-/***/ }),
-/* 27 */
+/***/ "@hyperapp/logger":
+/*!***********************************!*\
+  !*** external "@hyperapp/logger" ***!
+  \***********************************/
+/*! no static exports found */
 /***/ (function(module, exports) {
 
 module.exports = require("@hyperapp/logger");
 
 /***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+/***/ "electron":
+/*!***************************!*\
+  !*** external "electron" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
+module.exports = require("electron");
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // eslint-disable-line no-unused-vars
+/***/ }),
 
+/***/ "hyperapp":
+/*!***************************!*\
+  !*** external "hyperapp" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
-var _electron = __webpack_require__(1);
+module.exports = require("hyperapp");
 
-var _hyperapp = __webpack_require__(0);
+/***/ }),
 
-var _logger = __webpack_require__(27);
+/***/ "typa":
+/*!***********************!*\
+  !*** external "typa" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
-var _actionsIndex = __webpack_require__(26);
-
-var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
-
-var _viewsIndex = __webpack_require__(15);
-
-var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
-
-var _types = __webpack_require__(2);
-
-var _frontEndUtils = __webpack_require__(4);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const settingsWindowRendererApp = ( false ? undefined : _frontEndUtils.identity)(_hyperapp.app)(_extends({
-  activeTab: 'statusTab',
-  devicesCanSee: [],
-  debugMode: false
-}, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request')), _actionsIndex2.default, _viewsIndex2.default, document.body);
-
-_electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {
-  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(setting);
-});
-_electron.ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', function (event, devicesCanSee) {
-  settingsWindowRendererApp == null ? void 0 : typeof settingsWindowRendererApp.updateStateOnIpcMessage !== 'function' ? void 0 : settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee);
-});
-
-/**
-* https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-* https://stackoverflow.com/a/43911292/2785644
-*/
-function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
-  _electron.ipcRenderer.send('settings-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _frontEndUtils.omitInheritedProperties)(error) });
-}window.onerror = handleRendererWindowError;
-window.onunhandledrejection = handleRendererWindowError;
+module.exports = require("typa");
 
 /***/ })
-/******/ ]);
+
+/******/ });
+//# sourceMappingURL=settingsWindowRendererMain-compiled.js.map
