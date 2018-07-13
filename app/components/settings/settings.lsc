@@ -9,8 +9,9 @@ import { SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
-import { updateLastSeenForDevicesLookingForOnStartup } from './devices.lsc'
+import { updateTimeStampForAllDevicesSearchingFor } from './devices.lsc'
 import { logSettingsUpdateForDebugMode } from '../logging/logSettingsUpdates.lsc'
+import { tenYearsFromNow } from '../utils.lsc'
 
 settingsDBpath = path.join(electronApp.getPath('userData'), 'blueloss-settings.json')
 
@@ -24,7 +25,16 @@ initSettings():void ->
   now settings = gawk(db.getState())
   initSettingsObservers(settings)
   initSettingsIPClisteners()
-  updateLastSeenForDevicesLookingForOnStartup()
+/**
+ * When a user starts up BlueLoss after previously exiting, the
+ * lastSeen value will be out of date for the devices in
+ * devicesToSearchFor. This would cause BlueLoss to lock the
+ * system straight away because the lastSeen value + timeToLock
+ *  will be less than Date.now(). So to prevent this, we give all
+ * devices in devicesToSearchFor a lastSeen of 10 years from now.
+ * (when a device is seen again during a scan, lastSeen is updated.)
+ */
+  updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())
 
 getSettings() -> settings
 

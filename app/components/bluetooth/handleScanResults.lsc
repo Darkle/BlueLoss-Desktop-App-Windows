@@ -3,7 +3,7 @@ import isEmpty from 'is-empty'
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
+import { updateTimeStampForSingleDeviceSearchingFor } from '../settings/devices.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { pipe } from '../utils.lsc'
 
@@ -38,7 +38,7 @@ sendDevicesCanSeeToSettingsWindow(processedDeviceList:Array<DeviceType>):void ->
 updateDevicesToSearchFor(devicesToSearchFor:Object, deviceList:Array<DeviceType>):void ->
   for elem { deviceId } in deviceList:
     if devicesToSearchFor[deviceId]:
-      updateLastSeenForDeviceSearchingFor(deviceId, Date.now())
+      updateTimeStampForSingleDeviceSearchingFor(deviceId, Date.now())
 
 addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
   [ ...for elem device in deviceList: [{...device, lastSeen: Date.now()}] ]

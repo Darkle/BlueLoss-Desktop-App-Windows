@@ -294,7 +294,7 @@ function updateDevicesToSearchFor(devicesToSearchFor, deviceList) {
   for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
     const { deviceId } = deviceList[_i];
     if (devicesToSearchFor[deviceId]) {
-      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, Date.now());
+      (0, _devices.updateTimeStampForSingleDeviceSearchingFor)(deviceId, Date.now());
     }
   }
 }function addTimeStampToSeenDevices(deviceList) {
@@ -452,7 +452,7 @@ function lockSystemIfDeviceLost() {
     const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
     if (deviceHasBeenLost(lastSeen, timeToLock)) {
       (0, _lockSystem.lockTheSystem)(blueLossEnabled);
-      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
+      (0, _devices.updateTimeStampForSingleDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
     }
   }
 }function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
@@ -853,11 +853,9 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateLastSeenForDeviceSearchingFor = exports.updateLastSeenForDevicesLookingForOnStartup = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+exports.updateTimeStampForSingleDeviceSearchingFor = exports.updateTimeStampForAllDevicesSearchingFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
 
@@ -880,28 +878,22 @@ function addNewDeviceToSearchFor(deviceToAdd) {
 
 function deviceIsInDevicesToSearchFor(deviceId) {
   return (0, _settings.getSettings)().devicesToSearchFor[deviceId];
-}function updateLastSeenForDeviceSearchingFor(deviceId, time) {
+}function updateTimeStampForSingleDeviceSearchingFor(deviceId, newTimeStamp) {
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const deviceToUpdate = devicesToSearchFor[deviceId];
-  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, { [deviceId]: _extends({}, deviceToUpdate, { lastSeen: time }) }));
-} /**
-   * When a user starts up BlueLoss after previously exiting, the
-   * lastSeen value will be out of date for the devices in
-   * devicesToSearchFor. This would cause BlueLoss to lock the
-   * system straight away because the lastSeen value + timeToLock
-   *  will be less than Date.now(). So to prevent this, we give all
-   * devices in devicesToSearchFor a lastSeen of 10 years from now.
-   * (when a device is seen again during a scan, lastSeen is updated.)
-   */
-function updateLastSeenForDevicesLookingForOnStartup() {
-  for (let _obj3 = (0, _settings.getSettings)().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
-    const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
-    updateLastSeenForDeviceSearchingFor(deviceId, (0, _utils.tenYearsFromNow)());
-  }
+  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, { [deviceId]: _extends({}, deviceToUpdate, { lastSeen: newTimeStamp }) }));
+}function updateTimeStampForAllDevicesSearchingFor(newTimeStamp) {
+  (0, _settings.updateSetting)('devicesToSearchFor', (() => {
+    const _obj3 = {};
+    for (let _obj4 = (0, _settings.getSettings)().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj4), _len2 = _keys2.length; _i2 < _len2; _i2++) {
+      const deviceId = _keys2[_i2];const device = _obj4[deviceId];
+      _obj3[deviceId] = _extends({}, device, { lastSeen: newTimeStamp });
+    }return _obj3;
+  })());
 }exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
 exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
-exports.updateLastSeenForDevicesLookingForOnStartup = updateLastSeenForDevicesLookingForOnStartup;
-exports.updateLastSeenForDeviceSearchingFor = updateLastSeenForDeviceSearchingFor;
+exports.updateTimeStampForAllDevicesSearchingFor = updateTimeStampForAllDevicesSearchingFor;
+exports.updateTimeStampForSingleDeviceSearchingFor = updateTimeStampForSingleDeviceSearchingFor;
 
 /***/ }),
 
@@ -948,6 +940,8 @@ var _devices = __webpack_require__(/*! ./devices.lsc */ "./app/components/settin
 
 var _logSettingsUpdates = __webpack_require__(/*! ../logging/logSettingsUpdates.lsc */ "./app/components/logging/logSettingsUpdates.lsc");
 
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const settingsDBpath = _path2.default.join(_electron.app.getPath('userData'), 'blueloss-settings.json');
@@ -962,7 +956,16 @@ function initSettings() {
   settings = (0, _gawk2.default)(db.getState());
   (0, _settingsObservers.initSettingsObservers)(settings);
   (0, _settingsIPClisteners.initSettingsIPClisteners)();
-  (0, _devices.updateLastSeenForDevicesLookingForOnStartup)();
+  /**
+   * When a user starts up BlueLoss after previously exiting, the
+   * lastSeen value will be out of date for the devices in
+   * devicesToSearchFor. This would cause BlueLoss to lock the
+   * system straight away because the lastSeen value + timeToLock
+   *  will be less than Date.now(). So to prevent this, we give all
+   * devices in devicesToSearchFor a lastSeen of 10 years from now.
+   * (when a device is seen again during a scan, lastSeen is updated.)
+   */
+  (0, _devices.updateTimeStampForAllDevicesSearchingFor)((0, _utils.tenYearsFromNow)());
 }function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
