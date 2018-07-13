@@ -374,9 +374,8 @@ let debugWindow = null;
 
 function showDebugWindow() {
   if (!(0, _settings.getSettings)().debugMode) return;
-  if (debugWindow) {
-    return debugWindow.webContents.openDevTools({ mode: 'undocked' });
-  }createDebugWindow();
+  if (debugWindow) return debugWindow.webContents.openDevTools({ mode: 'undocked' });
+  createDebugWindow();
 }function createDebugWindow() {
   exports.debugWindow = debugWindow = new _electron.BrowserWindow({ show: false });
   debugWindow.loadURL(debugWindowHTMLpath);

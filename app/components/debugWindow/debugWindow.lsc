@@ -15,8 +15,7 @@ let debugWindow = null
 
 showDebugWindow():void ->
   if !getSettings().debugMode: return
-  if debugWindow:
-    return debugWindow.webContents.openDevTools({ mode: 'undocked'})
+  if debugWindow: return debugWindow.webContents.openDevTools({ mode: 'undocked'})
   createDebugWindow()
 
 createDebugWindow():void ->
