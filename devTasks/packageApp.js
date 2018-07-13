@@ -14,7 +14,6 @@ const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')
 const iconsFolderPath = path.join(basePath, 'resources', 'icons', 'Blue')
 const appVersion = require(path.join(basePath, 'package.json')).version
-const iconName = process.platform === 'darwin' ? 'BlueLoss-Blue.icns' : 'BlueLoss-Blue.ico'
 const platformBuildFolder = path.join(basePath, 'build', process.platform === 'win32' ? 'windows' : process.platform)
 const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
 const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'BlueLoss.msi')
@@ -23,7 +22,7 @@ const packageProperties = {
   asar: true,
   arch: 'x64',
   platform: process.platform,
-  icon: path.join(iconsFolderPath, iconName),
+  icon: path.join(iconsFolderPath, 'BlueLoss-Blue.ico'),
   overwrite: true,
   prune: true,
   name: 'BlueLoss',
