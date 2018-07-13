@@ -56,7 +56,6 @@ scanforDevices():void ->
       scanIn20Seconds()
     })
 
-
 scanIn20Seconds():void ->
   setTimeout(scanforDevices, tp.TWENTY_SECONDS)
 
