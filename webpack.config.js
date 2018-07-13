@@ -81,9 +81,7 @@ const commonWebpackOptions = {
     minimize: false
   },
   plugins: [
-    new webpack.DefinePlugin({
-      ISDEV
-    }),
+    new webpack.DefinePlugin({ISDEV}),
     new StringReplacePlugin()
   ]
 }
