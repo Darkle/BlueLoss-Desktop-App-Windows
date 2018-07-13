@@ -602,8 +602,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const settingsWindowRendererApp = ( true ? _logger.withLogger : undefined)(_hyperapp.app)(_extends({
   activeTab: 'statusTab',
-  devicesCanSee: [],
-  debugMode: false
+  devicesCanSee: []
 }, _electron.ipcRenderer.sendSync('renderer:intitial-settings-request')), _actionsIndex2.default, _viewsIndex2.default, document.body);
 
 _electron.ipcRenderer.on('mainprocess:setting-updated-in-main', function (event, setting) {

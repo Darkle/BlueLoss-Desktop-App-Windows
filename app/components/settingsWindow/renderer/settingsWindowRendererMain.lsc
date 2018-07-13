@@ -11,7 +11,6 @@ settingsWindowRendererApp = (ISDEV? withLogger: identity)(app)(
   {
     activeTab: 'statusTab',
     devicesCanSee: [],
-    debugMode: false,
     ...ipcRenderer.sendSync('renderer:intitial-settings-request')
   },
   appActions,
