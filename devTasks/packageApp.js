@@ -14,7 +14,7 @@ const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')
 const iconsFolderPath = path.join(basePath, 'resources', 'icons', 'Blue')
 const appVersion = require(path.join(basePath, 'package.json')).version
-const platformBuildFolder = path.join(basePath, 'build', process.platform === 'win32' ? 'windows' : process.platform)
+const platformBuildFolder = path.join(basePath, 'build', 'windows')
 const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
 const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'BlueLoss.msi')
 const packageProperties = {
