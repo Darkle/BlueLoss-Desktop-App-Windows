@@ -90,6 +90,7 @@
     "no-throw-literal": "error",
     "no-undefined": "error",
     "no-useless-call": "error",
+    "no-useless-escape": "off",
     "prefer-promise-reject-errors": "error",
   	"prefer-spread": "error",
   	"prefer-template": "error",

@@ -99,9 +99,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.defaultSettings = undefined;
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 const defaultSettings = {
   blueLossEnabled: true,
@@ -206,8 +204,6 @@ Object.defineProperty(exports, "__esModule", {
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -315,8 +311,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _types = __webpack_require__(/*! ../../../types/types.lsc */ "./app/components/types/types.lsc");
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -601,8 +595,6 @@ var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
 var _viewsIndex = __webpack_require__(/*! ./views/viewsIndex.lsc */ "./app/components/settingsWindow/renderer/views/viewsIndex.lsc");
 
 var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
-
-var _types = __webpack_require__(/*! ../../types/types.lsc */ "./app/components/types/types.lsc");
 
 var _frontEndUtils = __webpack_require__(/*! ./frontEndUtils.lsc */ "./app/components/settingsWindow/renderer/frontEndUtils.lsc");
 
@@ -1394,18 +1386,6 @@ exports.default = function (state, actions) {
     )
   );
 };
-
-/***/ }),
-
-/***/ "./app/components/types/types.lsc":
-/*!****************************************!*\
-  !*** ./app/components/types/types.lsc ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 /***/ }),
 

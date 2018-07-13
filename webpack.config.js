@@ -3,6 +3,7 @@ const path = require('path')
 
 const webpack = require('webpack')
 const nodeExternals = require('webpack-node-externals')
+const StringReplacePlugin = require("string-replace-webpack-plugin")
 
 const projectDir = path.resolve(__dirname)
 const appDir = path.join(projectDir, 'app')
@@ -20,8 +21,13 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 /*****
 * We dont want webpack to include polyfills or mocks for various node stuff, which we set with
 * the 'node' key https://webpack.js.org/configuration/node/
+*
 * We also dont want webpack to transpile the stuff in node_modules folder, so we use the
 * webpack-node-externals plugin.
+*
+* Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
+*
+* Ignore types.lsc imports with StringReplacePlugin as that's just flow.
 */
 
 const commonWebpackOptions = {
@@ -40,7 +46,22 @@ const commonWebpackOptions = {
   module: {
     rules: [
       {
-        test: /.lsc/,
+        test: /\.lsc$/,
+        exclude: [
+          /(node_modules)/
+        ],
+        enforce: "pre",
+        loader: StringReplacePlugin.replace({
+          replacements: [
+            {
+              pattern: /import.*from.*\/types\/types\.lsc'/ig,
+              replacement: () => ''
+            }
+          ]
+        })
+      },
+      {
+        test: /\.lsc$/,
         exclude: [
           /(node_modules)/
         ],
@@ -59,10 +80,10 @@ const commonWebpackOptions = {
     minimize: false
   },
   plugins: [
-    // Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
     new webpack.DefinePlugin({
       ISDEV
-    })
+    }),
+    new StringReplacePlugin()
   ]
 }
 

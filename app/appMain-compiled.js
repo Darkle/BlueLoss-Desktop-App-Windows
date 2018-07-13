@@ -257,8 +257,6 @@ var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
-
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _devices = __webpack_require__(/*! ../settings/devices.lsc */ "./app/components/settings/devices.lsc");
@@ -588,8 +586,6 @@ var _typa = __webpack_require__(/*! typa */ "typa");
 
 var _typa2 = _interopRequireDefault(_typa);
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
-
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/logging/logging.lsc");
@@ -862,8 +858,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
-
 var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
 
 function addNewDeviceToSearchFor(deviceToAdd) {
@@ -944,8 +938,6 @@ var _FileSync = __webpack_require__(/*! lowdb/adapters/FileSync */ "lowdb/adapte
 
 var _FileSync2 = _interopRequireDefault(_FileSync);
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
-
 var _settingsDefaults = __webpack_require__(/*! ./settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./app/components/settings/settingsObservers.lsc");
@@ -996,9 +988,7 @@ exports.getSettings = getSettings;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.defaultSettings = undefined;
 
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 const defaultSettings = {
   blueLossEnabled: true,
@@ -1032,8 +1022,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.initSettingsIPClisteners = undefined;
 
 var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
 
@@ -1279,18 +1267,6 @@ exports.updateTrayMenu = updateTrayMenu;
 
 /***/ }),
 
-/***/ "./app/components/types/types.lsc":
-/*!****************************************!*\
-  !*** ./app/components/types/types.lsc ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/***/ }),
-
 /***/ "./app/components/utils.lsc":
 /*!**********************************!*\
   !*** ./app/components/utils.lsc ***!
@@ -1414,7 +1390,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"=1.17.5","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","webpackBuildProduction":"cross-env NODE_ENV=production parallel-webpack","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.4","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"=1.17.5","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","string-replace-webpack-plugin":"^0.1.3","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
 
 /***/ }),
 
