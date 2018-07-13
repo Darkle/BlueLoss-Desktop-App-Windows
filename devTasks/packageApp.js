@@ -14,9 +14,9 @@ const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')
 const iconsFolderPath = path.join(basePath, 'resources', 'icons', 'Blue')
 const appVersion = require(path.join(basePath, 'package.json')).version
-const platformBuildFolder = path.join(basePath, 'build', 'windows')
-const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
-const windowsMSIpath = path.join(platformBuildFolder, 'installer', 'BlueLoss.msi')
+const buildFolder = path.join(basePath, 'build')
+const globsForCleaningBuildFolder = [path.join(buildFolder, '**', '*.*'), path.join(buildFolder, '**'), `!${ buildFolder }`]
+const windowsMSIpath = path.join(buildFolder, 'installer', 'BlueLoss.msi')
 const packageProperties = {
   dir: basePath,
   asar: true,
@@ -27,18 +27,18 @@ const packageProperties = {
   prune: true,
   name: 'BlueLoss',
   'app-copyright': 'MIT License',
-  out: platformBuildFolder,
+  out: buildFolder,
   appBundleId: 'com.darkle.BlueLoss',
   appCategoryType: 'public.app-category.utilities'
 }
 const msiCreator = new MSICreator({
-  appDirectory: path.join(platformBuildFolder, 'BlueLoss-win32-x64'),
+  appDirectory: path.join(buildFolder, 'BlueLoss-win32-x64'),
   description: 'BlueLoss - A desktop app that locks your computer when a device is lost',
   exe: 'BlueLoss',
   name: 'BlueLoss',
   version: appVersion,
   manufacturer: 'CoopCoding',
-  outputDirectory: path.join(platformBuildFolder, 'installer'),
+  outputDirectory: path.join(buildFolder, 'installer'),
   shortcutFolderName: 'BlueLoss',
   ui: {
     chooseDirectory: true,
@@ -59,7 +59,7 @@ function packageWin64() {
       console.log(chalk.green('Successfully Packaged Electron App!'))
     })
     .catch(err => {
-      console.error(chalk.red(`There was an error creating the ${platformBuildFolder} package`), err)
+      console.error(chalk.red(`There was an error creating the ${buildFolder} package`), err)
     })
 }
 
@@ -69,8 +69,8 @@ function webpackBuild(){
 }
 
 function prepareForPackaging(){
-  console.log(chalk.yellow(`Cleaning: \n ${stringifyObject(globsForCleanPlatformFolder)}`))
-  return del(globsForCleanPlatformFolder, { glob: true }).then(webpackBuild)
+  console.log(chalk.yellow(`Cleaning: \n ${stringifyObject(globsForCleaningBuildFolder)}`))
+  return del(globsForCleaningBuildFolder, { glob: true }).then(webpackBuild)
 }
 
 function packageApp(){
@@ -87,8 +87,8 @@ function createWindowsInstaller(){
 
 function createWindowsPortable() {
   return archive7zip.add(
-    path.join(platformBuildFolder, `BlueLoss-Windows-x86_64-${ appVersion }.7z`),
-    path.join(platformBuildFolder, 'BlueLoss-win32-x64')
+    path.join(buildFolder, `BlueLoss-Windows-x86_64-${ appVersion }.7z`),
+    path.join(buildFolder, 'BlueLoss-win32-x64')
   )
 }
 
