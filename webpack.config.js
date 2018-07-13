@@ -27,7 +27,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 *
 * Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
 *
-* Ignore types.lsc imports with StringReplacePlugin as that's just flow.
+* Ignore types.lsc imports with StringReplacePlugin as that's just flow and we don't need that
+* in the compiled code.
 */
 
 const commonWebpackOptions = {
