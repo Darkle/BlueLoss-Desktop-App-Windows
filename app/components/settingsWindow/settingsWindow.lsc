@@ -13,21 +13,19 @@ settingsHTMLpath = url.format({
   pathname: path.resolve(settingsWindowRendererDirPath, 'settingsWindow.html')
 })
 settingsWindowProperties = {
-  ...{
-    width: 786,
-    height: 616,
-    title: 'BlueLoss',
-    autoHideMenuBar: true,
-    resizable: false,
-    fullscreenable: false,
-    fullscreen: false,
-    frame: false,
-    show: false,
-    webPreferences: {
-      textAreasAreResizable: false,
-      devTools: ISDEV,
-    }
-  },
+  width: 786,
+  height: 616,
+  title: 'BlueLoss',
+  autoHideMenuBar: true,
+  resizable: false,
+  fullscreenable: false,
+  fullscreen: false,
+  frame: false,
+  show: false,
+  webPreferences: {
+    textAreasAreResizable: false,
+    devTools: ISDEV,
+  }
 }
 
 let settingsWindow = null
