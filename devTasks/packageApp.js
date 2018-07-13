@@ -87,7 +87,7 @@ function createWindowsInstaller(){
 
 function createWindowsPortable() {
   return archive7zip.add(
-    path.join(platformBuildFolder, `BlueLoss-Windows-Portable-(x86_64-${ appVersion }).7z`),
+    path.join(platformBuildFolder, `BlueLoss-Windows-x86_64-${ appVersion }.7z`),
     path.join(platformBuildFolder, 'BlueLoss-win32-x64')
   )
 }
