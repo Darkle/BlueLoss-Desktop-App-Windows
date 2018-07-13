@@ -216,10 +216,10 @@ function init() {
 }function scanforDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn20Seconds();
   _logging.logger.debug('=======New Scan Started=======');
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError);
-
-  (0, _lockCheck.lockSystemIfDeviceLost)();
-  scanIn20Seconds();
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError).then(() => {
+    (0, _lockCheck.lockSystemIfDeviceLost)();
+    return scanIn20Seconds();
+  });
 }function scanIn20Seconds() {
   setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
 } /**

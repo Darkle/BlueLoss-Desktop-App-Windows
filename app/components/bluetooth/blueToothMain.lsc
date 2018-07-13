@@ -51,9 +51,11 @@ scanforDevices():void ->
       invokeUserGesture
     )
     .catch(handleRequestDeviceError)
+    .then(() => {
+      lockSystemIfDeviceLost()
+      scanIn20Seconds()
+    })
 
-  lockSystemIfDeviceLost()
-  scanIn20Seconds()
 
 scanIn20Seconds():void ->
   setTimeout(scanforDevices, tp.TWENTY_SECONDS)
