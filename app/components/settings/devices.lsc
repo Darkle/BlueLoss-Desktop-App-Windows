@@ -27,10 +27,7 @@ updateLastSeenForDeviceSearchingFor(deviceId: String, time: Number):Object ->
   { devicesToSearchFor } = getSettings()
   deviceToUpdate = devicesToSearchFor[deviceId]
   updateSetting('devicesToSearchFor',
-    {
-      ...devicesToSearchFor,
-      [ deviceId ]: {...deviceToUpdate, lastSeen: time }
-    }
+    {...devicesToSearchFor, [ deviceId ]: {...deviceToUpdate, lastSeen: time }}
   )
 
 /**

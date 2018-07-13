@@ -883,9 +883,7 @@ function deviceIsInDevicesToSearchFor(deviceId) {
 }function updateLastSeenForDeviceSearchingFor(deviceId, time) {
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const deviceToUpdate = devicesToSearchFor[deviceId];
-  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, {
-    [deviceId]: _extends({}, deviceToUpdate, { lastSeen: time })
-  }));
+  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, { [deviceId]: _extends({}, deviceToUpdate, { lastSeen: time }) }));
 } /**
    * When a user starts up BlueLoss after previously exiting, the
    * lastSeen value will be out of date for the devices in
