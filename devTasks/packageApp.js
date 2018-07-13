@@ -48,23 +48,22 @@ const msiCreator = new MSICreator({
     }
   }
 })
-const archive7zip = new Zip()
 
 function packageWin64() {
   return prepareForPackaging()
-    .then(packageApp)
-    .then(createWindowsInstaller)
-    .then(createWindowsPortable)
-    .then(() => {
-      console.log(chalk.green('Successfully Packaged Electron App!'))
+  .then(packageApp)
+  .then(createWindowsInstaller)
+  .then(createZip)
+  .then(() => {
+    console.log(chalk.green('Successfully Packaged Electron App!'))
     })
     .catch(err => {
       console.error(chalk.red(`There was an error creating the ${buildFolder} package`), err)
     })
-}
+  }
 
-function webpackBuild(){
-  console.log(chalk.blue('Running Webpack Build'))
+  function webpackBuild(){
+    console.log(chalk.blue('Running Webpack Build'))
   return exeq(`cross-env NODE_ENV=production parallel-webpack`)
 }
 
@@ -81,11 +80,13 @@ function packageApp(){
 function createWindowsInstaller(){
   console.log(chalk.blue('Creating Windows Installer. Please Wait...'))
   return msiCreator.create()
-    .then(() => msiCreator.compile())
-    .then(() => jetpack.renameAsync(windowsMSIpath, `BlueLoss-Windows-Installer-x86_64-${ appVersion }.msi`))
+  .then(() => msiCreator.compile())
+  .then(() => jetpack.renameAsync(windowsMSIpath, `BlueLoss-Windows-Installer-x86_64-${ appVersion }.msi`))
 }
 
-function createWindowsPortable() {
+function createZip() {
+  console.log(chalk.blue('Creating Zip. Please Wait...'))
+  const archive7zip = new Zip()
   return archive7zip.add(
     path.join(buildFolder, `BlueLoss-Windows-x86_64-${ appVersion }.7z`),
     path.join(buildFolder, 'BlueLoss-win32-x64')
