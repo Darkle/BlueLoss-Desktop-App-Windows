@@ -35,13 +35,14 @@ initLogging():void ->
       humanReadableUnhandledException: true,
       // json: true
     })
+
+  createRollbarLogger()
+
   // dont send errors to rollbar in dev && only if enabled.
   if !ISDEV and getSettings().reportErrors:
     addRollbarLogging()
 
   logger.add(UserDebugLoggerTransport, userDebugTransportOptions)
-  createRollbarLogger()
-
 /**
 * We also need to enable/disable the rollbar module itself as well,
 * as it is set to report uncaught exceptions as well as logging

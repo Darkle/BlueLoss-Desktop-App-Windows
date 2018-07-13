@@ -666,9 +666,10 @@ function initLogging() {
       humanReadableUnhandledException: true
       // json: true
     });
-  } // dont send errors to rollbar in dev && only if enabled.
+  }(0, _customRollbarTransport.createRollbarLogger)();
+
+  // dont send errors to rollbar in dev && only if enabled.
   if (false) {}logger.add(_userDebugLogger.UserDebugLoggerTransport, userDebugTransportOptions);
-  (0, _customRollbarTransport.createRollbarLogger)();
 } /**
   * We also need to enable/disable the rollbar module itself as well,
   * as it is set to report uncaught exceptions as well as logging

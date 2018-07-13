@@ -95,7 +95,4 @@ function createWindowsPortable() {
 
 module.exports = {
   packageWin64,
-  createWindowsInstaller,
-  webpackBuild,
-  createWindowsPortable,
 }
