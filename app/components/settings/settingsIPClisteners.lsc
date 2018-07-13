@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { updateSetting } from './settings.lsc'
-import { addNewDeviceToSearchFor, removeNewDeviceToSearchFor } from './devices.lsc'
+import { addNewDeviceToSearchFor, removeDeviceSearchingFor } from './devices.lsc'
 
 initSettingsIPClisteners():void ->
   ipcMain.on('renderer:setting-updated-in-ui', (event, settingName: string, settingValue: SettingsTypes):void ->
@@ -12,7 +12,7 @@ initSettingsIPClisteners():void ->
     addNewDeviceToSearchFor(deviceToAdd)
   )
   ipcMain.on('renderer:device-removed-in-ui', (event, deviceToRemove: DeviceType):void ->
-    removeNewDeviceToSearchFor(deviceToRemove)
+    removeDeviceSearchingFor(deviceToRemove)
   )
 
 export {

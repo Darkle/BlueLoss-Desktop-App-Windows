@@ -8,7 +8,7 @@ addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
     {...getSettings().devicesToSearchFor, [ deviceId ]: deviceToAdd}
   )
 
-removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
+removeDeviceSearchingFor(deviceToRemove: DeviceType):void ->
   { deviceId } = deviceToRemove
   if !deviceIsInDevicesToSearchFor(deviceId): return
   updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
@@ -39,7 +39,7 @@ updateTimeStampForAllDevicesSearchingFor(newTimeStamp: Number):void ->
 
 export {
   addNewDeviceToSearchFor,
-  removeNewDeviceToSearchFor,
+  removeDeviceSearchingFor,
   updateTimeStampForAllDevicesSearchingFor,
   updateTimeStampForSingleDeviceSearchingFor,
 }

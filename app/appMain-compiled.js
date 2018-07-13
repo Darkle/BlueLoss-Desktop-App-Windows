@@ -853,7 +853,7 @@ function setUpDev() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateTimeStampForSingleDeviceSearchingFor = exports.updateTimeStampForAllDevicesSearchingFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+exports.updateTimeStampForSingleDeviceSearchingFor = exports.updateTimeStampForAllDevicesSearchingFor = exports.removeDeviceSearchingFor = exports.addNewDeviceToSearchFor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -863,7 +863,7 @@ function addNewDeviceToSearchFor(deviceToAdd) {
   const { deviceId } = deviceToAdd;
   if (deviceIsInDevicesToSearchFor(deviceId)) return;
   (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, (0, _settings.getSettings)().devicesToSearchFor, { [deviceId]: deviceToAdd }));
-}function removeNewDeviceToSearchFor(deviceToRemove) {
+}function removeDeviceSearchingFor(deviceToRemove) {
   const { deviceId } = deviceToRemove;
   if (!deviceIsInDevicesToSearchFor(deviceId)) return;
   (0, _settings.updateSetting)('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
@@ -891,7 +891,7 @@ function deviceIsInDevicesToSearchFor(deviceId) {
     }return _obj3;
   })());
 }exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
-exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
+exports.removeDeviceSearchingFor = removeDeviceSearchingFor;
 exports.updateTimeStampForAllDevicesSearchingFor = updateTimeStampForAllDevicesSearchingFor;
 exports.updateTimeStampForSingleDeviceSearchingFor = updateTimeStampForSingleDeviceSearchingFor;
 
@@ -1038,7 +1038,7 @@ function initSettingsIPClisteners() {
     (0, _devices.addNewDeviceToSearchFor)(deviceToAdd);
   });
   _electron.ipcMain.on('renderer:device-removed-in-ui', function (event, deviceToRemove) {
-    (0, _devices.removeNewDeviceToSearchFor)(deviceToRemove);
+    (0, _devices.removeDeviceSearchingFor)(deviceToRemove);
   });
 }exports.initSettingsIPClisteners = initSettingsIPClisteners;
 
