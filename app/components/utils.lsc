@@ -11,10 +11,15 @@ import { logger} from './logging/logging.lsc'
 appVersion = require('../../package.json').version
 
 getProperAppVersion():string -> appVersion
+
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
+
 noop() -> return
+
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
+
 identity(param) -> param
+
 tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
 recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->

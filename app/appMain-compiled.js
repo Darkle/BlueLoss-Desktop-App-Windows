@@ -1346,9 +1346,6 @@ var _settingsWindow = __webpack_require__(5);
 
 var _runOnStartup = __webpack_require__(10);
 
-if (false) {}
-
-
 if (_electron.app.makeSingleInstance(_utils.noop)) _electron.app.quit();
 
 _electron.app.once('ready', function () {
