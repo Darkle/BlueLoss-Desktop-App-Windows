@@ -384,11 +384,6 @@ function showDebugWindow() {
   debugWindow.once('closed', function () {
     exports.debugWindow = debugWindow = null;
   });
-  /**
-   * Without a delay, the console has trouble showing the VM:line to the right of
-   * what you just logged, instead it shows (unknown) which kinda looks like we're
-   * printing 'Current BlueLoss settings: (unknown)'
-   */
   debugWindow.webContents.once('devtools-opened', function () {
     _logging.logger.debug('Current BlueLoss settings:', (0, _settings.getSettings)());
   });
