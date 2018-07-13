@@ -13,8 +13,6 @@ export default addNewDevice(newDevice: DeviceType) -> state ->
   ({
     devicesToSearchFor: {
       ...state.devicesToSearchFor,
-      ...{
-        [ newDevice.deviceId ]: newDevice
-      }
+      [ newDevice.deviceId ]: newDevice
     }
   })

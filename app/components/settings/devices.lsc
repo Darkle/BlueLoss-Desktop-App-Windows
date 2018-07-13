@@ -6,7 +6,7 @@ addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
   { deviceId } = deviceToAdd
   if deviceIsInDevicesToSearchFor(deviceId): return
   updateSetting('devicesToSearchFor',
-    {...getSettings().devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
+    {...getSettings().devicesToSearchFor, [ deviceId ]: deviceToAdd}
   )
 
 removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
@@ -29,8 +29,7 @@ updateLastSeenForDeviceSearchingFor(deviceId: String, time: Number):Object ->
   updateSetting('devicesToSearchFor',
     {
       ...devicesToSearchFor,
-      ...{ [ deviceId ]: {...deviceToUpdate, ...{ lastSeen: time } }
-      }
+      [ deviceId ]: {...deviceToUpdate, lastSeen: time }
     }
   )
 
