@@ -208,7 +208,6 @@ function init() {
   return new Promise(function (resolve) {
     scannerWindow = new _electron.BrowserWindow(bluetoothHiddenWindowProperties);
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath);
-    // if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
     scannerWindow.webContents.once('dom-ready', resolve);
     scannerWindow.webContents.on('select-bluetooth-device', _handleScanResults.handleScanResults);
