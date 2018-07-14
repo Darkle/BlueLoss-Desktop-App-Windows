@@ -16,7 +16,6 @@ createRollbarLogger():void ->
     environment: process.env.NODE_ENV,
     reportLevel: 'error',
     payload: {
-        mainOrRenderer: 'main',
         platform: process.platform,
         processVersions: process.versions,
         arch: process.arch,
