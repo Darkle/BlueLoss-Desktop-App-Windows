@@ -221,8 +221,8 @@ function init() {
 } /*****
   * On Electron 1.8.7 the `navigator.bluetooth.requestDevice` call takes about a
   * minute to return results. Electron 2.0 and above don't take as long, but
-  * unfortunately those versions don't return multiple devices, they only seem
-  * to ever return one device.
+  * unfortunately those versions don't seem to return multiple devices, they only
+  * ever return one device.
   *
   * We use pTimeout here because if there are no devices around, `navigator.bluetooth.requestDevice`
   * never seems to resolve, which means `scannerWindow.webContents.executeJavaScript`
