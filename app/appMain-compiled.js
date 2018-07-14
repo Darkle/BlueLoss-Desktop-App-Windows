@@ -229,12 +229,11 @@ function init() {
   * never resolves (or calls its callback), which means we get stuck here and don't do new scans.
   */
 function scanforDevices() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleNewScan(_timeproxy2.default.TWENTY_SECONDS);
-  _logging.logger.debug(`=======New Scan Started=======  ${(0, _utils.generateLogTimeStamp)()}`);
+  if (!(0, _settings.getSettings)().blueLossEnabled) {
+    return setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
+  }_logging.logger.debug(`=======New Scan Started=======  ${(0, _utils.generateLogTimeStamp)()}`);
 
   (0, _pTimeout2.default)(scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture), _timeproxy2.default.EIGHTY_SECONDS).catch(handleRequestDeviceError).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
-}function scheduleNewScan(timeout) {
-  setTimeout(scanforDevices, timeout);
 } /**
    * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
    */

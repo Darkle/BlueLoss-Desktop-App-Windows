@@ -54,7 +54,8 @@ createBluetoothScannerWindow():Promise ->
 * never resolves (or calls its callback), which means we get stuck here and don't do new scans.
 */
 scanforDevices():void ->
-  if !getSettings().blueLossEnabled: return scheduleNewScan(tp.TWENTY_SECONDS)
+  if !getSettings().blueLossEnabled:
+    return setTimeout(scanforDevices, tp.TWENTY_SECONDS)
   logger.debug(`=======New Scan Started=======  ${ generateLogTimeStamp() }`)
 
   pTimeout(
@@ -67,9 +68,6 @@ scanforDevices():void ->
   .catch(handleRequestDeviceError)
   .then(lockSystemIfDeviceLost)
   .then(scanforDevices)
-
-scheduleNewScan(timeout:Number):void ->
-  setTimeout(scanforDevices, timeout)
 
 /**
  * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
