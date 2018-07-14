@@ -8,6 +8,7 @@ import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { lockSystemIfDeviceLost } from '../lockSystem/lockCheck.lsc'
+import { generateLogTimeStamp } from '../utils.lsc'
 
 bluetoothHiddenWindowHTMLpath = url.format({
   protocol: 'file',
@@ -30,7 +31,7 @@ createBluetoothScannerWindow():Promise ->
   new Promise((resolve):void ->
     now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
     scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
-    if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
+    // if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
 
     scannerWindow.webContents.once('dom-ready', resolve)
     scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
@@ -50,11 +51,11 @@ createBluetoothScannerWindow():Promise ->
 */
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scheduleNewScan(tp.TWENTY_SECONDS)
-  logger.debug('=======New Scan Started=======')
+  logger.debug(`=======New Scan Started=======  ${ generateLogTimeStamp() }`)
   scannerWindow.webContents
     .executeJavaScript(
       `navigator.bluetooth.requestDevice({acceptAllDevices: true})`,
-      invokeUserGesture
+      invokeUserGesture,
     )
     .catch(handleRequestDeviceError)
     .then(lockSystemIfDeviceLost)

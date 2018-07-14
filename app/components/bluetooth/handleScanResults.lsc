@@ -16,6 +16,7 @@ dedupeDeviceListAndAddTimeStamps = pipe(
  * if there are no results from the
  * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
  * call. That's why we do the lockCheck in scanforDevices.
+ * Note: if you want to return early here, make sure to return the callback('')
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
@@ -23,8 +24,8 @@ handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   logger.debug(`Found these Bluetooth devices in scan: `, processedDeviceList)
   { devicesToSearchFor } = getSettings()
   sendDevicesCanSeeToSettingsWindow(processedDeviceList)
-  if isEmpty(devicesToSearchFor): return
-  updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList)
+  if !isEmpty(devicesToSearchFor):
+    updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList)
   callback('')  // http://bit.ly/2kZhD74
 
 sendDevicesCanSeeToSettingsWindow(processedDeviceList:Array<DeviceType>):void ->
