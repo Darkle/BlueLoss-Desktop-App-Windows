@@ -42,8 +42,14 @@ createBluetoothScannerWindow():Promise ->
     )
   )
 
+/*****
+* On Electron 1.8.7 the `navigator.bluetooth.requestDevice` call takes about a
+* minute to return results. Electron 2.0 and above don't take as long, but
+* unfortunately those versions don't return multiple devices, they only seem
+* to ever return one device.
+*/
 scanforDevices():void ->
-  if !getSettings().blueLossEnabled: return scanIn20Seconds()
+  if !getSettings().blueLossEnabled: return scheduleNewScan(tp.TWENTY_SECONDS)
   logger.debug('=======New Scan Started=======')
   scannerWindow.webContents
     .executeJavaScript(
@@ -51,13 +57,11 @@ scanforDevices():void ->
       invokeUserGesture
     )
     .catch(handleRequestDeviceError)
-    .then(() => {
-      lockSystemIfDeviceLost()
-      scanIn20Seconds()
-    })
+    .then(lockSystemIfDeviceLost)
+    .then(scanforDevices)
 
-scanIn20Seconds():void ->
-  setTimeout(scanforDevices, tp.TWENTY_SECONDS)
+scheduleNewScan(timeout:Number):void ->
+  setTimeout(scanforDevices, timeout)
 
 /**
  * NotFoundError is the norm.

@@ -7,8 +7,8 @@ import { updateTimeStampForSingleDeviceSearchingFor } from '../settings/devices.
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 import { pipe } from '../utils.lsc'
 
-processDeviceListAndSendToSettingsWindow = pipe(
-  dedupeDeviceList, addTimeStampToSeenDevices, sendDevicesCanSeeToSettingsWindow
+dedupeDeviceListAndAddTimeStamps = pipe(
+  dedupeDeviceList, addTimeStampToSeenDevices
 )
 /**
  * Note: handleScanResults doesn't get called from
@@ -19,11 +19,12 @@ processDeviceListAndSendToSettingsWindow = pipe(
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
-  logger.debug(`Found these Bluetooth devices in scan: `, { deviceList })
+  processedDeviceList = dedupeDeviceListAndAddTimeStamps(deviceList)
+  logger.debug(`Found these Bluetooth devices in scan: `, processedDeviceList)
   { devicesToSearchFor } = getSettings()
-  processDeviceListAndSendToSettingsWindow(deviceList)
+  sendDevicesCanSeeToSettingsWindow(processedDeviceList)
   if isEmpty(devicesToSearchFor): return
-  updateDevicesToSearchFor(devicesToSearchFor, deviceList)
+  updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList)
   callback('')  // http://bit.ly/2kZhD74
 
 sendDevicesCanSeeToSettingsWindow(processedDeviceList:Array<DeviceType>):void ->

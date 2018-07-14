@@ -213,15 +213,18 @@ function init() {
       _logging.logger.error('scannerWindow unresponsive', event);
     });
   });
-}function scanforDevices() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return scanIn20Seconds();
+} /*****
+  * On Electron 1.8.7 the `navigator.bluetooth.requestDevice` call takes about a
+  * minute to return results. Electron 2.0 and above don't take as long, but
+  * unfortunately those versions don't return multiple devices, they only seem
+  * to ever return one device.
+  */
+function scanforDevices() {
+  if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleNewScan(_timeproxy2.default.TWENTY_SECONDS);
   _logging.logger.debug('=======New Scan Started=======');
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError).then(() => {
-    (0, _lockCheck.lockSystemIfDeviceLost)();
-    return scanIn20Seconds();
-  });
-}function scanIn20Seconds() {
-  setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
+  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
+}function scheduleNewScan(timeout) {
+  setTimeout(scanforDevices, timeout);
 } /**
    * NotFoundError is the norm.
    */
@@ -264,7 +267,7 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const processDeviceListAndSendToSettingsWindow = (0, _utils.pipe)(dedupeDeviceList, addTimeStampToSeenDevices, sendDevicesCanSeeToSettingsWindow);
+const dedupeDeviceListAndAddTimeStamps = (0, _utils.pipe)(dedupeDeviceList, addTimeStampToSeenDevices);
 /**
  * Note: handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
@@ -274,11 +277,12 @@ const processDeviceListAndSendToSettingsWindow = (0, _utils.pipe)(dedupeDeviceLi
  */
 function handleScanResults(event, deviceList, callback) {
   event.preventDefault();
-  _logging.logger.debug(`Found these Bluetooth devices in scan: `, { deviceList });
+  const processedDeviceList = dedupeDeviceListAndAddTimeStamps(deviceList);
+  _logging.logger.debug(`Found these Bluetooth devices in scan: `, processedDeviceList);
   const { devicesToSearchFor } = (0, _settings.getSettings)();
-  processDeviceListAndSendToSettingsWindow(deviceList);
+  sendDevicesCanSeeToSettingsWindow(processedDeviceList);
   if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
-  updateDevicesToSearchFor(devicesToSearchFor, deviceList);
+  updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList);
   callback('');
 } // http://bit.ly/2kZhD74
 
@@ -1384,7 +1388,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","webpackBuildProduction":"cross-env NODE_ENV=production parallel-webpack","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^2.0.5","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"^1.18.2","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","string-replace-webpack-plugin":"^0.1.3","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","webpackBuildProduction":"cross-env NODE_ENV=production parallel-webpack","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron":"^1.8.7","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"^1.18.2","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","string-replace-webpack-plugin":"^0.1.3","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
 
 /***/ }),
 
