@@ -3,6 +3,7 @@ import url from 'url'
 import { BrowserWindow } from 'electron'
 
 import tp from 'timeproxy'
+import pTimeout from 'p-timeout'
 
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
@@ -48,27 +49,35 @@ createBluetoothScannerWindow():Promise ->
 * minute to return results. Electron 2.0 and above don't take as long, but
 * unfortunately those versions don't return multiple devices, they only seem
 * to ever return one device.
+*
+* We use pTimeout here because if there are no devices around, `navigator.bluetooth.requestDevice`
+* never seems to resolve, which means `scannerWindow.webContents.executeJavaScript`
+* never resolves (or calls its callback), which means we get stuck here and don't do new scans.
 */
 scanforDevices():void ->
   if !getSettings().blueLossEnabled: return scheduleNewScan(tp.TWENTY_SECONDS)
   logger.debug(`=======New Scan Started=======  ${ generateLogTimeStamp() }`)
-  scannerWindow.webContents
-    .executeJavaScript(
+
+  pTimeout(
+    scannerWindow.webContents.executeJavaScript(
       `navigator.bluetooth.requestDevice({acceptAllDevices: true})`,
       invokeUserGesture,
-    )
-    .catch(handleRequestDeviceError)
-    .then(lockSystemIfDeviceLost)
-    .then(scanforDevices)
+    ),
+    tp.EIGHTY_SECONDS
+  )
+  .catch(handleRequestDeviceError)
+  .then(lockSystemIfDeviceLost)
+  .then(scanforDevices)
 
 scheduleNewScan(timeout:Number):void ->
   setTimeout(scanforDevices, timeout)
 
 /**
- * NotFoundError is the norm.
+ * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
  */
 handleRequestDeviceError(err):void ->
-  if err?.name !== 'NotFoundError': logger.error(err)
+  if err?.name !== 'NotFoundError' && err?.name !== 'TimeoutError':
+    logger.error(err)
 
 export {
   init,

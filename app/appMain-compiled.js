@@ -172,6 +172,10 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
+var _pTimeout = __webpack_require__(/*! p-timeout */ "./node_modules/p-timeout/index.js");
+
+var _pTimeout2 = _interopRequireDefault(_pTimeout);
+
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -220,18 +224,25 @@ function init() {
   * minute to return results. Electron 2.0 and above don't take as long, but
   * unfortunately those versions don't return multiple devices, they only seem
   * to ever return one device.
+  *
+  * We use pTimeout here because if there are no devices around, `navigator.bluetooth.requestDevice`
+  * never seems to resolve, which means `scannerWindow.webContents.executeJavaScript`
+  * never resolves (or calls its callback), which means we get stuck here and don't do new scans.
   */
 function scanforDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleNewScan(_timeproxy2.default.TWENTY_SECONDS);
   _logging.logger.debug(`=======New Scan Started=======  ${(0, _utils.generateLogTimeStamp)()}`);
-  scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture).catch(handleRequestDeviceError).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
+
+  (0, _pTimeout2.default)(scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture), _timeproxy2.default.EIGHTY_SECONDS).catch(handleRequestDeviceError).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
 }function scheduleNewScan(timeout) {
   setTimeout(scanforDevices, timeout);
 } /**
-   * NotFoundError is the norm.
+   * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
    */
 function handleRequestDeviceError(err) {
-  if ((err == null ? void 0 : err.name) !== 'NotFoundError') _logging.logger.error(err);
+  if ((err == null ? void 0 : err.name) !== 'NotFoundError' && (err == null ? void 0 : err.name) !== 'TimeoutError') {
+    _logging.logger.error(err);
+  }
 }exports.init = init;
 
 /***/ }),
@@ -1383,6 +1394,62 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 
 /***/ }),
 
+/***/ "./node_modules/p-timeout/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/p-timeout/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const pFinally = __webpack_require__(/*! p-finally */ "p-finally");
+
+class TimeoutError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = 'TimeoutError';
+	}
+}
+
+module.exports = (promise, ms, fallback) => new Promise((resolve, reject) => {
+	if (typeof ms !== 'number' || ms < 0) {
+		throw new TypeError('Expected `ms` to be a positive number');
+	}
+
+	const timer = setTimeout(() => {
+		if (typeof fallback === 'function') {
+			try {
+				resolve(fallback());
+			} catch (err) {
+				reject(err);
+			}
+			return;
+		}
+
+		const message = typeof fallback === 'string' ? fallback : `Promise timed out after ${ms} milliseconds`;
+		const err = fallback instanceof Error ? fallback : new TimeoutError(message);
+
+		if (typeof promise.cancel === 'function') {
+			promise.cancel();
+		}
+
+		reject(err);
+	}, ms);
+
+	pFinally(
+		promise.then(resolve, reject),
+		() => {
+			clearTimeout(timer);
+		}
+	);
+});
+
+module.exports.TimeoutError = TimeoutError;
+
+
+/***/ }),
+
 /***/ "./package.json":
 /*!**********************!*\
   !*** ./package.json ***!
@@ -1390,7 +1457,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","webpackBuildProduction":"cross-env NODE_ENV=production parallel-webpack","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^1.8.7","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"^1.18.2","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","string-replace-webpack-plugin":"^0.1.3","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"0.0.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"ww":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","webpackBuildProduction":"cross-env NODE_ENV=production parallel-webpack","ew":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js --config nodemon.json","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","debug":"cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js","start":"cross-env NODE_ENV=production electron app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^6.0.0","electron-positioner":"^3.0.1","formbase":"^6.0.4","gawk":"^4.5.0","hyperapp":"^1.2.6","is-empty":"^1.2.0","lock-system":"^1.3.0","lowdb":"^1.0.0","p-timeout":"^2.0.1","rollbar":"^2.3.9","snyk":"^1.88.2","timeproxy":"^1.2.1","typa":"^0.1.18","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.5","babel-loader":"^7.1.5","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.2.0","del":"^3.0.0","devtron":"^1.4.0","electron":"^1.8.7","electron-packager":"^12.1.0","electron-reload":"^1.2.5","electron-wix-msi":"^1.3.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.10.0","eslint-watch":"^4.0.1","exeq":"^3.0.0","fs-jetpack":"^2.0.0","inquirer":"^6.0.0","node-7z":"^0.4.0","nodemon":"^1.18.2","parallel-webpack":"^2.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","string-replace-webpack-plugin":"^0.1.3","stringify-object":"^3.2.2","webpack":"^4.15.1","webpack-node-externals":"^1.7.2"}};
 
 /***/ }),
 
@@ -1490,6 +1557,17 @@ module.exports = require("lowdb");
 /***/ (function(module, exports) {
 
 module.exports = require("lowdb/adapters/FileSync");
+
+/***/ }),
+
+/***/ "p-finally":
+/*!****************************!*\
+  !*** external "p-finally" ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("p-finally");
 
 /***/ }),
 
