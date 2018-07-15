@@ -88,37 +88,31 @@ const commonWebpackOptions = {
 
 const electronMainWebpackOptions = {
   ...commonWebpackOptions,
-  ...{
-    target: 'electron-main',
-    entry: mainAppEntryPoint,
-    output: {
-      filename: 'appMain-compiled.js',
-      path: appDir
-    }
+  target: 'electron-main',
+  entry: mainAppEntryPoint,
+  output: {
+    filename: 'appMain-compiled.js',
+    path: appDir
   }
 }
 
 const electronSettingsRendererWebpackOptions = {
   ...commonWebpackOptions,
-  ...{
-    target: 'electron-renderer',
-    entry: settingsWindowRendererEntryPoint,
-    output: {
-      filename: 'settingsWindowRendererMain-compiled.js',
-      path: settingsWindowRendererDir
-    }
+  target: 'electron-renderer',
+  entry: settingsWindowRendererEntryPoint,
+  output: {
+    filename: 'settingsWindowRendererMain-compiled.js',
+    path: settingsWindowRendererDir
   }
 }
 
 const bluetoothRendererWebpackOptions = {
   ...commonWebpackOptions,
-  ...{
-    target: 'electron-renderer',
-    entry: bluetoothRendererEntryPoint,
-    output: {
-      filename: 'bluetoothRendererMain-compiled.js',
-      path: bluetoothRendererDir
-    }
+  target: 'electron-renderer',
+  entry: bluetoothRendererEntryPoint,
+  output: {
+    filename: 'bluetoothRendererMain-compiled.js',
+    path: bluetoothRendererDir
   }
 }
 
