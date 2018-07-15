@@ -18,13 +18,13 @@ settingsWindowRendererApp = logInDev()(app)(
 )
 
 ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsTypes):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?(setting)
+  settingsWindowRendererApp.updateStateOnIpcMessage(setting)
 )
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
+  settingsWindowRendererApp.updateStateOnIpcMessage(devicesCanSee)
 )
 ipcRenderer.on('mainprocess:blueloss-enabled-disabled', (event, enabled: Boolean):void ->
-  settingsWindowRendererApp?.updateStateOnIpcMessage?({blueLossEnabled: enabled})
+  settingsWindowRendererApp.updateStateOnIpcMessage({blueLossEnabled: enabled})
 )
 
 /**
