@@ -8,6 +8,7 @@ import changeTrayIconColor from './changeTrayIconColor.lsc'
 import removeDevice from './removeDevice.lsc'
 import addNewDevice from './addNewDevice.lsc'
 import toggleDebugWindow from './toggleDebugWindow.lsc'
+import enableDisableBlueLoss from './enableDisableBlueLoss.lsc'
 
 export default {
   minimizeSettingsWindow,
@@ -21,4 +22,5 @@ export default {
   removeDevice,
   addNewDevice,
   toggleDebugWindow,
+  enableDisableBlueLoss,
 }

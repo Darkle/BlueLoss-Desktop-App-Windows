@@ -24,7 +24,7 @@ export default ({ actions, state }) ->
           id="blueLossEnableswitch"
           toggled={ state.blueLossEnabled }
           onchange={(event):void ->
-            actions.updateSetting({ settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled})
+            actions.enableDisableBlueLoss({ blueLossEnabled: event.currentTarget.toggled})
           }
         ></x-switch>
         <x-label for="blueLossEnableswitch" id="blueLossEnableswitch">BlueLoss { blueLossStatusText }</x-label>

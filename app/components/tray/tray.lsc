@@ -2,10 +2,12 @@ import path from 'path'
 import { Tray, Menu, app as electronApp } from 'electron'
 
 import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { updateSetting, getSettings } from '../settings/settings.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import { enableDisableBlueLoss } from '../enableDisableBlueLoss.lsc'
 
 let tray = null
 trayIconsFolder = path.resolve(__dirname, 'components', 'tray', 'icons')
+toggledFromTray = true
 
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
@@ -22,7 +24,9 @@ createContextMenu():Object ->
       },
       {
         label: generateEnabledDisabledLabel(),
-        click: toggleEnabledFromTray
+        click: () => {
+          enableDisableBlueLoss(toggledFromTray, !getSettings().blueLossEnabled)
+        }
       },
       {
         label: 'Quit BlueLoss',
@@ -42,9 +46,6 @@ changeTrayIcon(newTrayIconColor: string):void ->
 
 updateTrayMenu():void ->
   tray.setContextMenu(createContextMenu())
-
-toggleEnabledFromTray():void ->
-  updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
 
 export {
   initTrayMenu,

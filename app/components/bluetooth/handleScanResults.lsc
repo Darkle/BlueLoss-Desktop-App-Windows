@@ -16,15 +16,22 @@ dedupeDeviceListAndAddTimeStamps = pipe(
  * if there are no results from the
  * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
  * call. That's why we do the lockCheck in scanforDevices.
+ *
  * Note: if you want to return early here, make sure to return the callback('')
+ *
+ * We check for blueLossEnabled before calling updateDevicesToSearchFor because if
+ * they disable blueloss and a scan hasn't finished, when it does finish it will
+ * update the devices lastSeen in devicesToSearchFor with Date.now() which is not
+ * what we want. As you can see in enableDisableBlueLoss.lsc, we need to update the
+ * devices lastSeen with tenYearsFromNow(). More comments in enableDisableBlueLoss.lsc.
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
+  { devicesToSearchFor, blueLossEnabled } = getSettings()
   processedDeviceList = dedupeDeviceListAndAddTimeStamps(deviceList)
   logger.debug(`Found these Bluetooth devices in scan: `, processedDeviceList)
-  { devicesToSearchFor } = getSettings()
   sendDevicesCanSeeToSettingsWindow(processedDeviceList)
-  if !isEmpty(devicesToSearchFor):
+  if !isEmpty(devicesToSearchFor) && blueLossEnabled:
     updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList)
   callback('')  // http://bit.ly/2kZhD74
 

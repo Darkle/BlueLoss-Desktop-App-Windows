@@ -24,6 +24,9 @@ ipcRenderer.on('mainprocess:setting-updated-in-main', (event, setting: SettingsT
 ipcRenderer.on('mainprocess:update-of-bluetooth-devices-can-see', (event, devicesCanSee: Array<DeviceType>):void ->
   settingsWindowRendererApp?.updateStateOnIpcMessage?(devicesCanSee)
 )
+ipcRenderer.on('mainprocess:blueloss-enabled-disabled', (event, enabled: Boolean):void ->
+  settingsWindowRendererApp?.updateStateOnIpcMessage?({blueLossEnabled: enabled})
+)
 
 /**
 * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror

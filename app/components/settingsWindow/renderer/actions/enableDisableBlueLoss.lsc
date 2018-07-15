@@ -1,0 +1,5 @@
+import { ipcRenderer } from 'electron'
+
+export default enableDisableBlueLoss({ blueLossEnabled }) ->
+  ipcRenderer.send('renderer:blueloss-enabled-disabled', blueLossEnabled)
+  { blueLossEnabled }
