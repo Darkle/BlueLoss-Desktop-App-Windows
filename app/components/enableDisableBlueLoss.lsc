@@ -5,6 +5,9 @@ import { tenYearsFromNow } from './utils.lsc'
 import { updateTimeStampForAllDevicesSearchingFor } from './settings/devices.lsc'
 
 /*****
+* We aren't using a gawk observer for blueLossEnabled as we were running in to
+* circular issues.
+*
 * We run `updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())` when BlueLoss
 * is disabled because otherwise if you disabled BlueLoss and devices that you are
 * looking for went away and then re-enabled BlueLoss, it would lock straight away.
