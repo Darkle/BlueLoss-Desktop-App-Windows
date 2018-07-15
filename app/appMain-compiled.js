@@ -172,7 +172,7 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
-var _pTimeout = __webpack_require__(/*! p-timeout */ "./node_modules/p-timeout/index.js");
+var _pTimeout = __webpack_require__(/*! p-timeout */ "p-timeout");
 
 var _pTimeout2 = _interopRequireDefault(_pTimeout);
 
@@ -233,14 +233,18 @@ function scanforDevices() {
     return setTimeout(scanforDevices, _timeproxy2.default.TWENTY_SECONDS);
   }_logging.logger.debug(`=======New Scan Started=======  ${(0, _utils.generateLogTimeStamp)()}`);
 
-  (0, _pTimeout2.default)(scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture), _timeproxy2.default.EIGHTY_SECONDS).catch(handleRequestDeviceError).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
+  (0, _pTimeout2.default)(scannerWindow.webContents.executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, invokeUserGesture), _timeproxy2.default.EIGHTY_SECONDS).catch(handleRequestDeviceErrors).then(_lockCheck.lockSystemIfDeviceLost).then(scanforDevices);
 } /**
-   * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
+   * A NotFoundError is the norm on success.
+   * A TimeoutError is the norm when no devices are found.
+   * We also need to update the frontend settings window if there is a timeout,
+   * as that means no devices were found.
    */
-function handleRequestDeviceError(err) {
-  if ((err == null ? void 0 : err.name) !== 'NotFoundError' && (err == null ? void 0 : err.name) !== 'TimeoutError') {
-    _logging.logger.error(err);
-  }
+function handleRequestDeviceErrors(err) {
+  if ((err == null ? void 0 : err.name) === 'NotFoundError') return;
+  if ((err == null ? void 0 : err.name) === 'TimeoutError') {
+    return (0, _handleScanResults.sendDevicesCanSeeToSettingsWindow)([]);
+  }_logging.logger.error(err);
 }exports.init = init;
 
 /***/ }),
@@ -258,7 +262,7 @@ function handleRequestDeviceError(err) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.handleScanResults = undefined;
+exports.sendDevicesCanSeeToSettingsWindow = exports.handleScanResults = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -345,6 +349,7 @@ function dedupeDeviceList(deviceList) {
 }function betterNamedDevice(existingDevice, newDevice) {
   return existingDevice.deviceName.length === 0 && newDevice.deviceName.length > 0;
 }exports.handleScanResults = handleScanResults;
+exports.sendDevicesCanSeeToSettingsWindow = sendDevicesCanSeeToSettingsWindow;
 
 /***/ }),
 
@@ -402,6 +407,7 @@ function showDebugWindow() {
   });
   debugWindow.webContents.once('devtools-opened', function () {
     _logging.logger.debug('Current BlueLoss settings:', (0, _settings.getSettings)());
+    _logging.logger.debug('Note: Scans take about a minute to complete.');
   });
   debugWindow.webContents.once('devtools-closed', function () {
     var _settingsWindow$webCo;
@@ -1007,7 +1013,7 @@ const defaultSettings = {
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
-  timeToLock: 3,
+  timeToLock: 4,
   reportErrors: true,
   firstRun: true,
   settingsWindowPosition: null,
@@ -1082,14 +1088,27 @@ var _runOnStartup = __webpack_require__(/*! ../runOnStartup.lsc */ "./app/compon
 
 var _debugWindow = __webpack_require__(/*! ../debugWindow/debugWindow.lsc */ "./app/components/debugWindow/debugWindow.lsc");
 
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+var _devices = __webpack_require__(/*! ./devices.lsc */ "./app/components/settings/devices.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function initSettingsObservers(settings) {
+  /*****
+  * We run `updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())` when BlueLoss
+  * is disabled because otherwise if you disabled BlueLoss and devices that you are
+  * looking for went away and then re-enabled BlueLoss, it would lock straight away.
+  */
   _gawk2.default.watch(settings, ['blueLossEnabled'], function (enabled) {
     var _settingsWindow$webCo;
 
     _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { blueLossEnabled: enabled });
     (0, _tray.updateTrayMenu)();
+    console.log(`gawk.watch(settings, ['blueLossEnabled']`);
+    console.log(enabled);
+    // if !enabled: console.log('after if')
+    if (!enabled) (0, _devices.updateTimeStampForAllDevicesSearchingFor)(Date.now());
   });
   _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
     if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
@@ -1392,62 +1411,6 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', 'config'
 
 /***/ }),
 
-/***/ "./node_modules/p-timeout/index.js":
-/*!*****************************************!*\
-  !*** ./node_modules/p-timeout/index.js ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const pFinally = __webpack_require__(/*! p-finally */ "p-finally");
-
-class TimeoutError extends Error {
-	constructor(message) {
-		super(message);
-		this.name = 'TimeoutError';
-	}
-}
-
-module.exports = (promise, ms, fallback) => new Promise((resolve, reject) => {
-	if (typeof ms !== 'number' || ms < 0) {
-		throw new TypeError('Expected `ms` to be a positive number');
-	}
-
-	const timer = setTimeout(() => {
-		if (typeof fallback === 'function') {
-			try {
-				resolve(fallback());
-			} catch (err) {
-				reject(err);
-			}
-			return;
-		}
-
-		const message = typeof fallback === 'string' ? fallback : `Promise timed out after ${ms} milliseconds`;
-		const err = fallback instanceof Error ? fallback : new TimeoutError(message);
-
-		if (typeof promise.cancel === 'function') {
-			promise.cancel();
-		}
-
-		reject(err);
-	}, ms);
-
-	pFinally(
-		promise.then(resolve, reject),
-		() => {
-			clearTimeout(timer);
-		}
-	);
-});
-
-module.exports.TimeoutError = TimeoutError;
-
-
-/***/ }),
-
 /***/ "./package.json":
 /*!**********************!*\
   !*** ./package.json ***!
@@ -1558,14 +1521,14 @@ module.exports = require("lowdb/adapters/FileSync");
 
 /***/ }),
 
-/***/ "p-finally":
+/***/ "p-timeout":
 /*!****************************!*\
-  !*** external "p-finally" ***!
+  !*** external "p-timeout" ***!
   \****************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = require("p-finally");
+module.exports = require("p-timeout");
 
 /***/ }),
 

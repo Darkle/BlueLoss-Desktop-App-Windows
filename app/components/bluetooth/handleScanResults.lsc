@@ -66,4 +66,5 @@ betterNamedDevice(existingDevice:Object, newDevice:Object):Boolean ->
 
 export {
   handleScanResults,
+  sendDevicesCanSeeToSettingsWindow,
 }

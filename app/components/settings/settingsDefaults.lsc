@@ -15,7 +15,7 @@ defaultSettings: {
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
-  timeToLock: 3,
+  timeToLock: 4,
   reportErrors: true,
   firstRun: true,
   settingsWindowPosition: null,

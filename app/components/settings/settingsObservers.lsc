@@ -6,11 +6,22 @@ import { addRollbarLogging, removeRollbarLogging } from '../logging/logging.lsc'
 import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
 import { showDebugWindow, debugWindow } from '../debugWindow/debugWindow.lsc'
+import { tenYearsFromNow } from '../utils.lsc'
+import { updateTimeStampForAllDevicesSearchingFor } from './devices.lsc'
 
 initSettingsObservers(settings):void ->
+  /*****
+  * We run `updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())` when BlueLoss
+  * is disabled because otherwise if you disabled BlueLoss and devices that you are
+  * looking for went away and then re-enabled BlueLoss, it would lock straight away.
+  */
   gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
     updateTrayMenu()
+    console.log(`gawk.watch(settings, ['blueLossEnabled']`)
+    console.log(enabled)
+    // if !enabled: console.log('after if')
+    if !enabled: updateTimeStampForAllDevicesSearchingFor(Date.now())
   )
   gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
     if enabled: addRollbarLogging()

@@ -5,7 +5,7 @@ import { BrowserWindow } from 'electron'
 import tp from 'timeproxy'
 import pTimeout from 'p-timeout'
 
-import { handleScanResults } from './handleScanResults.lsc'
+import { handleScanResults,sendDevicesCanSeeToSettingsWindow } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { lockSystemIfDeviceLost } from '../lockSystem/lockCheck.lsc'
@@ -65,16 +65,21 @@ scanforDevices():void ->
     ),
     tp.EIGHTY_SECONDS
   )
-  .catch(handleRequestDeviceError)
+  .catch(handleRequestDeviceErrors)
   .then(lockSystemIfDeviceLost)
   .then(scanforDevices)
 
 /**
- * A NotFoundError is the norm on success. A TimeoutError is the norm when no devices are found.
+ * A NotFoundError is the norm on success.
+ * A TimeoutError is the norm when no devices are found.
+ * We also need to update the frontend settings window if there is a timeout,
+ * as that means no devices were found.
  */
-handleRequestDeviceError(err):void ->
-  if err?.name !== 'NotFoundError' && err?.name !== 'TimeoutError':
-    logger.error(err)
+handleRequestDeviceErrors(err):void ->
+  if err?.name === 'NotFoundError': return
+  if err?.name === 'TimeoutError':
+    return sendDevicesCanSeeToSettingsWindow([])
+  logger.error(err)
 
 export {
   init,

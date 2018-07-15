@@ -28,6 +28,7 @@ createDebugWindow():void ->
   )
   debugWindow.webContents.once('devtools-opened', ():void ->
     logger.debug('Current BlueLoss settings:', getSettings())
+    logger.debug('Note: Scans take about a minute to complete.')
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {debugMode: false})

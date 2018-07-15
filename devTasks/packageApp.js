@@ -55,7 +55,7 @@ function packageWin64() {
   .then(createWindowsInstaller)
   .then(createZip)
   .then(() => {
-    console.log(chalk.green('Successfully Packaged Electron App!'))
+    console.log(chalk.green('Successfully Built App!'))
     })
     .catch(err => {
       console.error(chalk.red(`There was an error creating the ${buildFolder} package`), err)
