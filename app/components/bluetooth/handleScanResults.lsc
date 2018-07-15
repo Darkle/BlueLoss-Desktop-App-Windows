@@ -11,7 +11,7 @@ dedupeDeviceListAndAddTimeStamps = pipe(
   dedupeDeviceList, addTimeStampToSeenDevices
 )
 /**
- * Note: handleScanResults doesn't get called from
+ * handleScanResults doesn't get called from
  * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
  * if there are no results from the
  * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
