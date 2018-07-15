@@ -5,7 +5,7 @@ import { updateSetting } from './settings.lsc'
 import { addNewDeviceToSearchFor, removeDeviceSearchingFor } from './devices.lsc'
 import { enableDisableBlueLoss } from '../enableDisableBlueLoss.lsc'
 
-toggledFromTray = false
+blueLossToggledFromTray = false
 
 initSettingsIPClisteners():void ->
   ipcMain.on('renderer:setting-updated-in-ui', (event, settingName: string, settingValue: SettingsTypes):void ->
@@ -18,7 +18,7 @@ initSettingsIPClisteners():void ->
     removeDeviceSearchingFor(deviceToRemove)
   )
   ipcMain.on('renderer:blueloss-enabled-disabled', (event, enabled: Boolean):void ->
-    enableDisableBlueLoss(toggledFromTray, enabled)
+    enableDisableBlueLoss(blueLossToggledFromTray, enabled)
   )
 
 export {

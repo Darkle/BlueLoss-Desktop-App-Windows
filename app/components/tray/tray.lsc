@@ -7,7 +7,7 @@ import { enableDisableBlueLoss } from '../enableDisableBlueLoss.lsc'
 
 let tray = null
 trayIconsFolder = path.resolve(__dirname, 'components', 'tray', 'icons')
-toggledFromTray = true
+blueLossToggledFromTray = true
 
 initTrayMenu():void ->
   now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
@@ -25,7 +25,7 @@ createContextMenu():Object ->
       {
         label: generateEnabledDisabledLabel(),
         click: () => {
-          enableDisableBlueLoss(toggledFromTray, !getSettings().blueLossEnabled)
+          enableDisableBlueLoss(blueLossToggledFromTray, !getSettings().blueLossEnabled)
         }
       },
       {
