@@ -1,13 +1,12 @@
 import { ipcRenderer } from 'electron'
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
-import { withLogger } from '@hyperapp/logger'
 
 import appActions from './actions/actionsIndex.lsc'
 import views from './views/viewsIndex.lsc'
 import { DeviceType, SettingsTypes } from '../../types/types.lsc'
-import { omitInheritedProperties, identity } from './frontEndUtils.lsc'
+import { omitInheritedProperties, logInDev } from './frontEndUtils.lsc'
 
-settingsWindowRendererApp = (ISDEV? withLogger: identity)(app)(
+settingsWindowRendererApp = logInDev()(app)(
   {
     activeTab: 'statusTab',
     devicesCanSee: [],

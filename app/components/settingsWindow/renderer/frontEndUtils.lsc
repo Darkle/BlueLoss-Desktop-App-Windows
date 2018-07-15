@@ -1,4 +1,5 @@
 import is from 'typa'
+import { withLogger } from '@hyperapp/logger'
 
 identity(param) -> param
 
@@ -9,7 +10,10 @@ omitInheritedProperties(obj: Object):Object ->
     {...newObj, [propName]: obj[propName]}
   , {})
 
+logInDev():Function -> if ISDEV: withLogger else: identity
+
 export {
   omitInheritedProperties,
   identity,
+  logInDev,
 }
