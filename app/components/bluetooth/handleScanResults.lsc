@@ -27,12 +27,17 @@ dedupeDeviceListAndAddTimeStamps = pipe(
  */
 handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
   event.preventDefault()
+
   { devicesToSearchFor, blueLossEnabled } = getSettings()
   processedDeviceList = dedupeDeviceListAndAddTimeStamps(deviceList)
+
   logger.debug(`Found these Bluetooth devices in scan: `, processedDeviceList)
+
   sendDevicesCanSeeToSettingsWindow(processedDeviceList)
+
   if !isEmpty(devicesToSearchFor) && blueLossEnabled:
     updateDevicesToSearchFor(devicesToSearchFor, processedDeviceList)
+
   callback('')  // http://bit.ly/2kZhD74
 
 sendDevicesCanSeeToSettingsWindow(processedDeviceList:Array<DeviceType>):void ->
@@ -62,9 +67,12 @@ dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
   deviceList.reduce((newDeviceList, newDevice) ->
     newDeviceId = newDevice.deviceId
     existingDevice = newDeviceList.find(device -> device.deviceId === newDeviceId )
+
     if !existingDevice: return [...newDeviceList, newDevice]
+
     if betterNamedDevice(existingDevice, newDevice):
       return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
+
     newDeviceList
   , [])
 
