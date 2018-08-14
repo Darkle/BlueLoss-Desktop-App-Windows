@@ -770,7 +770,7 @@ var _hyperapp = __webpack_require__(0);
 exports.default = function ({ actions }) {
   return (0, _hyperapp.h)(
     "div",
-    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://darkle.github.io/BlueLoss/" },
+    { "class": "tab", onclick: actions.openLink, id: "helpTab", "data-external-link": "https://blueloss.ccoding.net/" },
     (0, _hyperapp.h)(
       "div",
       { "class": "tabIcon" },
