@@ -10,7 +10,7 @@ import { initTrayMenu } from './components/tray/tray.lsc'
 import { showSettingsWindow } from './components/settingsWindow/settingsWindow.lsc'
 import { enableRunOnStartup } from './components/runOnStartup.lsc'
 
-if electronApp.makeSingleInstance(noop): electronApp.quit()
+if electronApp.makeSingleInstance(noop): electronApp.exit()
 
 electronApp.once('ready', ():void ->
   initSettings()
