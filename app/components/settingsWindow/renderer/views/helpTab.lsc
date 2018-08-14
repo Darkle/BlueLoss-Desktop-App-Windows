@@ -1,7 +1,7 @@
 import { h } from 'hyperapp'
 
 export default ({ actions }) ->
-  <div class="tab" onclick={ actions.openLink } id="helpTab" data-external-link="https://darkle.github.io/BlueLoss/">
+  <div class="tab" onclick={ actions.openLink } id="helpTab" data-external-link="https://blueloss.ccoding.net/">
     <div class="tabIcon">
       <svg height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 0h24v24H0z" fill="none"></path>

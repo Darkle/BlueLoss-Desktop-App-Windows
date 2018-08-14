@@ -81,37 +81,23 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./app/components/bluetooth/renderer/bluetoothRendererMain.lsc");
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
-/******/ ({
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
 
-/***/ "./app/components/bluetooth/renderer/bluetoothRendererMain.lsc":
-/*!*********************************************************************!*\
-  !*** ./app/components/bluetooth/renderer/bluetoothRendererMain.lsc ***!
-  \*********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _electron = __webpack_require__(/*! electron */ "electron");
-
-var _frontEndUtils = __webpack_require__(/*! ../../settingsWindow/renderer/frontEndUtils.lsc */ "./app/components/settingsWindow/renderer/frontEndUtils.lsc");
-
-function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
-  _electron.ipcRenderer.send('bluetooth-scan-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _frontEndUtils.omitInheritedProperties)(error) });
-}window.onerror = handleRendererWindowError;
-window.onunhandledrejection = handleRendererWindowError;
+module.exports = require("@hyperapp/logger");
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports) {
 
-/***/ "./app/components/settingsWindow/renderer/frontEndUtils.lsc":
-/*!******************************************************************!*\
-  !*** ./app/components/settingsWindow/renderer/frontEndUtils.lsc ***!
-  \******************************************************************/
-/*! no static exports found */
+module.exports = require("typa");
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -124,11 +110,11 @@ exports.logInDev = exports.identity = exports.omitInheritedProperties = undefine
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _typa = __webpack_require__(/*! typa */ "typa");
+var _typa = __webpack_require__(1);
 
 var _typa2 = _interopRequireDefault(_typa);
 
-var _logger = __webpack_require__(/*! @hyperapp/logger */ "@hyperapp/logger");
+var _logger = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -141,45 +127,32 @@ function identity(param) {
     }return _extends({}, newObj, { [propName]: obj[propName] });
   }, {});
 }function logInDev() {
-  return  true ? _logger.withLogger : undefined;
+  return  false ? undefined : identity;
 }exports.omitInheritedProperties = omitInheritedProperties;
 exports.identity = identity;
 exports.logInDev = logInDev;
 
 /***/ }),
-
-/***/ "@hyperapp/logger":
-/*!***********************************!*\
-  !*** external "@hyperapp/logger" ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("@hyperapp/logger");
-
-/***/ }),
-
-/***/ "electron":
-/*!***************************!*\
-  !*** external "electron" ***!
-  \***************************/
-/*! no static exports found */
+/* 3 */
 /***/ (function(module, exports) {
 
 module.exports = require("electron");
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ "typa":
-/*!***********************!*\
-  !*** external "typa" ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+"use strict";
 
-module.exports = require("typa");
+
+var _electron = __webpack_require__(3);
+
+var _frontEndUtils = __webpack_require__(2);
+
+function handleRendererWindowError(messageOrEvent, source, lineNumber, columnNumber, error) {
+  _electron.ipcRenderer.send('bluetooth-scan-window-renderer:error-sent', { messageOrEvent, source, lineNumber, columnNumber, error: (0, _frontEndUtils.omitInheritedProperties)(error) });
+}window.onerror = handleRendererWindowError;
+window.onunhandledrejection = handleRendererWindowError;
 
 /***/ })
-
-/******/ });
-//# sourceMappingURL=bluetoothRendererMain-compiled.js.map
+/******/ ]);
