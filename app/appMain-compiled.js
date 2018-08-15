@@ -705,6 +705,7 @@ function showDebugWindow() {
   debugWindow.webContents.once('devtools-closed', function () {
     var _settingsWindow$webCo;
 
+    (0, _settings.updateSetting)('debugMode', false);
     _settingsWindow.settingsWindow == null ? void 0 : (_settingsWindow$webCo = _settingsWindow.settingsWindow.webContents) == null ? void 0 : _settingsWindow$webCo.send('mainprocess:setting-updated-in-main', { debugMode: false });
     debugWindow.close();
   });

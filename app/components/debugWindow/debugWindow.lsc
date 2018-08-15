@@ -3,7 +3,7 @@ import url from 'url'
 import { BrowserWindow } from 'electron'
 
 import { logger } from '../logging/logging.lsc'
-import { getSettings } from '../settings/settings.lsc'
+import { getSettings, updateSetting } from '../settings/settings.lsc'
 import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
 debugWindowHTMLpath = url.format({
@@ -31,6 +31,7 @@ createDebugWindow():void ->
     logger.debug('Note: Scans take about a minute to complete.')
   )
   debugWindow.webContents.once('devtools-closed', ():void ->
+    updateSetting('debugMode', false)
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {debugMode: false})
     debugWindow.close()
   )
