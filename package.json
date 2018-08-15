@@ -1,7 +1,7 @@
 {
   "name": "blueloss",
   "productName": "BlueLoss",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A desktop app that locks your computer when a device is lost",
   "main": "app/appMain-compiled.js",
   "scripts": {
