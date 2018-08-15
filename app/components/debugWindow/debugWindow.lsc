@@ -33,7 +33,7 @@ createDebugWindow():void ->
   debugWindow.webContents.once('devtools-closed', ():void ->
     updateSetting('debugMode', false)
     settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {debugMode: false})
-    debugWindow.close()
+    debugWindow?.close()
   )
   debugWindow.webContents.once('crashed', (event):void ->
     logger.error('debugWindow.webContents crashed', event)
