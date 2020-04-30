@@ -12,7 +12,9 @@
     "debug": "cross-env NODE_ENV=development parallel-webpack && sleepms 3000 && electron --inspect-brk app/appMain-compiled.js",
     "start": "cross-env NODE_ENV=production electron app/appMain-compiled.js",
     "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
-    "test": "snyk test"
+    "test": "snyk test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": "https://github.com/Darkle/BlueLoss.git",
   "author": "Darkle <coop.coding@gmail.com>",
@@ -30,7 +32,7 @@
     "lowdb": "^1.0.0",
     "p-timeout": "^2.0.1",
     "rollbar": "^2.3.9",
-    "snyk": "^1.88.2",
+    "snyk": "^1.316.1",
     "timeproxy": "^1.2.1",
     "typa": "^0.1.18",
     "winston": "^2.4.1"
@@ -67,5 +69,6 @@
     "stringify-object": "^3.2.2",
     "webpack": "^4.15.1",
     "webpack-node-externals": "^1.7.2"
-  }
+  },
+  "snyk": true
 }
